@@ -1,0 +1,5 @@
+-- this script extracts protein information from a fasta file header
+   and saves it in a tabular format
+-- protein info extracted to output/protein_info.tsv
+   can find them in this form: 
+peptide_id,gene_id,transcript_id,genome,chromosome,start_pos,end_pos,strand,description
