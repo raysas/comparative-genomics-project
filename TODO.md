@@ -3,7 +3,7 @@
 ## pipeline
 
 - [x] data extraction and protein features script [./pipeline/0_extract_data.sh](./pipeline/0_extract_data.sh)
-- [ ] filter isoforms script (use data/protein_info.csv to keep longest isoform per gene): [./pipeline/1_filter_isoforms.sh](./pipeline/1_filter_isoforms.sh)
+- [x] filter isoforms script (use data/protein_info.csv to keep longest isoform per gene): [./pipeline/1_filter_isoforms.sh](./pipeline/1_filter_isoforms.sh)
 - [x] all-vs-all bash script [./pipeline/2_blast.sh](./pipeline/2_blast.sh)
 - [ ] get edgelist file (putative homologs with bit score) script | filter options based on different metrics (user defines) [./pipeline/3_filter_pairs.sh](./pipeline/3_filter_pairs.sh)
 - [ ] clustering script (check which algos - ones that match the galaxy ones) | get gene families [./pipeline/4_cluster_families.sh](./pipeline/4_cluster_families.sh)
