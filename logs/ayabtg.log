@@ -1,6 +1,0 @@
-### [0.0.3] - 2025-11-16 10:00:29
-- Added 1_filter_isoforms.sh script.
-- Implemented longest-isoform filtering using embedded Python.
-- Generated peptides_longest.fa and protein_info_longest.csv.
-- Updated the pipeline TODO list.
-
