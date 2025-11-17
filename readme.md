@@ -24,10 +24,10 @@ Main directory structure:
 The main data files to that will be found in `data/` can be extracted this way:
 
 1. **Whole Glycine max genome (genes FASTA)**
-```bash
+<!-- ```bash
 curl http://ftp.ensemblgenomes.org/pub/release-41/plants/fasta/glycine_max/dna_index/Glycine_max.Glycine_max_v2.0.dna.toplevel.fa.gz -o data/genome.fa.gz
 gunzip data/genome.fa.gz 
-```
+``` -->
 But I think what we need is the peptide sequences:
 ```bash
 curl http://ftp.ensemblgenomes.org/pub/release-41/plants/fasta/glycine_max/pep/Glycine_max.Glycine_max_v2.0.pep.all.fa.gz -o data/peptides.fa.gz
@@ -42,4 +42,5 @@ _Check out installation in [scripts/SETUP.sh](scripts/SETUP.sh)_
 
 ```
 ncbi-blast+
+mcl
 ```

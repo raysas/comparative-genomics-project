@@ -15,7 +15,7 @@
 - added pipeline plan in TODO.md
 - logs folder for script outputs
 
-## [.1.0] - 2025-11-16 by @ayabtg
+## [0.0.3] - 2025-11-16 by @ayabtg
 - Added 1_filter_isoforms.sh script.
 - Implemented longest-isoform filtering using embedded Python.
 - Generated peptides_longest.fa and protein_info_longest.csv.

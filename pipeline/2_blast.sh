@@ -9,7 +9,7 @@ cat <<EOF
 EOF
 
 # -- default parameters
-INPUT_FILE='data/peptides.fa'
+INPUT_FILE='data/peptides_longest.fa'
 OUTPUT_DIR='output/blast_output'
 
 DB_NAME='peptide_db'
