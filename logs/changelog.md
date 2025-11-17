@@ -25,3 +25,7 @@
 - fixed blast
 - running
 
+## [0.0.5] - 2025-11-17 by @raysas
+- branches with readmes and examples
+- updated readme and todo - split parts during meeting
+

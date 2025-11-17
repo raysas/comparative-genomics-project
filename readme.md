@@ -13,8 +13,8 @@ The main directories to be aware of in master branch
 ├── TODO.md             # -- general todo list
 ├── analysis
 │   ├── Ks
-│   ├── code.Rproj
-│   └── duplicated_genes
+│   ├── duplicated_genes
+│   └── TE_analysis
 ├── data                # -- large data_files (hidden)
 ├── docs                # -- documentation files (some notes if you wanna add something)
 ├── output              # -- output files and results of pipelines and codes
@@ -29,9 +29,28 @@ The main directories to be aware of in master branch
 > ``` ./dev/version_tracker.sh ```, follow the instructions (choose an option - default z unless you did a big change, write each step you've done in a seperate line and the press `ENTER` to get out of the prompt => version will be updated automatically)
  -->
 
-At the end all of our works will be merged in the `main` branch, this is why preserving these main directory names is essential to avoid conflicts.
+At the end all of our works will be merged, this is why preserving these main directory names is essential to avoid conflicts.
+Each specific branch will have a specific readme.md with an `examples` folder containing example data files to test the code and pipelines (`pipeline_2` and `general_analysis` branches already have it).
 
-Each specific branch will have a specific readme.md with an `examples` folder containing example data files to test the code and pipelines.
+These files are important, change them in your respective branches if needed, will merge later on:
+
+* requirements.txt : contains the list of python packages needed for the project (if any new package is needed, please add it to the list)
+* scripts/SETUP.sh : contains installation commands for softwares needed for the project (if any new software is needed, please add it to the script)
+* TODO.md : contains the todo list
+
+> [!NOTE]
+> Each branch has a different todo list tailored to its specific tasks, in `master` branch you will find the general todo list for the whole project
+
+
+## Branches in this repository
+
+* TE
+* dev (try moving in and out there before doing stuff on master)
+* general_analysis
+* master
+* pipeline_1
+* pipeline_2
+* ppi
 
 ## Accessing branches
 
