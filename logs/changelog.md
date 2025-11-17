@@ -21,3 +21,7 @@
 - Generated peptides_longest.fa and protein_info_longest.csv.
 - Updated the pipeline TODO list.
 
+## [0.0.4] - 2025-11-17 by @raysas
+- fixed blast
+- running
+
