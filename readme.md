@@ -33,44 +33,10 @@ At the end all of our works will be merged in the `main` branch, this is why pre
 
 Each specific branch will have a specific readme.md with an `examples` folder containing example data files to test the code and pipelines.
 
-## Accessing branches
+## Transposable Elements (TEs)
 
-If you already clones the repository locally, you can access any branch by running first the `fetch` command to get the latest changes from remote repository:
-```bash
-git fetch origin
-```
+For this branch there are 2 types of codes:
 
-Then you can checkout the branch you want to work on:
-```bash
-git checkout -b <branch_name> origin/<branch_name>
-```
+Analysis, annotation and that kind of stuff regarding TEs: `analysis/TE_analysis` (or rename/change)
 
-### for pipeline 2
-
-```bash
-# -- first time accessing the branch
-git fetch origin
-git checkout -b pipeline_2 origin/pipeline_2
-# -- making sure you're on the right branch
-git branch # this should highlight pipeline_2
-
-# -- then every time you wanna push your changes on github:
-git add .
-git commit -m "your message here"
-git push origin pipeline_2
-```
-
-### for general_analysis
-
-```bash
-# -- first time accessing the branch
-git fetch origin
-git checkout -b general_analysis origin/general_analysis
-# -- making sure you're on the right branch
-git branch # this should highlight general_analysis
-
-# -- then every time you wanna push your changes on github:
-git add .
-git commit -m "your message here"
-git push origin general_analysis
-```
+Scripts related to TEs and covergae computation (heavy computation/metrics type of codes on terminal): add to `scripts/`)
