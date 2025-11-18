@@ -1,0 +1,11 @@
+-- clustering proteins into families using MCL with parameters:
+   INPUT : output/blast_output/cluster_input_id50_qcov70_scov70_evalue1_wcol12.tsv
+   OUTPUT: output/clusters
+   MCL Inflation: 2.0
+   Discard Loops: y
+   Pruning Threshold: 4000
+   Select Down To: 500
+   Recover: 600
+   PCT: 90
+   C-Fold: 1.0
+-- clustering completed: Output written to output/clusters/protein_families_cluster_input_id50_qcov70_scov70_evalue1_wcol12.txt

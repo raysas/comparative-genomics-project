@@ -1,0 +1,5 @@
+-- prepared BLAST output with query and subject lengths
+-- computed coverage
+   last 2 columns correspond to qcoverage and scoverage
+-- removed temporary files
+-- coverage computation completed, results saved to output/blast_output/blast_results_with_coverage.tsv

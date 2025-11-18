@@ -5,14 +5,6 @@ OUTPUT_DIR='data'
 FASTA_FILE="peptides.fa"
 FEATURE_OUTPUT_FILE='protein_info.csv'
 
-LOG_DIR="logs/pipeline"
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir -p "$LOG_DIR"
-fi
-LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
-exec > >(tee -i "$LOG_FILE") 2>&1
-
-
 cat <<EOF
 -- this script downloads peptide data from Ensembl Plants,
    extracts protein information from fasta headers,
@@ -36,20 +28,43 @@ done
 FASTA_FILE="${OUTPUT_DIR}/${FASTA_FILE}"
 FEATURE_OUTPUT_FILE="${OUTPUT_DIR}/${FEATURE_OUTPUT_FILE}"
 
+LOG_DIR="logs/pipeline"
+if [ ! -d "$LOG_DIR" ]; then
+    mkdir -p "$LOG_DIR"
+fi
+LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
+exec > >(tee -i "$LOG_FILE") 2>&1
+echo "Command: $0 $*"
+
+
+echo "-- downloading peptide data from Ensembl Plants:"
+echo "   LINK  : $LINK"
+echo "   OUTPUT PATH: $FASTA_FILE"
+echo "   FEATURE OUTPUT PATH: $FEATURE_OUTPUT_FILE"
+
 if [ ! -d "$OUTPUT_DIR" ]; then
     mkdir -p "$OUTPUT_DIR"
+    echo "-- created output directory: $OUTPUT_DIR"
 fi
 
-date_now=$(date +"%Y-%m-%d %T")
-echo "-- [$date_now] downloading data from $LINK"
+# -- if fasta already exists, skip this step
+if [ ! -f "$FASTA_FILE" ]; then
+    echo "-- fasta file does not exist, proceeding to download."
+    date_now=$(date +"%Y-%m-%d %T")
+    echo "-- [$date_now] downloading data from $LINK"
 
-curl $LINK -o "${FASTA_FILE}.gz"
-gunzip "${FASTA_FILE}.gz"
+    curl $LINK -o "${FASTA_FILE}.gz"
+    gunzip "${FASTA_FILE}.gz"
 
-# -- return the file path
-echo "-- data downloaded to $FASTA_FILE"
+    # -- return the file path
+    echo "-- data downloaded to $FASTA_FILE"
+else
+    echo "-- fasta file already exists at $FASTA_FILE, skipping download."
+fi
+
 # -- from these headers need to extract all info >KRH46721 pep chromosome:Glycine_max_v2.0:8:46595288:46603445:-1 gene:GLYMA_08G352800 transcript:KRH46721 gene_biotype:protein_coding transcript_biotype:protein_coding description:hypothetical protein
 
+echo " -- now extracting protein information from fasta headers:"
 echo "peptide_id,gene_id,transcript_id,genome,chromosome,start_pos,end_pos,strand,description,length" > "$FEATURE_OUTPUT_FILE"
 
 grep ">" "$FASTA_FILE" | sed 's/>//g' | awk '{ printf "%s %s %s %s ", $1, $3, $4, $5; for(i=8;i<=NF;i++) {printf "%s%s", $i, (i<NF?OFS:ORS) }}' | awk '{

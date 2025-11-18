@@ -1,0 +1,7 @@
+-- generating edgelist from filtered BLASTP results:
+   INPUT : output/blast_output/filtered_blast_results_id50_qcov70_scov70_evalue1.tsv
+   OUTPUT: output/blast_output/cluster_input_id50_qcov70_scov70_evalue1.tsv
+   WEIGHT COLUMN INDEX: 12
+-- edgelist written to output/blast_output/cluster_input_id50_qcov70_scov70_evalue1.tsv
+-- renamed output file to indicate weight column used:
+   output/blast_output/cluster_input_id50_qcov70_scov70_evalue1_wcol12.tsv
