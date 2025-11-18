@@ -10,7 +10,7 @@ EOF
 
 # -- default parameters
 INPUT_FILE='output/blast_output/blast_results_with_coverage.tsv'
-OUTPUT_FILE='output/blast_output/filtered_blast_results'
+OUTPUT_DIR='output/blast_filtered'
 
 ID_THRESHOLD=30
 Q_COV_THRESHOLD=50
@@ -22,16 +22,16 @@ E_VALUE_THRESHOLD=NULL  # -- no filtering on e-value by default
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -i) INPUT_FILE="$2"; shift 2;;
-        -o) OUTPUT_FILE="$2"; shift 2;;
+        -o) OUTPUT_DIR="$2"; shift 2;;
         -id) ID_THRESHOLD="$2"; shift 2;;
         -qcov) Q_COV_THRESHOLD="$2"; shift 2;;
         -scov) S_COV_THRESHOLD="$2"; shift 2;;
         -bit) BIT_SCORE_THRESHOLD="$2"; shift 2;;
         -evalue) E_VALUE_THRESHOLD="$2"; shift 2;;
         -h|--help)
-            echo "Usage: $0 [-i input_file] [-o output_file] [-id identity_threshold] [-qcov query_coverage_threshold] [-scov subject_coverage_threshold] [-bit bit_score_threshold] [-evalue e_value_threshold]"
+            echo "Usage: $0 [-i input_file] [-o output_dir] [-id identity_threshold] [-qcov query_coverage_threshold] [-scov subject_coverage_threshold] [-bit bit_score_threshold] [-evalue e_value_threshold]"
             echo "  -i        Input BLAST results file with coverage"
-            echo "  -o        Output file name for filtered results"
+            echo "  -o        Output directory for filtered results"
             echo "  -id       Identity threshold (default: $ID_THRESHOLD)"
             echo "  -qcov     Query coverage threshold (default: $Q_COV_THRESHOLD)"
             echo "  -scov     Subject coverage threshold (default: $S_COV_THRESHOLD)"
@@ -53,6 +53,21 @@ exec > >(tee -i "$LOG_FILE") 2>&1
 echo "Command: $0 $*"
 
 
+
+# -- check input file exists
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: input file $INPUT_FILE not found" >&2
+    exit 1
+fi
+# -- ensure output directory exists
+if [ ! -d "$OUTPUT_DIR" ]; then
+    mkdir -p "$OUTPUT_DIR"
+    echo "-- created output directory: $OUTPUT_DIR"
+fi
+
+OUTPUT_FILE="${OUTPUT_DIR}/filtered_blast_results_id${ID_THRESHOLD}_qcov${Q_COV_THRESHOLD}_scov${S_COV_THRESHOLD}"
+echo ""
+
 echo " -- this file parameters:"
 echo "   INPUT FILE : $INPUT_FILE"
 echo "   OUTPUT FILE: $OUTPUT_FILE"
@@ -72,7 +87,6 @@ else
 fi
 
 # -- put thresholds in output filename
-OUTPUT_FILE="${OUTPUT_FILE}_id${ID_THRESHOLD}_qcov${Q_COV_THRESHOLD}_scov${S_COV_THRESHOLD}"
 if [ "$BIT_SCORE_THRESHOLD" != "NULL" ]; then
     OUTPUT_FILE="${OUTPUT_FILE}_bit${BIT_SCORE_THRESHOLD}"
 fi
@@ -128,7 +142,7 @@ filter_by_feature() {
         return
     fi
 
-    echo "-- filtering column $column_index with threshold $threshold (remoing values $comparison than threshold)"
+    echo "-- filtering column $column_index with threshold $threshold (removing values $comparison than threshold)"
 
     if [ "$comparison" = "less" ]; then
         awk -v col_idx="$column_index" -v thresh="$threshold" '{

@@ -25,3 +25,8 @@
 - fixed blast
 - running
 
+## [0.0.5] - 2025-11-18 by @raysas
+- fixed script 4,5,6 in pipeline_1
+- refixed output directories in scripts
+- got prelimnary results
+

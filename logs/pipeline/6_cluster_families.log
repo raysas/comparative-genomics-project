@@ -1,5 +1,6 @@
+Command: ./pipeline_1/6_cluster_families.sh -i output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12.txt
 -- clustering proteins into families using MCL with parameters:
-   INPUT : output/blast_output/cluster_input_id50_qcov70_scov70_evalue1_wcol12.tsv
+   INPUT : output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12.txt
    OUTPUT: output/clusters
    MCL Inflation: 2.0
    Discard Loops: y
@@ -8,4 +9,5 @@
    Recover: 600
    PCT: 90
    C-Fold: 1.0
--- clustering completed: Output written to output/clusters/protein_families_cluster_input_id50_qcov70_scov70_evalue1_wcol12.txt
+
+-- clustering completed: Output written to output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12.txt.txt

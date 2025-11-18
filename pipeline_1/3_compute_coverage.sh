@@ -48,6 +48,11 @@ echo "Command: $0 $*"
 OUTPUT_DIR=$(dirname ${INPUT_FILE})
 COVERAGE_OUTPUT_FILE=${OUTPUT_DIR}/${COVERAGE_OUTPUT_FILE}
 
+# -- check input file exists
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: input file $INPUT_FILE not found" >&2
+    exit 1
+fi
 
 echo "-- computing coverage for BLASTP results:"
 echo "   INPUT : $INPUT_FILE"

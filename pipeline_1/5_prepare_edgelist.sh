@@ -9,12 +9,12 @@ cat <<EOF
 EOF
 
 # -- default parameters
-INPUT_FILE='output/blast_filtered/filtered_blast_results_id50_qcov70_scov70_evalue1.tsv'
+INPUT_FILE='output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv'
 OUTPUT_DIR='output/similarity_edgelists'
 WEIGHT_COLUMN_INDEX=12  # -- bit score column in BLAST output
 
 # -- get arguments
-while getopts "i:o:h" flag; do
+while getopts "i:o:w:h" flag; do
     case "${flag}" in
         i) INPUT_FILE="${OPTARG}" ;;
         o) OUTPUT_DIR="${OPTARG}" ;;
@@ -45,6 +45,18 @@ echo "Command: $0 $*"
 
 exec > >(tee -i "$LOG_FILE") 2>&1
 
+# -- check input file exists
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: input file $INPUT_FILE not found" >&2
+    exit 1
+fi
+# -- ensure output directory exists
+if [ ! -d "$OUTPUT_DIR" ]; then
+    mkdir -p "$OUTPUT_DIR"
+    echo "-- created output directory $OUTPUT_DIR"
+fi
+
+
 OUTPUT_FILE=$OUTPUT_DIR/$(basename "${INPUT_FILE%.tsv}_wcol${WEIGHT_COLUMN_INDEX}.txt")
 
 echo "-- generating edgelist from filtered BLASTP results:"
@@ -52,14 +64,14 @@ echo "   INPUT : $INPUT_FILE"
 echo "   OUTPUT: $OUTPUT_FILE"
 echo "   WEIGHT COLUMN INDEX: $WEIGHT_COLUMN_INDEX"
 
-tail -n +2 "$INPUT_FILE" |awk -v weight_col="$WEIGHT_COLUMN_INDEX" 'BEGIN {
+tail -n +2 "$INPUT_FILE" | awk -v weight_col="$WEIGHT_COLUMN_INDEX" 'BEGIN {
     if (weight_col !~ /^[0-9]+$/) {
-        print "Error: Weight column index must be a number. Setting to default bit score column (12)"
+        print "Error: Weight column index must be a number. Setting to default bit score column (12)" > "/dev/stderr"
         weight_col = 12
     }
 }
 {
-    print $1, $2, $weight_col
+    print $1, $2, $(weight_col)
 }' > "$OUTPUT_FILE"
 
 echo "-- edgelist written to $OUTPUT_FILE"
