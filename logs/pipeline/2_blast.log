@@ -1,2 +1,21 @@
--- output directory output/blast_output already exists and -f flag not set; using existing directory
--- to force creation of a new output directory, use the -f flag
+Command: ./pipeline_1/2_blast.sh -f -o output/blast_output_maxseq1
+-- We have the following parameters:
+   INPUT FILE : data/peptides_longest.fa
+   OUTPUT DIR : output/blast_output
+   FORCE NEW  : true (create new output dir even if one exists)
+-- preparing to create new output directory: output/blast_output
+-- ! moved existing directory output/blast_output to output/blast_output_old_2
+-- created output directory: output/blast_output
+
+
+Building a new DB, current time: 11/20/2025 16:31:18
+New DB name:   /mnt/c/Users/rayan/Documents/saclay/courses/comparative-genomics/project/output/blast_output/peptide_db
+New DB title:  data/peptides_longest.fa
+Sequence type: Protein
+Keep MBits: T
+Maximum file size: 1000000000B
+Adding sequences from FASTA; added 56679 sequences in 5.13833 seconds.
+
+
+-- created BLAST database from data/peptides_longest.fa
+Warning: [blastp] Examining 5 or more matches is recommended

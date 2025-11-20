@@ -21,21 +21,21 @@ COV_OUTPUT_FILE="blast_results_with_coverage.tsv"
 force_new=false
 
 # -- get arguments
-while getopts "i:o:k:h" flag; do
+while getopts "i:o:f:h" flag; do
     case "${flag}" in
         i) INPUT_FILE="${OPTARG}" ;;
         o) OUTPUT_DIR="${OPTARG}" ;;
-        k) force_new=true ;;
+        f) force_new=true ;;
         h)
-            echo "Usage: $0 [-i input_file] [-o output_directory] [-k] [-h]"
+            echo "Usage: $0 [-i input_file] [-o output_directory] [-f] [-h]"
             echo "  -i    Input file"
             echo "  -o    Output directory"
-            echo "  -k    Force creation of a new blast_output directory (do not reuse existing one)"
+            echo "  -f    Force creation of a new blast_output directory (do not reuse existing one - wont delete previous one will only rename it with prefix old_ and a number suffix)"
             echo "  -h    Show this help message"
             exit 0
             ;;
         *)
-            echo "Invalid option: -${OPTARG}" >&2
+            echo "Invalid option: -${OPTARG}, follow the order of -i, -o, -f, -h just in case" >&2
             exit 1
             ;;
     esac
@@ -103,8 +103,10 @@ else
         exit 3
     fi
 
-    blastp -query "$INPUT_FILE" -db "${OUTPUT_DIR}/${DB_NAME}" -out "${OUTPUT_DIR}/${OUTPUT_FILE}" -outfmt 6 
+    blastp -query "$INPUT_FILE" -db "${OUTPUT_DIR}/${DB_NAME}" -out "${OUTPUT_DIR}/${OUTPUT_FILE}" -outfmt 6 -max_target_seqs 1
     echo "-- BLASTP search completed, results saved to ${OUTPUT_DIR}/${OUTPUT_FILE}"
+    current_timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "-- completed at: $current_timestamp"
 fi
 
 
