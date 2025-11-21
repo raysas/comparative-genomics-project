@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# !! need to fix merged ids: KRH29797KRH39445
+# !! need to format to tsv: geneName\tfamily
+
 # -- message on what this script does
 cat <<EOF
 -- this script clusters proteins into families based on filtered BLASTP results
@@ -8,7 +11,7 @@ cat <<EOF
 EOF
 
 # -- default parameters
-INPUT_FILE='output/similarity_edgelists/cluster_input_id50_qcov70_scov70_evalue1_wcol12.tsv'
+INPUT_FILE='output/similarity_edgelists/cluster_input_id30_qcov50_scov50_wcol12.tsv'
 OUTPUT_DIR='output/clusters'
 MCL_INFLATION=2.0
 DISCARD_LOOPS='y'
@@ -82,6 +85,6 @@ OUTPUT_FILE="${OUTPUT_DIR}/protein_families_$(basename "${INPUT_FILE%.tsv}").txt
 # -- this is the default command for mcl ran on galaxy
 mcl "$INPUT_FILE" -I "$MCL_INFLATION" --abc -V all --discard-loops="$DISCARD_LOOPS" -c 1.0 -P "$PRUNING_THRESHOLD" -S "$SELECT_DOWN_TO" -R "$RECOVER" -pct "$PCT" -o "$OUTPUT_FILE"
 
-echo "-- clustering completed: Output written to $OUTPUT_FILE"
+echo "-- clustering completed"
 
 exit 0

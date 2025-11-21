@@ -1,5 +1,7 @@
 -- generating edgelist from filtered BLASTP results:
-   INPUT : output/blast_filtered/filtered_blast_results_id50_qcov70_scov70.tsv
-   OUTPUT: output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_wcol12.txt
+   INPUT : output/blast_filtered/filtered_blast_results_id50_qcov70_scov70_evalue1.tsv
+   OUTPUT: output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_evalue1_wcol12.txt
    WEIGHT COLUMN INDEX: 12
--- edgelist written to output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_wcol12.txt
+-- self-loops removed
+-- duplicate edges removed, keeping highest weight
+-- edgelist written to output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_evalue1_wcol12.txt

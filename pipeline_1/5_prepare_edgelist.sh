@@ -1,5 +1,11 @@
 #!/bin/bash
 
+
+# -- !SOME ISSUES WITH THE SIMILARITY NETWORK:
+#    we always have a self loop (best match to p1 is p1): needs to be removed
+#    we have multiple edges between some pairs (p1,p2) with different weights (due to different alignments): need to keep only the highest weight
+# will create temp files during filtreation for testing and troubleshooting
+
 # -- message on what this script does
 cat <<EOF
 -- this script generates an edgelist from the filtered BLASTP results
@@ -73,6 +79,24 @@ tail -n +2 "$INPUT_FILE" | awk -v weight_col="$WEIGHT_COLUMN_INDEX" 'BEGIN {
 {
     print $1, $2, $(weight_col)
 }' > "$OUTPUT_FILE"
+
+# -- 1.remove self loops (when col1=col2)
+awk '$1 != $2' "$OUTPUT_FILE" > "${OUTPUT_FILE}.tmp"
+mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
+rm -f "${OUTPUT_FILE}.tmp"
+echo "-- self-loops removed"
+
+# -- 2.some duplicates of col1+col2, will keep only the highest weight
+sort -k1,1 -k2,2 -k3,3nr "$OUTPUT_FILE" | awk '{
+    key = $1 "_" $2
+    if (!(key in seen)) {
+        print $0
+        seen[key] = 1
+    }
+}' > "${OUTPUT_FILE}.tmp" 
+mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
+rm -f "${OUTPUT_FILE}.tmp"
+echo "-- duplicate edges removed, keeping highest weight"
 
 echo "-- edgelist written to $OUTPUT_FILE"
 
