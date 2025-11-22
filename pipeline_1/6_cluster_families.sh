@@ -11,7 +11,7 @@ cat <<EOF
 EOF
 
 # -- default parameters
-INPUT_FILE='output/similarity_edgelists/cluster_input_id30_qcov50_scov50_wcol12.tsv'
+INPUT_FILE='output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv'
 OUTPUT_DIR='output/clusters'
 MCL_INFLATION=2.0
 DISCARD_LOOPS='y'
@@ -81,10 +81,52 @@ fi
 
 # -- rename file based on input file
 OUTPUT_FILE="${OUTPUT_DIR}/protein_families_$(basename "${INPUT_FILE%.tsv}").txt"
+TSV_OUTPUT_FILE="${OUTPUT_FILE%.txt}.tsv"
 
 # -- this is the default command for mcl ran on galaxy
 mcl "$INPUT_FILE" -I "$MCL_INFLATION" --abc -V all --discard-loops="$DISCARD_LOOPS" -c 1.0 -P "$PRUNING_THRESHOLD" -S "$SELECT_DOWN_TO" -R "$RECOVER" -pct "$PCT" -o "$OUTPUT_FILE"
-
 echo "-- clustering completed"
+
+# -- 2 things to do:
+# * fix mixed ids in output (merged ids) e.g. KRH29797KRH39445 should be KRH29797\tKRH39445
+# * map all ids in the same line to the same familyID
+
+echo "-- converting MCL output into TSV: $TSV_OUTPUT_FILE"
+echo "-- fixing merged ids and mapping to family IDs"
+
+python3 <<EOF
+import re
+
+input_file = "$OUTPUT_FILE"
+tsv_file = "$TSV_OUTPUT_FILE"
+
+# --- step 1: fix merged IDs and rewrite the MCL file in place ---
+cleaned_lines = []
+with open(input_file) as f:
+    for line in f:
+        line = line.rstrip()
+        # Fix merged IDs: insert space between digit → letter, e.g., "123A"
+        fixed = re.sub(r"(?<=\d)(?=[A-Za-z])", " ", line)
+        cleaned_lines.append(fixed)
+
+# overwriting the MCL output file with cleaned lines
+with open(input_file, "w") as f:
+    for line in cleaned_lines:
+        f.write(line + "\n")
+
+# --- step 2: generate TSV from the now-corrected file ---
+with open(input_file) as f, open(tsv_file, "w") as out:
+    out.write("geneName\tfamily\n")
+    family_id = 1
+    for line in f:
+        genes = [g for g in line.split() if g]
+        for g in genes:
+            out.write(f"{g}\t{family_id}\n")
+        family_id += 1
+EOF
+
+echo "-- TSV conversion complete: $TSV_OUTPUT_FILE"
+
+# -- transform to tsv format: geneName\tfamilyID
 
 exit 0

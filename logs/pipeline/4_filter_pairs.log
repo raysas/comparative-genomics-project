@@ -1,18 +1,2 @@
 Command: ./pipeline_1/4_filter_pairs.sh 
-
- -- this file parameters:
-   INPUT FILE : output/blast_output/blast_results_with_coverage.tsv
-   OUTPUT FILE: output/blast_filtered/filtered_blast_results_id50_qcov70_scov70
- -- filtering BLASTP results in output/blast_output/blast_results_with_coverage.tsv with thresholds:
-   Identity >= 50
-   Query Coverage >= 70
-   Subject Coverage >= 70
-   No filtering on Bit Score
-   E-value <= 1
--- filtering column 3 with threshold 50 (removing values less than threshold)
--- filtering column 13 with threshold 70 (removing values less than threshold)
--- filtering column 14 with threshold 70 (removing values less than threshold)
--- skipping filtering for column 12 as threshold is NULL
--- filtering column 11 with threshold 1 (removing values greater than threshold)
--- filtering completed! filtered results saved to output/blast_filtered/filtered_blast_results_id50_qcov70_scov70_evalue1.tsv
--- removed temporary files in output/blast_filtered/temp/
+Error: input file output/blast_output/blast_results_with_coverage.tsv not found

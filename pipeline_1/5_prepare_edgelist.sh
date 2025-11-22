@@ -63,12 +63,17 @@ if [ ! -d "$OUTPUT_DIR" ]; then
 fi
 
 
-OUTPUT_FILE=$OUTPUT_DIR/$(basename "${INPUT_FILE%.tsv}_wcol${WEIGHT_COLUMN_INDEX}.txt")
+OUTPUT_FILE=$OUTPUT_DIR/$(basename "${INPUT_FILE%.tsv}_wcol${WEIGHT_COLUMN_INDEX}_network.tsv")
 
-echo "-- generating edgelist from filtered BLASTP results:"
+echo " -- generating edgelist from filtered BLASTP results:"
 echo "   INPUT : $INPUT_FILE"
 echo "   OUTPUT: $OUTPUT_FILE"
 echo "   WEIGHT COLUMN INDEX: $WEIGHT_COLUMN_INDEX"
+echo " -- starting with $(wc -l < "$INPUT_FILE") lines in input file"
+
+# -- re-order columns to have first id < second id (lexico-alphabetical order)
+
+# -- extract relevant columns: protein1, protein2, weight
 
 tail -n +2 "$INPUT_FILE" | awk -v weight_col="$WEIGHT_COLUMN_INDEX" 'BEGIN {
     if (weight_col !~ /^[0-9]+$/) {
@@ -80,23 +85,43 @@ tail -n +2 "$INPUT_FILE" | awk -v weight_col="$WEIGHT_COLUMN_INDEX" 'BEGIN {
     print $1, $2, $(weight_col)
 }' > "$OUTPUT_FILE"
 
+# -- reorder to have first id < second id (lexico-alphabetical order)
+# -- !! made sure to have the real query and subject ids in a row before the swapped ones (by sorting first)
+sort -d ${OUTPUT_FILE} | awk '
+{
+    if ($1 <= $2) {
+        print $0
+    } else {
+        # --swap $1 and $2, keep rest untouched
+        temp = $1
+        $1 = $2
+        $2 = temp
+        print $0
+    }
+}
+' > "${OUTPUT_FILE}.tmp"
+echo "-- reordered columns to ensure first id <= second id lexicographically"
+
 # -- 1.remove self loops (when col1=col2)
 awk '$1 != $2' "$OUTPUT_FILE" > "${OUTPUT_FILE}.tmp"
 mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
 rm -f "${OUTPUT_FILE}.tmp"
 echo "-- self-loops removed"
+echo "-- $(wc -l < "$OUTPUT_FILE") lines remain after removing self-loops"
 
-# -- 2.some duplicates of col1+col2, will keep only the highest weight
-sort -k1,1 -k2,2 -k3,3nr "$OUTPUT_FILE" | awk '{
+# -- 2.some duplicates of col1+col2, will keep only the highest weight (ALREADY SORTED)
+cat "$OUTPUT_FILE" | awk '{
     key = $1 "_" $2
     if (!(key in seen)) {
         print $0
         seen[key] = 1
     }
 }' > "${OUTPUT_FILE}.tmp" 
+
 mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
 rm -f "${OUTPUT_FILE}.tmp"
 echo "-- duplicate edges removed, keeping highest weight"
+echo "-- $(wc -l < "$OUTPUT_FILE") lines remain after removing duplicate edges with different weights (multiple hits - keeping best hit)"
 
 echo "-- edgelist written to $OUTPUT_FILE"
 

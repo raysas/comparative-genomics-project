@@ -1,7 +1,12 @@
--- generating edgelist from filtered BLASTP results:
-   INPUT : output/blast_filtered/filtered_blast_results_id50_qcov70_scov70_evalue1.tsv
-   OUTPUT: output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_evalue1_wcol12.txt
+-- created output directory output/similarity_edgelists
+ -- generating edgelist from filtered BLASTP results:
+   INPUT : output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv
+   OUTPUT: output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv
    WEIGHT COLUMN INDEX: 12
+ -- starting with 5282694 lines in input file
+-- reordered columns to ensure first id <= second id lexicographically
 -- self-loops removed
+-- 5226450 lines remain after removing self-loops
 -- duplicate edges removed, keeping highest weight
--- edgelist written to output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_evalue1_wcol12.txt
+-- 4020665 lines remain after removing duplicate edges with different weights (multiple hits - keeping best hit)
+-- edgelist written to output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv
