@@ -1,0 +1,16 @@
+name: comp-genomics
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.10
+  - pandas
+  - biopython
+  - matplotlib
+  - seaborn
+  - jupyter
+  - pip
+  - pip:
+      - tqdm
+      - scikit-learn
