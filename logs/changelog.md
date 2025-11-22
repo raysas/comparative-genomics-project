@@ -21,6 +21,7 @@
 - Generated peptides_longest.fa and protein_info_longest.csv.
 - Updated the pipeline TODO list.
 
+
 ## [0.0.4] - 2025-11-17 by @raysas
 - fixed blast
 - running
@@ -44,3 +45,23 @@
 - started with small documentation, detailed one ahead
 - cleaned log files from scripts
 
+### [0.0.7] - 2025-11-22 18:00:00
+- Created environment.yaml file for reproducibility.
+- Created test dataset to ease debugging.
+- Generated paralog pairs from clustered families.
+- Produced paralog_pairs.tsv in output/ks/test/.
+- Downloaded Glycine max CDS from Ensembl Plants.
+- Extracted CDS sequences for paralog pairs.
+- Used Bio.SeqIO to parse cds.fa and write FASTA files.
+- Encountered error, changed the version of CDS, rerun.
+- Created cds_pairs/ folder with individual paralog CDS files.
+- Added 3_align_pairs.sh script to align CDS paralog pairs using MAFFT.
+- Added inline comments to improve script readability and reproducibility.
+- Added 4_calculate_ks.sh script to convert aligned FASTA to AXT and run KaKs_Calculator.
+- Modified script so .axt files are saved in the same folder as aligned FASTA.
+- Produced *_kaks.txt results in ks_results/ folder.
+- Noted that some KaKs result files are empty due to invalid or short alignments.
+- Filtered out empty *_kaks.txt files caused by invalid/short alignments.
+- Merged valid Ka/Ks results, extracted Ks column and removed NA values.
+- Plotted histogram of Ks distribution.
+- Checked all results before implementing on full dataset.
