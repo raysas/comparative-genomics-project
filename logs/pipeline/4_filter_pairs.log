@@ -1,0 +1,2 @@
+Command: ./pipeline_1/4_filter_pairs.sh 
+Error: input file output/blast_output/blast_results_with_coverage.tsv not found

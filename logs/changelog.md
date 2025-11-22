@@ -25,7 +25,22 @@
 - fixed blast
 - running
 
-## [0.0.5] - 2025-11-17 by @raysas
-- branches with readmes and examples
-- updated readme and todo - split parts during meeting
+## [0.0.5] - 2025-11-18 by @raysas
+- fixed script 4,5,6 in pipeline_1
+- refixed output directories in scripts
+- got prelimnary results
+
+## [0.0.6] - 2025-11-22 by @raysas
+- completed yesterday's work (mainly debugging)
+- changes in 5_prepare_edgelist.sh (1) and 6_cluster_families (2)
+- (1) filtration and fixing output coming from script 4 (filtered blast results) to a similarity network (in form of tsv edge list)
+- (1) a. made sure that the same symmetric edge (a b w = b a w) only appears once (undirected edges)
+- (1) b. made sure no self loops are kept (protein self-matching, for each protein in the list)
+- (1) c. removed multiple edges coming from multiple hits: for 2 proteins a and b, keep only the best hit between a and b and remove the rest (by highest edge-weight, by default, bit score)
+- (2) figured an issue in MCL output: some ids are merged like KRH29797KRH39445 so read as 1 seq instead of 2
+- (2) fixed it inplace and reformatted the mcl txt output into a tsv output file with the columns: geneName  family
+- some fixing in input/output file names for consistency
+- updated todolist for pipeline_1: officially clean pipeline
+- started with small documentation, detailed one ahead
+- cleaned log files from scripts
 
