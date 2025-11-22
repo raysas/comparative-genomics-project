@@ -1,4 +1,6 @@
 test/
 results/
 data/
-output/blast_output*
+output/*
+!output/clusters/
+!output/clusters/**
