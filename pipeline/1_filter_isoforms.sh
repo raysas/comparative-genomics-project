@@ -6,13 +6,6 @@ set -euo pipefail
 FASTA_FILE='data/peptides.fa'
 FEATURE_FILE='data/protein_info.csv'
 
-LOG_DIR="logs/pipeline"
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir -p "$LOG_DIR"
-fi
-LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
-exec > >(tee -i "$LOG_FILE") 2>&1
-
 cat <<EOF
 -- this script filters the initial fasta file to keep only the longest isoform per gene
    and creates:
@@ -22,15 +15,29 @@ cat <<EOF
 EOF
 
 # -- get arguments if provided any
-while getopts f:i:h flag
-do
+while getopts "f:i:h" flag; do
     case "${flag}" in
-        f) FASTA_FILE=${OPTARG};;
-        i) FEATURE_FILE=${OPTARG};;
-        h) echo "Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE]"
-           exit 0;;
+        f) FASTA_FILE="${OPTARG}" ;;
+        i) FEATURE_FILE="${OPTARG}" ;;
+        h)
+            echo "Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE]"
+            exit 0
+            ;;
+        *)
+            echo "Invalid option. Use -h for help."
+            exit 1
+            ;;
     esac
 done
+
+LOG_DIR="logs/pipeline"
+if [ ! -d "$LOG_DIR" ]; then
+    mkdir -p "$LOG_DIR"
+fi
+LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
+exec > >(tee -i "$LOG_FILE") 2>&1
+echo "Command: $0 $*"
+
 
 echo "-- filtering to keep only longest isoform per gene from:"
 echo "   FASTA   : $FASTA_FILE"
