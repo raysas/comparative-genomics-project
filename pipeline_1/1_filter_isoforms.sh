@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# --------------------------------------------------------------------
+# -- What this script does:
+#    keeps only the longest isoform per gene from the initial peptide fasta file
+#    and creates:
+#      1) a filtered fasta file (e.g., peptides_longest.fa)
+#      2) a filtered protein info file (e.g., protein_info_longest.csv)
+# -- Usage:
+#    bash ./pipeline_1/1_filter_isoforms.sh [-f FASTA_FILE] [-i FEATURE_FILE]
+# -- default (without params) equivalent to:
+#    bash ./pipeline_1/1_filter_isoforms.sh -f "data/peptides.fa" -i "data/protein_info.csv"
+# --------------------------------------------------------------------
+###########################################################################
+
+# ---------------------------------------------------------------------
+# prepare variables, get arguments, set up logging
+# ---------------------------------------------------------------------
+
 # -- keep only the longest isoform from the initial fasta file
 set -euo pipefail
 
@@ -21,6 +38,9 @@ while getopts "f:i:h" flag; do
         i) FEATURE_FILE="${OPTARG}" ;;
         h)
             echo "Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE]"
+            echo "  -f    Input peptide FASTA file (default: $FASTA_FILE)"
+            echo "  -i    Input protein info CSV file (default: $FEATURE_FILE)"
+            echo "  -h    Show this help message"
             exit 0
             ;;
         *)
@@ -52,6 +72,8 @@ FEATURE_FILTERED="${FEATURE_DIR}/protein_info_longest.csv"
 
 TMP_METADATA="${FEATURE_DIR}/_tmp_longest_isoforms.csv"
 TMP_IDS="${FEATURE_DIR}/_tmp_longest_ids.txt"
+
+#########################################################################
 
 # --------------------------------------------------------------------
 # 1) select longest isoform per gene using FEATURE_FILE

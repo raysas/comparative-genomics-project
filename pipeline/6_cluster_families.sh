@@ -1,7 +1,22 @@
 #!/bin/bash
 
+# --------------------------------------------------------------------
+# -- What this script does:
+#    clusters proteins into families based on filtered BLASTP results
+#    using connected components from a graph representation of the BLAST results
+#    will be using the MCL algorithm for clustering
 # !! need to fix merged ids: KRH29797KRH39445
 # !! need to format to tsv: geneName\tfamily
+#
+#    so 2 formats of output:
+#    1) .txt -mcl output format: each line is a family with space-separated gene
+#    2) .tsv - 2 columns: geneName and familyID
+#
+# -- Usage:
+#    bash ./pipeline_1/6_cluster_families.sh [-i INPUT_FILE] [-o OUTPUT_DIR] [-h]
+# -- default (without params) equivalent to:
+#    bash ./pipeline_1/6_cluster_families.sh -i "output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv" -o "output/clusters"
+# --------------------------------------------------------------------
 
 # -- message on what this script does
 cat <<EOF

@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# --------------------------------------------------------------------
+# -- What this script does:
+#    1) creates a BLAST database from a given peptide fasta file
+#    2) runs a BLASTP search of the peptides against themselves
+# !! if the output directory already exists, it will skip running blast unless -f flag is provided
+# -- Usage:
+#    bash ./pipeline_1/2_blast.sh [-i INPUT_FILE] [-o OUTPUT_DIR] [-f] [-h]
+# -- default (without params) equivalent to:
+#    bash ./pipeline_1/2_blast.sh -i "data/peptides_longest.fa" -o "output/blast_output"
+# --------------------------------------------------------------------
+###########################################################################
+
+# ---------------------------------------------------------------------
+# prepare variables, get arguments, set up logging
+# ---------------------------------------------------------------------
 # -- message on what this script does
 cat <<EOF
 -- this script:
@@ -62,6 +77,10 @@ if [ ! -f "$INPUT_FILE" ]; then
     echo "Error: Input file $INPUT_FILE does not exist."
     exit 1
 fi
+
+# -------------------------------------------------------------------------
+# -- main script logic
+# -------------------------------------------------------------------------
 
 # -- handle existing output directory
 if [ "$force_new" = false ] && [ -d "$OUTPUT_DIR" ]; then
