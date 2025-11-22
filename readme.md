@@ -356,6 +356,9 @@ for more info see mcl --help
 |KRH37933| 1     |
 |KRH38261| 1     |
 
+> [!NOTE]
+> Also worth noting, the script now removes clusters with only 1 member (not interested in singleton clusters - no gene duplicates information), so the final output files will only contain clusters with 2 or more members (minimum size of a gene family)
+
 # Requirements
 
 * curl if not already installed
