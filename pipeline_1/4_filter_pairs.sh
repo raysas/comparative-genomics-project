@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# --------------------------------------------------------------------
+# -- What this script does:
+#    filters BLASTP results based on identity/coverge/score thresholds
+#    and outputs the filtered results to a new file
+#    options to specify thresholds for identity, query coverage, subject coverage, bit score, e-value (less then)
+#    created a helper function to filter by any feature/column index
+#    how to use it:
+#       filter_by_feature input_file column_index threshold comparison[less/greater] output_file
+# e.g., to filter by identity (column 3) with threshold 30 (remove lines with identity < 30):
+#       filter_by_feature blast_results.tsv 3 30 less filtered_by_id.tsv
+
+# -- Usage:
+#    bash ./pipeline_1/4_filter_pairs.sh [-i INPUT_FILE] [-o OUTPUT_DIR] [-id ID_THRESHOLD] [-qcov Q_COV_THRESHOLD] [-scov S_COV_THRESHOLD] [-bit BIT_SCORE_THRESHOLD] [-evalue E_VALUE_THRESHOLD] [-h]
+# -- default (without params) equivalent to:
+#    bash ./pipeline_1/4_filter_pairs.sh -i "output/blast_output/blast_results_with_coverage.tsv" -o "output/blast_filtered" -id 30 -qcov 50 -scov 50
+# --------------------------------------------------------------------
+###########################################################################
+
+# ---------------------------------------------------------------------
+# prepare variables, get arguments, set up logging
+# ---------------------------------------------------------------------
 # -- meaasge what this script does
 
 cat <<EOF
@@ -52,8 +73,6 @@ LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
 exec > >(tee -i "$LOG_FILE") 2>&1
 echo "Command: $0 $*"
 
-
-
 # -- check input file exists
 if [ ! -f "$INPUT_FILE" ]; then
     echo "Error: input file $INPUT_FILE not found" >&2
@@ -86,6 +105,9 @@ else
     echo "   No filtering on E-value"
 fi
 
+################################################################################
+# ------------------------------------------------------------------
+
 # -- put thresholds in output filename
 if [ "$BIT_SCORE_THRESHOLD" != "NULL" ]; then
     OUTPUT_FILE="${OUTPUT_FILE}_bit${BIT_SCORE_THRESHOLD}"
@@ -95,39 +117,7 @@ if [ "$E_VALUE_THRESHOLD" != "NULL" ]; then
 fi
 OUTPUT_FILE="${OUTPUT_FILE}.tsv"
 
-################################################################################
-# ------------------------------ old code to delete ---------------------------
-# -- function that takes column index and removes lines with value below threshold
-# remove_less_than() {
-#     input_file="$1"
-#     column_index="$2"
-#     threshold="$3"
-#     output_file="$4"
-
-#     awk -v col_idx="$column_index" -v thresh="$threshold" '{
-#         if ($col_idx >= thresh) {
-#             print $0
-#         }
-#     }' "$input_file" > "$output_file"
-# }
-# remove_greater_than() {
-#     input_file="$1"
-#     column_index="$2"
-#     threshold="$3"
-#     output_file="$4"
-
-#     awk -v col_idx="$column_index" -v thresh="$threshold" '{
-#         if ($col_idx <= thresh) {
-#             print $0
-#         }
-#     }' "$input_file" > "$output_file"
-# }
-# ------------------------------ end old code to delete -----------------------
-################################################################################
-
 # -- helper function to remove lines that are less than or greater than
-# -- how to use it:
-#       filter_by_feature input_file column_index threshold comparison[less/greater] output_file
 filter_by_feature() {
     input_file="$1"
     column_index="$2"
@@ -188,3 +178,33 @@ rm -rf "$TEMP_DIR"
 echo "-- removed temporary files in $TEMP_DIR"
 
 exit 0
+
+################################################################################
+# ------------------------------ old code to delete ---------------------------
+# -- function that takes column index and removes lines with value below threshold
+# remove_less_than() {
+#     input_file="$1"
+#     column_index="$2"
+#     threshold="$3"
+#     output_file="$4"
+
+#     awk -v col_idx="$column_index" -v thresh="$threshold" '{
+#         if ($col_idx >= thresh) {
+#             print $0
+#         }
+#     }' "$input_file" > "$output_file"
+# }
+# remove_greater_than() {
+#     input_file="$1"
+#     column_index="$2"
+#     threshold="$3"
+#     output_file="$4"
+
+#     awk -v col_idx="$column_index" -v thresh="$threshold" '{
+#         if ($col_idx <= thresh) {
+#             print $0
+#         }
+#     }' "$input_file" > "$output_file"
+# }
+# ------------------------------ end old code to delete -----------------------
+################################################################################

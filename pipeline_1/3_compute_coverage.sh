@@ -1,8 +1,24 @@
 #!/bin/bash
 
+# --------------------------------------------------------------------
+# -- What this script does:
+#    computes query and subject coverage from BLASTP output
+#    and appends the coverage values as new columns to the BLAST output file
+#
 # -- splitted into 2 steps:
 # I) preparing BLAST output with query and subject lengths
 # II) computing coverage and appending to BLAST output
+# -- Usage:
+#    bash ./pipeline_1/3_compute_coverage.sh [-i INPUT_FILE] [-o COVERAGE_OUTPUT_FILE] [-p PROTEIN_INFO_FILE] [-h]
+# -- default (without params) equivalent to:
+#    bash ./pipeline_1/3_compute_coverage.sh -i "output/blast_output/blast_results.tsv" -o "output/blast_output/blast_results_with_coverage.tsv" -p "data/protein_info_longest.csv"
+# --------------------------------------------------------------------
+###########################################################################
+
+
+# ---------------------------------------------------------------------
+# prepare variables, get arguments, set up logging
+# ---------------------------------------------------------------------
 
 # -- message on what this script does
 cat <<EOF
@@ -59,6 +75,7 @@ echo "   INPUT : $INPUT_FILE"
 echo "   PROTEIN INFO FILE : $PROTEIN_INFO_FILE"
 echo "   OUTPUT: $COVERAGE_OUTPUT_FILE"
 
+################################################################################
 # ------------------------------------------------------------------
 
 # I) preparing for covergae

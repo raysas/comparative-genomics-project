@@ -1,10 +1,26 @@
 #!/bin/bash
 
-
-# -- !SOME ISSUES WITH THE SIMILARITY NETWORK:
+# --------------------------------------------------------------------
+# -- What this script does:
+#    generates an edgelist from the filtered BLASTP results
+#    the edgelist will be of the form: protein1 protein2 weight
+#    where weight here is bit score (consider making the option more general later)
+#
+#  !SOME ISSUES WITH THE SIMILARITY NETWORK:
+#    we have symmetric edges (p1,p2,w) and (p2,p1,w) that needs to be shortned to one edge
 #    we always have a self loop (best match to p1 is p1): needs to be removed
 #    we have multiple edges between some pairs (p1,p2) with different weights (due to different alignments): need to keep only the highest weight
-# will create temp files during filtreation for testing and troubleshooting
+#    * will create temp files during filtreation for testing and troubleshooting
+# -- Usage:
+#    bash ./pipeline_1/5_prepare_edgelist.sh [-i INPUT_FILE] [-o OUTPUT_DIR] [-w WEIGHT_COLUMN_INDEX] [-h]
+# -- default (without params) equivalent to:
+#    bash ./pipeline_1/5_prepare_edgelist.sh -i "output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv" -o "output/similarity_edgelists" -w 12
+# --------------------------------------------------------------------
+###########################################################################
+
+# ---------------------------------------------------------------------
+# prepare variables, get arguments, set up logging
+# ---------------------------------------------------------------------
 
 # -- message on what this script does
 cat <<EOF
@@ -70,6 +86,10 @@ echo "   INPUT : $INPUT_FILE"
 echo "   OUTPUT: $OUTPUT_FILE"
 echo "   WEIGHT COLUMN INDEX: $WEIGHT_COLUMN_INDEX"
 echo " -- starting with $(wc -l < "$INPUT_FILE") lines in input file"
+
+# -------------------------------------------------------------------------
+# -- main script logic
+# -------------------------------------------------------------------------
 
 # -- re-order columns to have first id < second id (lexico-alphabetical order)
 

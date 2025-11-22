@@ -10,8 +10,7 @@
 - [x] get edgelist file (putative homologs with bit score) script | filter options based on different metrics (user defines) [./pipeline/5_prepare_edgelist.sh](./pipeline/5_prepare_edgelist.sh)
 - [x] clustering script (check which algos - ones that match the galaxy ones) | get gene families [./pipeline/6_cluster_families.sh](./pipeline/6_cluster_families.sh)
 - [x] get another format for clusters: 2 columns for gene and family ID (7th script)
-
-from the end file later on perform filtering, analysis, plotting, stats etc
+- [ ] check the deal with families of size 2 (are there smaller than 2? check mcl output)
 
 - [ ] make a script to get number of genes, per chromosome, per family... different stats
 - [ ] make a nice diagram of the pipeline steps
