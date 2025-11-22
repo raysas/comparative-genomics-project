@@ -7,6 +7,7 @@
 #    will be using the MCL algorithm for clustering
 # !! need to fix merged ids: KRH29797KRH39445
 # !! need to format to tsv: geneName\tfamily
+# !! need to remove singletons (clusters with only 1 member)
 #
 #    so 2 formats of output:
 #    1) .txt -mcl output format: each line is a family with space-separated gene
@@ -100,7 +101,13 @@ TSV_OUTPUT_FILE="${OUTPUT_FILE%.txt}.tsv"
 
 # -- this is the default command for mcl ran on galaxy
 mcl "$INPUT_FILE" -I "$MCL_INFLATION" --abc -V all --discard-loops="$DISCARD_LOOPS" -c 1.0 -P "$PRUNING_THRESHOLD" -S "$SELECT_DOWN_TO" -R "$RECOVER" -pct "$PCT" -o "$OUTPUT_FILE"
-echo "-- clustering completed"
+echo "-- clustering completed: $OUTPUT_FILE"
+
+# -- remove clusters with only 1 member (not interested in singletons - no gene duplicates information)
+# if number of ids in one line is 1, remove that line
+awk 'NF>1' "$OUTPUT_FILE" > "${OUTPUT_FILE}.tmp" 
+mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
+echo "-- removed singleton clusters from output file: $OUTPUT_FILE"
 
 # -- 2 things to do:
 # * fix mixed ids in output (merged ids) e.g. KRH29797KRH39445 should be KRH29797\tKRH39445
@@ -141,6 +148,10 @@ with open(input_file) as f, open(tsv_file, "w") as out:
 EOF
 
 echo "-- TSV conversion complete: $TSV_OUTPUT_FILE"
+
+echo "-- clustering finished successfully:"
+echo "   MCL output file: $OUTPUT_FILE"
+echo "   TSV output file: $TSV_OUTPUT_FILE"
 
 # -- transform to tsv format: geneName\tfamilyID
 
