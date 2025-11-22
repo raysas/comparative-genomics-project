@@ -2,6 +2,12 @@
 
 [todo list for this project](TODO.md)
 
+You can find the duplicated genes (gene families output, from pipeline_1) in [`output/clusters/`](output/clusters/) in 2 formats:
+- `.txt` : mcl output format (space-separated gene names per line, line=family)
+- `.tsv` : tab-separated format (geneName \t familyID, mapping of each gene to its family)
+
+*preferable to use tsv format, easier and clearer to handle*
+
 ## Important notes
 
 > [!CAUTION]
