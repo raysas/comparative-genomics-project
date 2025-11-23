@@ -45,7 +45,8 @@
 - started with small documentation, detailed one ahead
 - cleaned log files from scripts
 
-### [0.0.7] - 2025-11-22 18:00:00
+
+## [0.0.7] - 2025-11-22 by @nhi
 - Created environment.yaml file for reproducibility.
 - Created test dataset to ease debugging.
 - Generated paralog pairs from clustered families.
@@ -65,3 +66,13 @@
 - Merged valid Ka/Ks results, extracted Ks column and removed NA values.
 - Plotted histogram of Ks distribution.
 - Checked all results before implementing on full dataset.
+
+
+## [0.0.8] - 2025-11-23 by @nhi
+- Renamed output/ks to output/ks_b, 3_align_pairs.sh to 3b_align_pairs.sh, 4_calculate_ks.sh to 4b_calculate_ks.sh, and pipeline_2/pipeline_2 to pipeline_2/pipeline_2b.
+- Updated all scripts to reference the new file names.
+- Split CDS, proteins by family.
+- Prepared 3_align_proteins.sh, 4_generate_phy.sh.
+- Run in test dataset.
+- Run in full dataset.
+

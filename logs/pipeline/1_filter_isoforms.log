@@ -1,8 +1,4 @@
--- this script filters the initial fasta file to keep only the longest isoform per gene
-   and creates:
-     1) a filtered fasta file (peptides_longest.fa)
-     2) a filtered protein info file (protein_info_longest.csv)
-     
+Command: ./pipeline_1/1_filter_isoforms.sh 
 -- filtering to keep only longest isoform per gene from:
    FASTA   : data/peptides.fa
    FEATURES: data/protein_info.csv
