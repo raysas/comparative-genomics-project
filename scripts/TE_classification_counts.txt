@@ -1,0 +1,42 @@
+ 619524 Unknown/-/-
+  92396 Class I/LTR/Gypsy
+  60399 Class I/LTR/Copia
+  27566 Class II subclass 1/TIR/MuLE-MuDR
+  26395 Class II subclass 1/TIR/CMC-EnSpm
+  22978 Class I/LTR/Unknown
+  15920 Class II subclass 1/TIR/MuDR
+  11897 Class I/LINE/L1
+   9676 Class II subclass 1/TIR/hAT-Ac
+   9355 Class II subclass 2/MITE/MITE
+   8157 Class II subclass 1/TIR/PIF-Harbinger
+   6804 Class I/LTR/LARD
+   6122 Class I/LINE/Unknown
+   5860 Class II subclass 2/Helitron/Helitron
+   4612 Class II subclass 1/TIR/hAT-Tag1
+   4596 Class II subclass 1/TIR/EnSpm-CACTA
+   3927 Class I/LINE/RTE
+   3914 Class I/SINE/Unknown
+   3698 Class I/LTR/TRIM
+   3440 Class II subclass I/TIR/Unknown
+   3348 Class II subclass 1/TIR/hAT
+   2920 Class II subclass 1/TIR/TcMar-Stowaway
+   2805 Class II subclass 1/TIR/hAT-Tip100
+   2224 Class II subclass 1/TIR/Unknown
+   1811 Class I/SINE/tRNA
+   1182 Class II subclass 1/TIR/Harbinger
+   1126 Class I/LTR/Cassandra
+    973 Class I/SINE/tRNA-RTE
+    577 Class II subclass 1/TIR/Novosib
+    574 Class I/LTR/Caulimovirus
+    535 Class II subclass 1/Crypton/Crypton-S
+    472 Class II subclass 1/TIR/Tc1-Mariner
+    235 Class I/SINE/ID
+    193 Class I/SINE/rRNA
+    180 Class II subclass 1/TIR/hAT-Charlie
+    177 Class I/LINE/L2
+    168 Class I/LINE/I-Jockey
+     78 Class II subclass 1/TIR/TcMar-Pogo
+     64 Class I/SINE/snRNA
+      2 Class I/LINE/TEX
+      2 Class I/DIRS/Unknown
+      1 Class I/LINE/CRE
