@@ -76,3 +76,9 @@
 - Run in test dataset.
 - Run in full dataset.
 
+## [0.0.9] - 2025-11-24 by @nhi
+- Debug.
+- Merged CDS and protein pair generation to avoid looping twice.
+- Rearranged codes.
+- Run on full data.
+
