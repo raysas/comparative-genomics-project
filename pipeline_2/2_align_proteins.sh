@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# It is configured for the "test" dataset. Change paths for "full" dataset.
-input_dir="/mnt/d/documents/Nhi/comparative-genomics-project/output/ks/full/families"
-output_dir="/mnt/d/documents/Nhi/comparative-genomics-project/output/ks/full/alignments"
+input_dir="../output/ks/proteins"
+output_dir="../output/ks/alignments"
 
 # Select the range of families to run
-start=4666    # starting family
-end=4667      # ending family
+start=1    # starting family
+end=7221     # ending family
 
 # Ensure the output folder exists
 mkdir -p "$output_dir"
@@ -29,4 +28,4 @@ for ((fam_num=start; fam_num<=end; fam_num++)); do
     done
 done
 
-echo "Pairwise alignments done for families $start to $end, results in $output_dir/family*/"
+echo "Pairwise alignments done for protiens $start to $end, results in $output_dir/family*/"

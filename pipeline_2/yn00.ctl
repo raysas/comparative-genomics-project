@@ -1,1 +1,0 @@
-/usr/lib/paml/data/yn00.ctl
