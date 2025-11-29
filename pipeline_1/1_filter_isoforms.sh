@@ -20,8 +20,10 @@
 # -- keep only the longest isoform from the initial fasta file
 set -euo pipefail
 
-FASTA_FILE='data/peptides.fa'
-FEATURE_FILE='data/protein_info.csv'
+# Default paths (will auto-detect species subdirectory)
+FASTA_FILE=''
+FEATURE_FILE=''
+AUTO_DETECT=true
 
 cat <<EOF
 -- this script filters the initial fasta file to keep only the longest isoform per gene
@@ -34,13 +36,33 @@ EOF
 # -- get arguments if provided any
 while getopts "f:i:h" flag; do
     case "${flag}" in
-        f) FASTA_FILE="${OPTARG}" ;;
-        i) FEATURE_FILE="${OPTARG}" ;;
+        f) FASTA_FILE="${OPTARG}"; AUTO_DETECT=false ;;
+        i) FEATURE_FILE="${OPTARG}"; AUTO_DETECT=false ;;
         h)
-            echo "Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE]"
-            echo "  -f    Input peptide FASTA file (default: $FASTA_FILE)"
-            echo "  -i    Input protein info CSV file (default: $FEATURE_FILE)"
-            echo "  -h    Show this help message"
+            cat <<EOF
+Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE]
+
+OPTIONS:
+  -f FASTA_FILE     Input peptide FASTA file
+  -i FEATURE_FILE   Input protein info CSV file
+  -h                Show this help message
+
+AUTO-DETECTION:
+  If no files are specified, the script will automatically detect
+  species-specific directories under data/
+  
+  Expected structure:
+    data/{species}/peptides.fa
+    data/{species}/protein_info.csv
+
+EXAMPLES:
+  # Auto-detect (recommended)
+  $0
+
+  # Explicit paths
+  $0 -f data/glycine_max/peptides.fa -i data/glycine_max/protein_info.csv
+
+EOF
             exit 0
             ;;
         *)
@@ -49,6 +71,45 @@ while getopts "f:i:h" flag; do
             ;;
     esac
 done
+
+# Auto-detect species directory if not specified
+if [ "$AUTO_DETECT" = true ]; then
+    echo "-- Auto-detecting species directory..."
+    
+    # Look for data/species_name/ structure
+    SPECIES_DIRS=(data/*/)
+    
+    if [ ${#SPECIES_DIRS[@]} -eq 1 ] && [ -d "${SPECIES_DIRS[0]}" ]; then
+        SPECIES_DIR="${SPECIES_DIRS[0]%/}"
+        SPECIES_NAME=$(basename "$SPECIES_DIR")
+        
+        FASTA_FILE="${SPECIES_DIR}/peptides.fa"
+        FEATURE_FILE="${SPECIES_DIR}/protein_info.csv"
+        
+        echo "   Detected species: $SPECIES_NAME"
+        echo "   Using directory: $SPECIES_DIR"
+    elif [ ${#SPECIES_DIRS[@]} -gt 1 ]; then
+        echo "ERROR: Multiple species directories found in data/"
+        echo "       Please specify files explicitly with -f and -i"
+        echo "       Found: ${SPECIES_DIRS[*]}"
+        exit 1
+    else
+        echo "ERROR: No species directories found in data/"
+        echo "       Run 0_extract_data.sh first or specify files with -f and -i"
+        exit 1
+    fi
+fi
+
+# Validate files exist
+if [ ! -f "$FASTA_FILE" ]; then
+    echo "ERROR: FASTA file not found: $FASTA_FILE"
+    exit 1
+fi
+
+if [ ! -f "$FEATURE_FILE" ]; then
+    echo "ERROR: Feature file not found: $FEATURE_FILE"
+    exit 1
+fi
 
 LOG_DIR="logs/pipeline"
 if [ ! -d "$LOG_DIR" ]; then
@@ -134,13 +195,17 @@ with open(fasta_path) as fin, open(out_path, "w") as out:
 EOF
 
 echo "-- step 2 done."
-echo "-- outputs:"
-echo "   FASTA   : $FASTA_FILTERED"
-echo "   FEATURES: $FEATURE_FILTERED"
+echo ""
+echo "========================================="
+echo "FILTERING COMPLETED"
+echo "========================================="
+echo "Filtered FASTA:    $FASTA_FILTERED"
+echo "Filtered features: $FEATURE_FILTERED"
+echo "Genes retained:    $N_GENES"
+echo "========================================="
 
 # cleanup
 rm -f "$TMP_METADATA" "$TMP_IDS"
 
-echo "-- filtering completed successfully."
 exit 0
 
