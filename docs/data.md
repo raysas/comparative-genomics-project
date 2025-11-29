@@ -19,6 +19,6 @@ gunzip data/peptides.fa.gz
 2. **Coding sequences (CDS FASTA)**
 For Ks calculation we need the CDS sequences. They can be downloaded from Ensembl Plants:
 ```bash
-curl http://ftp.ensemblgenomes.org/pub/release-41/plants/fasta/glycine_max/cdna/Glycine_max.Glycine_max_v2.0.cdna.all.fa.gz -o 
+curl http://ftp.ensemblgenomes.org/pub/release-41/plants/fasta/glycine_max/cdna/Glycine_max.Glycine_max_v2.0.cdna.all.fa.gz -o data/cds.fa.gz
 gunzip data/cds.fa.gz
 ```
