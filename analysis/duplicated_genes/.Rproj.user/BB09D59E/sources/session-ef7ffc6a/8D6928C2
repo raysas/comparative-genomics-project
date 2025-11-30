@@ -1,0 +1,26 @@
+{
+    "id": "8D6928C2",
+    "path": "~/saclay/courses/comparative-genomics/project/analysis/duplicated_genes/plot_gene_family_distribution.R",
+    "project_path": "plot_gene_family_distribution.R",
+    "type": "r_source",
+    "hash": "748139947",
+    "contents": "",
+    "dirty": false,
+    "created": 1764498173756.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "20,24",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1764498191,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1764498191,
+    "read_only": false,
+    "read_only_alternatives": []
+}

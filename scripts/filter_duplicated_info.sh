@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# --------------------------------------------------------
+# -- script to filter duplicated genes information file from the main protein info file
+# -- only keeping genes that are present in the duplicated genes clusters file
+# --------------------------------------------------------
+
 
 input_file="data/protein_info_longest.csv"
 duplicated_genes_clusters_file="output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv"

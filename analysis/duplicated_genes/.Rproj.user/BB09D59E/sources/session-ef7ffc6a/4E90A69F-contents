@@ -1,0 +1,139 @@
+#!/usr/bin/env Rscript
+
+
+# -- libs
+if (!requireNamespace(c("argparse", "GenomicRanges", "dplyr"), quietly = TRUE)) {
+  install.packages(c("argparse", "dplyr"))
+  if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+  BiocManager::install("GenomicRanges")
+}
+suppressPackageStartupMessages({
+  library(GenomicRanges)
+  library(dplyr)
+  library(argparse)
+})
+
+# -- change dir to ../../
+# setwd("../../")
+
+
+# --------------------------------------------------
+# -- 1. parse command line arguments with defaults
+# -------------------------------------------------
+parser <- ArgumentParser(description = "detect TAGs in duplicated genes")
+parser$add_argument("--dup_file", default = "output/statistics/duplicated_info.csv",
+                    help = "-- path to duplication dataframe CSV [default: %(default)s]")
+parser$add_argument("--families_file", default = "output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv",
+                    help = "-- path to families dataframe CSV/TSV [default: %(default)s]")
+parser$add_argument("--spacer", type = "integer", default = 1,
+                    help = "-- maximum spacer between genes in a TAG [default: %(default)s]")
+parser$add_argument("--outfile", default = NULL,
+                    help = "-- path to save the output CSV/TSV [default: output/statistics/TAGs_{spacer}.tsv]")
+args <- parser$parse_args()
+
+# -------------------------------
+# -- 2. output file
+# -------------------------------
+if (is.null(args$outfile)) {
+  args$outfile <- paste0("output/statistics/TAGs_", args$spacer, ".tsv")
+}
+
+# -------------------------------
+# -- 3. input data
+# -------------------------------
+dup_full_df <- read.csv(args$dup_file, stringsAsFactors = FALSE)
+families_df <- read.delim(args$families_file, stringsAsFactors = FALSE)
+max_spacers <- args$spacer
+
+# ------------------------------------
+# -- 4. merge data and create GRanges
+# -------------------------------------
+merged_df <- dup_full_df %>%
+  inner_join(families_df, by = c("peptide_id"="geneName")) %>%
+  arrange(chromosome, start_pos)
+
+gr_all <- GRanges(
+  seqnames = merged_df$chromosome,
+  ranges = IRanges(start = merged_df$start_pos, end = merged_df$end_pos),
+  strand = merged_df$strand
+)
+
+mcols(gr_all)$peptide_id <- merged_df$peptide_id
+mcols(gr_all)$family <- merged_df$family
+
+# -------------------------------
+# -- 5. TAG detection func
+# -------------------------------
+detect_TAGs_global <- function(gr, family, max_spacers = 1) {
+  
+  df <- data.frame(
+    seqnames = as.character(seqnames(gr)),
+    start = start(gr),
+    end = end(gr),
+    peptide_id = mcols(gr)$peptide_id,
+    family = mcols(gr)$family,
+    stringsAsFactors = FALSE
+  )
+  
+  df <- df[order(df$seqnames, df$start), ]
+  
+  family_hits <- which(df$family == family)
+  if (length(family_hits) == 0) return(NULL)
+  
+  tag_id <- 0
+  prev_hit <- NULL
+  df$TAG <- NA
+  
+  for (i in family_hits) {
+    if (is.null(prev_hit)) {
+      tag_id <- tag_id + 1
+      df$TAG[i] <- tag_id
+      prev_hit <- i
+    } else {
+      spacers <- i - prev_hit - 1
+      if (spacers <= max_spacers) {
+        df$TAG[i] <- tag_id
+      } else {
+        tag_id <- tag_id + 1
+        df$TAG[i] <- tag_id
+      }
+      prev_hit <- i
+    }
+  }
+  
+  df[df$family == family, ]
+}
+
+# ------------------------------------
+# -- 6. TAG detection for all families
+# ------------------------------------
+all_families <- unique(mcols(gr_all)$family)
+
+tag_results_list <- lapply(all_families, function(fam) {
+  detect_TAGs_global(gr_all, fam, max_spacers = max_spacers)
+})
+
+tag_results_list <- tag_results_list[!sapply(tag_results_list, is.null)]
+tag_results <- bind_rows(tag_results_list)
+
+# -------------------------------
+# -- 7. singletons reset
+# -------------------------------
+tag_sizes <- tag_results %>%
+  group_by(family, TAG) %>%
+  summarise(n_genes = n(), .groups = "drop")
+
+tag_results <- tag_results %>%
+  left_join(tag_sizes, by = c("family", "TAG")) %>%
+  mutate(TAG = ifelse(n_genes == 1, 0, TAG)) %>%
+  select(-n_genes) %>%
+  arrange(seqnames, start)
+
+# -------------------------------
+# -- 8. saving output
+# -------------------------------
+write.table(tag_results, args$outfile, sep = "\t", row.names = FALSE, quote = FALSE)
+
+num_TAGs <- sum(tag_results$TAG != 0)
+cat("-- number of TAGs detected out of total:", num_TAGs, "/", nrow(tag_results), "\n")

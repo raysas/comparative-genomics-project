@@ -1,0 +1,27 @@
+{
+    "id": "EED5B3A0",
+    "path": "~/saclay/courses/comparative-genomics/project/analysis/duplicated_genes/load_variables.R",
+    "project_path": "load_variables.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1764406619693.0,
+    "source_on_save": false,
+    "relative_order": 3,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "9,16",
+        "scrollLine": "16"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1764497107,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1764497107121,
+    "read_only": false,
+    "read_only_alternatives": []
+}
