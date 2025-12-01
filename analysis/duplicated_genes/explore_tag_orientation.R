@@ -72,3 +72,12 @@ orientation_counts <- tag_pairs_df %>%
   arrange(desc(count)) %>%
   mutate(percentage = (count / sum(count)) * 100)
 print(orientation_counts)
+
+observed <- table(tag_pairs_df$orientation)
+
+# Suppose genome-wide proportions are known:
+# tandem = 0.5, convergent = 0.25, divergent = 0.25
+expected_prop <- c(tandem = 0.5, convergent = 0.25, divergent = 0.25)
+expected <- sum(observed) * expected_prop[names(observed)]
+
+chisq.test(x = observed, p = expected_prop[names(observed)])

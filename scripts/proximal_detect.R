@@ -8,6 +8,7 @@ suppressPackageStartupMessages({
   library(GenomicRanges)
   library(readr)
   library(argparse)
+  library(parallel)
 })
 
 # -- argument parser
@@ -100,10 +101,27 @@ get_proximal_pairs <- function(family_df, gr, max_dist) {
 
 
 # -- loop over families
-proximal_pairs_list <- lapply(unique(gr$family_id), function(fam) {
-  gr_fam <- gr[gr$family_id == fam]
-  get_proximal_pairs(gr_fam, gr, max_dist = proximal_kb * 1000)
-})
+# proximal_pairs_list <- lapply(unique(gr$family_id), function(fam) {
+#   gr_fam <- gr[gr$family_id == fam]
+#   get_proximal_pairs(gr_fam, gr, max_dist = proximal_kb * 1000)
+#   print(paste("-- processed family:", fam))
+# })
+
+# -- parallel version
+
+num_cores <- 8
+
+proximal_pairs_list <- mclapply(
+  unique(gr$family_id),
+  function(fam) {
+    gr_fam <- gr[gr$family_id == fam]
+    res <- get_proximal_pairs(gr_fam, gr, max_dist = proximal_kb * 1000)
+    message(paste("-- processed family:", fam))
+    return(res)
+  },
+  mc.cores = num_cores
+)
+
 
 print("-- done! making final dataframe...")
 

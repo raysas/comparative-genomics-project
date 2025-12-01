@@ -218,7 +218,7 @@ Performing a chi-squared test to see if the observed orientation frequencies dif
 - **Data:** observed *(expected is based on 50% tandem, 25% convergent, 25% divergent)*
 - **Chi-squared statistic (X²):** 5697.3  
 - **Degrees of freedom (df):** 2  
-- **p-value:** < 2.2 × 10⁻¹⁶
+- **p-value:** < 2.2 × 10-16
 
 *table and results copied from Rscript output*
 
