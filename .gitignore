@@ -8,3 +8,5 @@ output/*
 !output/statistics/**
 !output/duplication_classes/
 !output/duplication_classes/**
+!output/gene_lists/
+!output/gene_lists/**

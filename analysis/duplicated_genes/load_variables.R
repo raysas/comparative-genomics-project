@@ -17,6 +17,11 @@ dup_full_df <- dup_df[!is.na(dup_df$chromosome) & !is.na(dup_df$start_pos) & !is
 dup_df<-dup_df[order(as.numeric(as.character(dup_df$chromosome))), ]
 prot_df<-prot_df[order(as.numeric(as.character(prot_df$chromosome))), ]
 
+# -- save those in prot but not in dup
+singletons_df<-prot_df[!prot_df$peptide_id %in% dup_df$peptide_id, ]
+dim(singletons_df)
+write.table(singletons_df$peptide_id, '../../output/gene_lists/singleton_genes.txt', row.names=FALSE, col.names = FALSE, quote=FALSE)
+
 # -- chormosome colors
 chrom_colors <- c(
   "#1f77b4", "#1ca2c7", "#17becf", "#2ca02c", "#33cc33",
@@ -32,6 +37,7 @@ colnames(count_df)<-c('family','count')
 count_df <-count_df[order(-count_df$count), ]
 longest_family<-as.character(count_df$family[1])
 longest_family_members<-families_df[families_df$family==longest_family, ]$geneName
+write.table(longest_family_members, '../../output/gene_lists/largest_family.txt', row.names=FALSE, col.names=FALSE, quote=FALSE)
 
 # -- the the cluster of the longest family
 longest_family_edgelist<-edgelist[edgelist$V1 %in% longest_family_members & edgelist$V2 %in% longest_family_members, ]

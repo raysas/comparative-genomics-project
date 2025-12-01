@@ -19,9 +19,11 @@ curl -O https://circos.ca/distribution/circos-0.69-10.tgz
 tar xvfz circos-0.69-10.tgz 
 cd circos-0.69-10
 # -- need to check if perl is installed
-# which perl
-# -- check perl modules if installed
+which perl
 ./circos -modules # need to install all missing modules
+# -- making it global
+# echo 'export PATH="/mnt/c/Users/rayan/Documents/saclay/courses/comparative-genomics/project/test/tools/circos-0.69-10/bin:$PATH"' >> ~/.bashrc
+# source ~/.bashrc
 cd ..
 
 # ------------ MUMmer installation ----------------

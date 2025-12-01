@@ -1,6 +1,10 @@
 library(GenomicRanges)
 library(dplyr)
 
+# -- make a df of TAG pairs (geneA geneB family tag)
+# -- fir
+# # -- then make pairs
+
 merged_df <- dup_full_df %>%
   inner_join(families_df, by = c("peptide_id"="geneName")) %>%
   arrange(chromosome, start_pos)
@@ -321,3 +325,8 @@ for (spacer in max_spacer_values) {
 }
 # Save all results
 save(all_tag_results, file = "files/tag_spacers_experiment.Rdata")
+
+
+##############################################
+
+
