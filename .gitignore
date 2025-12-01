@@ -4,3 +4,9 @@ data/
 output/*
 !output/clusters/
 !output/clusters/**
+!output/statistics/
+!output/statistics/**
+!output/duplication_classes/
+!output/duplication_classes/**
+!output/gene_lists/
+!output/gene_lists/**
