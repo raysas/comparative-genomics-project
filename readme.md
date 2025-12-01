@@ -16,6 +16,8 @@ The main directories to be aware of in master branch
 │   ├── family_sizes    # -- analysis of this part here
 │   ├── duplicated_genes
 │   └── TE_analysis
+├── figures/
+│   └── family_sizes    # -- figures from family sizes analysis
 ├── data                # -- large data_files (hidden)
 ├── docs                # -- documentation files (some notes if you wanna add something)
 └── output              # -- output files and results of pipelines and codes
