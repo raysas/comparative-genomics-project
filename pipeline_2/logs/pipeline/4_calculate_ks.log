@@ -1,0 +1,6 @@
+Command: ./4_calculate_ks.sh -i /tmp/pipeline2_full/codon_alignments_test/ /tmp/pipeline2_full/ks_results/
+-- Parameters:
+   INPUT DIR  : /tmp/pipeline2_full/codon_alignments_test/
+   OUTPUT DIR : 
+-- Calculating Ks/Ka values with PAML yn00...
+mkdir: cannot create directory ‘’: No such file or directory

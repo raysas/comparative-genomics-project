@@ -1,0 +1,26 @@
+Command: ./5_consolidate_results.sh -i /tmp/pipeline2_full/ks_results/ -o /tmp/pipeline2_full/final/
+-- Parameters:
+   INPUT DIR   : /tmp/pipeline2_full/ks_results/
+   OUTPUT FILE : /tmp/pipeline2_full/final/
+-- Quality filters:
+   Max Ks      : 5.0
+   Max Ka      : 5.0
+   Max Ka/Ks   : 5.0
+   Min length  : 50 codons
+-- Consolidating PAML yn00 results...
+   Found 1318356 yn00 output files
+./5_consolidate_results.sh: line 142: /tmp/pipeline2_full/final/: Is a directory
+./5_consolidate_results.sh: line 145: /tmp/pipeline2_full/final/: Is a directory
+tail: cannot open '/tmp/pipeline2_full/final/' for reading: No such file or directory
+tail: cannot open '/tmp/pipeline2_full/final/' for reading: No such file or directory
+tail: cannot open '/tmp/pipeline2_full/final/' for reading: No such file or directory
+
+-- Results consolidation completed
+   Total pairs: 0
+   Passed QC: 0
+   Filtered: 0
+   Processing time: 0s
+   Output file: /tmp/pipeline2_full/final/
+
+-- Pipeline 2 completed successfully!
+   Final results: /tmp/pipeline2_full/final/
