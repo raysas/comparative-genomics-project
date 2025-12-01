@@ -1,5 +1,18 @@
--- prepared BLAST output with query and subject lengths
--- computed coverage
-   last 2 columns correspond to qcoverage and scoverage
--- removed temporary files
--- coverage computation completed, results saved to output/blast_output/blast_results_with_coverage.tsv
+Command: ./pipeline_1/3_compute_coverage.sh -i test/blast_results.tsv -o test/ -p data/glycine_max/protein_info_longest.csv
+-- Parameters:
+   INPUT FILE    : test/blast_results.tsv
+   PROTEIN INFO  : data/glycine_max/protein_info_longest.csv
+   OUTPUT FILE   : test/blast_results_with_coverage.tsv
+-- Output file already exists: test/blast_results_with_coverage.tsv
+   Overwriting existing file
+-- Computing coverage for BLASTP results...
+   Processing 8864404 BLAST hits...
+   Computing coverage with optimized single-pass algorithm...
+   Loaded 56679 protein lengths into memory
+   Processed: 8864404 hits
+
+-- Coverage computation completed successfully
+   Input hits:    8864404
+   Output hits:   8864404
+   Processing time: 91s
+   Output file:   test/blast_results_with_coverage.tsv

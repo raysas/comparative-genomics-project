@@ -1,13 +1,17 @@
 Command: ./pipeline_1/1_filter_isoforms.sh 
 -- filtering to keep only longest isoform per gene from:
-   FASTA   : data/peptides.fa
-   FEATURES: data/protein_info.csv
+   FASTA   : data/glycine_max/peptides.fa
+   FEATURES: data/glycine_max/protein_info.csv
 -- step 1: selecting longest isoform per gene based on 'length' column
 -- step 1 done: kept 56679 genes (one isoform each)
 -- step 2: filtering FASTA to keep only selected peptide IDs
-   output FASTA: data/peptides_longest.fa
+   output FASTA: data/glycine_max/peptides_longest.fa
 -- step 2 done.
--- outputs:
-   FASTA   : data/peptides_longest.fa
-   FEATURES: data/protein_info_longest.csv
--- filtering completed successfully.
+
+=========================================
+FILTERING COMPLETED
+=========================================
+Filtered FASTA:    data/glycine_max/peptides_longest.fa
+Filtered features: data/glycine_max/protein_info_longest.csv
+Genes retained:    56679
+=========================================
