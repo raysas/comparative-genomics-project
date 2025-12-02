@@ -10,4 +10,3 @@ output/*
 !output/duplication_classes/**
 !output/gene_lists/
 !output/gene_lists/**
-output/duplication_classes/proximal/ 
