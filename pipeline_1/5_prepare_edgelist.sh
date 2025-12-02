@@ -7,76 +7,119 @@
 
 set -euo pipefail
 
+
+# Resolve paths to run from anywhere
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
 NC='\033[0m'
 
-# Default parameters
-INPUT_FILE='output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv'
-OUTPUT_DIR='output/similarity_edgelists'
-WEIGHT_COLUMN_INDEX=12  # Bit score column
-NUM_JOBS=$(nproc)
-CHUNK_SIZE=10000000  # 10M lines per chunk
-USE_MEMORY_SORT=false
 
-# Parse arguments
-while getopts "i:o:w:j:c:mh" flag; do
+# Default parameters (species-aware, pipeline1 layout)
+INPUT_FILE=""
+OUTPUT_DIR=""
+SPECIES_NAME=""
+WEIGHT_COLUMN_INDEX=12
+NUM_JOBS=$(nproc)
+CHUNK_SIZE=10000000
+USE_MEMORY_SORT=false
+AUTO_DETECT=true
+
+while getopts "i:o:s:w:j:c:mh" flag; do
     case "${flag}" in
-        i) INPUT_FILE="${OPTARG}" ;;
-        o) OUTPUT_DIR="${OPTARG}" ;;
+        i) INPUT_FILE="${OPTARG}"; AUTO_DETECT=false ;;
+        o) OUTPUT_DIR="${OPTARG}"; AUTO_DETECT=false ;;
+        s) SPECIES_NAME="${OPTARG}"; AUTO_DETECT=true ;;
         w) WEIGHT_COLUMN_INDEX="${OPTARG}" ;;
         j) NUM_JOBS="${OPTARG}" ;;
         c) CHUNK_SIZE="${OPTARG}" ;;
         m) USE_MEMORY_SORT=true ;;
         h)
-            cat <<EOF
+                        cat <<EOF
 Usage: $0 [OPTIONS]
 
 OPTIONS:
-  -i FILE    Input filtered BLAST results
-  -o DIR     Output directory
-  -w NUM     Weight column index (default: 12 for bit score)
-  -j NUM     Parallel jobs (default: all CPUs)
-  -c NUM     Chunk size for processing (default: 10000000)
-  -m         Use memory-based sorting (faster for <100M edges)
-  -h         Show this help
+    -i FILE    Input filtered BLAST results
+    -o DIR     Output directory
+    -s NAME    Species name (auto-detects input/output)
+    -w NUM     Weight column index (default: 12 for bit score)
+    -j NUM     Parallel jobs (default: all CPUs)
+    -c NUM     Chunk size for processing (default: 10000000)
+    -m         Use memory-based sorting (faster for <100M edges)
+    -h         Show this help
 
 EXAMPLES:
-  # Standard usage
-  $0 -i blast_filtered.tsv -o edgelists/
+    # Standard usage
+    $0 -s glycine_max
 
-  # Fast processing with memory sort
-  $0 -i blast_filtered.tsv -m -j 32
+    # Fast processing with memory sort
+    $0 -i blast_filtered.tsv -m -j 32
 
-  # Large file with chunking
-  $0 -i huge_blast.tsv -c 50000000 -j 64
+    # Large file with chunking
+    $0 -i huge_blast.tsv -c 50000000 -j 64
 
 EOF
-            exit 0
-            ;;
+                        exit 0
+                        ;;
         *) echo "Unknown option: $1"; exit 1;;
     esac
 done
 
-# Setup logging
-LOG_DIR="logs/pipeline"
+
+# Auto-detect input/output if not provided
+if [ "$AUTO_DETECT" = true ]; then
+    if [ -n "$SPECIES_NAME" ]; then
+        BLAST_DIR="$REPO_ROOT/output/pipeline1/${SPECIES_NAME}/filtered_networks"
+        if [ -d "$BLAST_DIR" ]; then
+            INPUT_FILE="$BLAST_DIR/filtered_blast_results_id30_qcov50_scov50.tsv"
+            OUTPUT_DIR="$REPO_ROOT/output/pipeline1/${SPECIES_NAME}/filtered_networks"
+        else
+            echo -e "${RED}ERROR:${NC} Could not find filtered BLAST results for species '$SPECIES_NAME'"; exit 1
+        fi
+    else
+        # Try to auto-detect single species
+        BLAST_DIRS=("$REPO_ROOT"/output/pipeline1/*/filtered_networks)
+        if [ ${#BLAST_DIRS[@]} -eq 1 ] && [ -d "${BLAST_DIRS[0]}" ]; then
+            INPUT_FILE="${BLAST_DIRS[0]}/filtered_blast_results_id30_qcov50_scov50.tsv"
+            OUTPUT_DIR="$(dirname "${BLAST_DIRS[0]}")/filtered_networks"
+        else
+            echo -e "${RED}ERROR:${NC} Could not auto-detect species. Use -s or specify -i/-o."; exit 1
+        fi
+    fi
+fi
+
+# Setup logging inside the pipeline directory regardless of where the script is run from
+LOG_DIR="${SCRIPT_DIR}/logs/pipeline"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/$(basename "$0" .sh)_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -i "$LOG_FILE") 2>&1
 
-echo -e "${GREEN}===================================="
 echo " OPTIMIZED EDGELIST GENERATION"
 echo -e "====================================${NC}"
 echo " Input:  $INPUT_FILE"
 echo " Output: $OUTPUT_DIR"
 echo " Weight column: $WEIGHT_COLUMN_INDEX"
 echo " CPUs:   $NUM_JOBS"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN} PIPELINE 1 / Step 5: Prepare Edgelist ${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo -e " 1) Extract and normalize edges"
+echo -e " 2) Sort and deduplicate edges"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}Input:   ${BLUE}$INPUT_FILE${NC}"
+echo -e "${GREEN}Output:  ${BLUE}$OUTPUT_DIR${NC}"
+echo -e "${GREEN}Weight column: ${YELLOW}$WEIGHT_COLUMN_INDEX${NC}"
+echo -e "${GREEN}CPUs:    ${YELLOW}$NUM_JOBS${NC}"
 if [ "$USE_MEMORY_SORT" = true ]; then
-    echo " Mode:   Memory-based sorting"
+    echo -e "${GREEN}Mode:    ${YELLOW}Memory-based sorting${NC}"
 else
-    echo " Mode:   Disk-based sorting"
+    echo -e "${GREEN}Mode:    ${YELLOW}Disk-based sorting${NC}"
 fi
 echo -e "${GREEN}====================================${NC}"
 
@@ -225,7 +268,7 @@ REMOVED_DUPLICATES=$((NORMALIZED_COUNT - FINAL_COUNT))
 echo ""
 echo -e "${GREEN}===================================="
 echo " EDGELIST GENERATION COMPLETE"
-echo "====================================${NC}"
+echo -e "====================================${NC}"
 echo " Processing time: ${ELAPSED}s"
 echo " Input edges:     $((TOTAL_LINES - 1))"
 echo " Self-loops removed: $((TOTAL_LINES - NORMALIZED_COUNT - 1))"
