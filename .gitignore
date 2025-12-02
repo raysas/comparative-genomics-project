@@ -6,4 +6,3 @@ output/*
 !output/clusters/**
 tmp/
 logs/
-analysis/*

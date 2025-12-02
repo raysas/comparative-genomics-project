@@ -150,63 +150,63 @@ echo "   Processing $TOTAL_FAMILIES families..."
 START_TIME=$(date +%s)
 
 echo "-- Pre-creating family directories..."
-# tail -n +2 "$FAMILY_FILE" | cut -f2 | sort -u | while read fam; do
-#     clean_fam=$(echo "$fam" | tr -d '\r' | tr -d '[:space:]')
-#     mkdir -p "$OUTPUT_DIR/family${clean_fam}"
-# done
+tail -n +2 "$FAMILY_FILE" | cut -f2 | sort -u | while read fam; do
+    clean_fam=$(echo "$fam" | tr -d '\r' | tr -d '[:space:]')
+    mkdir -p "$OUTPUT_DIR/family${clean_fam}"
+done
 
 # Pre-create all family directories
 # find "/tmp/pipeline2_full/alignments/" -maxdepth 1 -type d -name "family*" -printf "%f\n" | \
-    # parallel -j "$NUM_JOBS" "mkdir -p '$OUTPUT_DIR/{}'"
+#     parallel -j "$NUM_JOBS" "mkdir -p '$OUTPUT_DIR/{}'"
 
 
 echo "-- Generating the list of pairwise FASTA files..."
 PAIR_LIST="/tmp/pair_list.tsv"
-# awk -F'\t' -v protein_file="$PROTEIN_FASTA" -v output_dir="$OUTPUT_DIR" '
-# BEGIN {
-#     while ((getline line < protein_file) > 0) {
-#         if (line ~ /^>/) {
-#             split(substr(line, 2), parts, " ")
-#             seq_id = parts[1]
-#         } else {
-#             sequences[seq_id] = sequences[seq_id] line
-#         }
-#     }
-#     close(protein_file)
-# }
-# NR == 1 { next }
-# {
-#     gene_id = $1
-#     family_id = $2
-#     gsub(/\r/, "", gene_id)
-#     gsub(/\r/, "", family_id)
-#     gsub(/ /, "", gene_id)
-#     gsub(/ /, "", family_id)
-#     family_genes[family_id][++family_count[family_id]] = gene_id
-# }
-# END {
-#     for (fam in family_genes) {
-#         clean_fam = fam
-#         gsub(/\r/, "", clean_fam)
-#         gsub(/ /, "", clean_fam)
-#         fam_dir = output_dir "family" clean_fam
-#         for (i = 1; i <= family_count[fam]; i++) {
-#             for (j = i + 1; j <= family_count[fam]; j++) {
-#                 gene1 = family_genes[fam][i]
-#                 gene2 = family_genes[fam][j]
-#                 if (gene1 in sequences && gene2 in sequences) {
-#                     print fam_dir "\t" gene1 "\t" gene2 "\t" sequences[gene1] "\t" sequences[gene2]
-#                 }
-#             }
-#         }
-#     }
-# }
-# ' "$FAMILY_FILE" > "$PAIR_LIST"
+awk -F'\t' -v protein_file="$PROTEIN_FASTA" -v output_dir="$OUTPUT_DIR" '
+BEGIN {
+    while ((getline line < protein_file) > 0) {
+        if (line ~ /^>/) {
+            split(substr(line, 2), parts, " ")
+            seq_id = parts[1]
+        } else {
+            sequences[seq_id] = sequences[seq_id] line
+        }
+    }
+    close(protein_file)
+}
+NR == 1 { next }
+{
+    gene_id = $1
+    family_id = $2
+    gsub(/\r/, "", gene_id)
+    gsub(/\r/, "", family_id)
+    gsub(/ /, "", gene_id)
+    gsub(/ /, "", family_id)
+    family_genes[family_id][++family_count[family_id]] = gene_id
+}
+END {
+    for (fam in family_genes) {
+        clean_fam = fam
+        gsub(/\r/, "", clean_fam)
+        gsub(/ /, "", clean_fam)
+        fam_dir = output_dir "family" clean_fam
+        for (i = 1; i <= family_count[fam]; i++) {
+            for (j = i + 1; j <= family_count[fam]; j++) {
+                gene1 = family_genes[fam][i]
+                gene2 = family_genes[fam][j]
+                if (gene1 in sequences && gene2 in sequences) {
+                    print fam_dir "\t" gene1 "\t" gene2 "\t" sequences[gene1] "\t" sequences[gene2]
+                }
+            }
+        }
+    }
+}
+' "$FAMILY_FILE" > "$PAIR_LIST"
 
 # Step 2: GNU Parallel to create FASTA files with progress bar
-# TOTAL_PAIRS=$(wc -l < "$PAIR_LIST")
+TOTAL_PAIRS=$(wc -l < "$PAIR_LIST")
 
-# echo "Creating $TOTAL_PAIRS pairwise FASTA files in parallel..."
+echo "Creating $TOTAL_PAIRS pairwise FASTA files in parallel..."
 
 function make_fasta {
     fam_dir="$1"; gene1="$2"; gene2="$3"; seq1="$4"; seq2="$5"
@@ -223,11 +223,14 @@ export -f make_fasta
 
 
 # Filter out lines that would exceed ARG_MAX for command line length
-ARG_MAX=25000
-tail -n +430000 "$PAIR_LIST" | awk -F'\t' -v max="$ARG_MAX" '{sum=0; for(i=1;i<=NF;i++) sum+=length($i); if(sum+NF-1 < max) print $0}' | \
-    parallel -j "$NUM_JOBS" --colsep '\t' --progress make_fasta {1} {2} {3} {4} {5}
+# ARG_MAX=25000
+# tail -n +430000 "$PAIR_LIST" | awk -F'\t' -v max="$ARG_MAX" '{sum=0; for(i=1;i<=NF;i++) sum+=length($i); if(sum+NF-1 < max) print $0}' | \
+#     parallel -j "$NUM_JOBS" --colsep '\t' --progress make_fasta {1} {2} {3} {4} {5}
 
-# rm -f "$PAIR_LIST"
+cat "$PAIR_LIST" | \
+    parallel -j "$NUM_JOBS" --colsep '\t' make_fasta {1} {2} {3} {4} {5}
+
+rm -f "$PAIR_LIST"
 
 END_TIME=$(date +%s)
 ELAPSED=$((END_TIME - START_TIME))

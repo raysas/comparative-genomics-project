@@ -80,7 +80,7 @@ exec > >(tee -i "$LOG_FILE") 2>&1
 
 echo -e "${GREEN}===================================="
 echo " OPTIMIZED MCL CLUSTERING"
-echo "====================================${NC}"
+echo -e "====================================${NC}"
 echo " Input:     $INPUT_FILE"
 echo " Output:    $OUTPUT_DIR"
 echo " Inflation: $MCL_INFLATION"
