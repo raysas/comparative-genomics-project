@@ -1,0 +1,37 @@
+[0;32m====================================
+ OPTIMIZED BLAST FILTERING
+====================================\033[0m
+ Input:  output/blast_output/blast_results_with_coverage.tsv
+ Output: output/blast_filtered
+ CPUs:   16
+[0;32m====================================[0m
+[1;33mFiltering parameters:[0m
+  Identity       >= 60
+  Query Coverage >= 70
+  Subject Coverage >= 70
+  E-value       <= 1e-10
+[1;33mAnalyzing input file...[0m
+[0;32m✓ Total lines: 9393200[0m
+[1;33mUsing single-pass AWK filtering (file < 10M lines)...[0m
+
+[0;32m====================================
+ FILTERING COMPLETE
+====================================\033[0m
+ Processing time: 1313s
+ Input lines:     9393200
+ Output lines:    443178
+ Removed:         8950022
+ Retention:       4.71%
+[0;32m====================================[0m
+ Output saved to:
+ output/blast_filtered/filtered_blast_results_id60_qcov70_scov70_evalue1e-10.tsv
+[0;32m====================================[0m
+
+Quick statistics of filtered data:
+  Average identity: 78.0%
+  Average query coverage: 451.7%
+  Average subject coverage: 450.2%
+
+Checking pair distribution...
+  Unique genes: 443178
+  Average pairs per gene: 1.0

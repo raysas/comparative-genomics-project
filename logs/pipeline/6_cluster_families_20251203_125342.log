@@ -1,0 +1,41 @@
+[0;32m====================================
+ OPTIMIZED MCL CLUSTERING
+====================================\033[0m
+ Input:     output/similarity_edgelists/filtered_blast_results_id60_qcov70_scov70_evalue1e-10_wcol12_network.tsv
+ Output:    output/clusters
+ Inflation: 2.0
+ Threads:   16
+[0;32m====================================[0m
+[1;33mAnalyzing input network...[0m
+[0;32m✓ Nodes: 48615[0m
+[0;32m✓ Edges: 191419[0m
+[1;33mRunning MCL clustering...[0m
+[0;32m✓ MCL completed in 5s[0m
+[1;33mPost-processing clusters...[0m
+Total clusters: 13350
+Total genes: 48615
+Singletons removed: 0
+Largest family: 210 genes
+Average family size: 3.6
+
+Family size distribution:
+  Size 2: 7176 families
+  Size 3: 1809 families
+  Size 4: 2041 families
+  Size 5: 730 families
+  Size 11-50: 412 families
+  Size 51-100: 7 families
+  Size 101-500: 6 families
+
+[0;32m====================================
+ CLUSTERING COMPLETE
+====================================\033[0m
+ Total time:     5s
+ MCL time:       5s
+ Post-process:   0s
+[0;32m====================================[0m
+
+Clustering summary:
+  Total families: 13350
+  Clustered genes: 48615
+  Average genes/family: 3.6

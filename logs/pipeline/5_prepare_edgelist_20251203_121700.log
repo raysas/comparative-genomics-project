@@ -1,0 +1,41 @@
+[0;32m====================================
+ OPTIMIZED EDGELIST GENERATION
+====================================\033[0m
+ Input:  output/blast_filtered/filtered_blast_results_id40_qcov70_scov70_evalue1e-10.tsv
+ Output: output/similarity_edgelists
+ Weight column: 12
+ CPUs:   16
+ Mode:   Disk-based sorting
+[0;32m====================================[0m
+[1;33mAnalyzing input file...[0m
+[0;32m✓ Input lines: 1441233[0m
+[1;33mStep 1: Extracting edges and normalizing...[0m
+  Using single-pass processing...
+[0;32m  ✓ Normalized edges: 1386881[0m
+  ✓ Self-loops removed: 54351
+[1;33mStep 2: Sorting and removing duplicates...[0m
+  Using disk-based sorting with parallel merge...
+
+[0;32m====================================
+ EDGELIST GENERATION COMPLETE
+====================================\033[0m
+ Processing time: 19s
+ Input edges:     1441232
+ Self-loops removed: 54351
+ Duplicates removed: 679157
+ Final edges:     707724
+ Reduction:       60.0%
+[0;32m====================================[0m
+ Output saved to:
+ output/similarity_edgelists/filtered_blast_results_id40_qcov70_scov70_evalue1e-10_wcol12_network.tsv
+[0;32m====================================[0m
+
+Edge weight statistics:
+  Min weight:  52.4
+  Max weight:  9991.0
+  Mean weight: 277.6
+
+Network connectivity:
+  Unique nodes: 50724
+  Average degree: 27.9
+  Max degree node: KRH71097 (degree: 866)

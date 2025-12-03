@@ -1,0 +1,10 @@
+[0;32m====================================
+ OPTIMIZED EDGELIST GENERATION
+====================================\033[0m
+ Input:  output/blast_filtered/filtered_blast_results_id30_qcov60_scov60_evalue1e-10.tsv
+ Output: output/similarity_edgelists
+ Weight column: 12
+ CPUs:   16
+ Mode:   Disk-based sorting
+[0;32m====================================[0m
+[1;33mAnalyzing input file...[0m
