@@ -1,0 +1,27 @@
+{
+    "id": "F48277F8",
+    "path": "~/saclay/courses/comparative-genomics/project/analysis/largest_family/explore_ora.R",
+    "project_path": "explore_ora.R",
+    "type": "r_source",
+    "hash": "312850498",
+    "contents": "",
+    "dirty": false,
+    "created": 1764726515470.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "8,45",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1764727002,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1764727002,
+    "read_only": false,
+    "read_only_alternatives": []
+}

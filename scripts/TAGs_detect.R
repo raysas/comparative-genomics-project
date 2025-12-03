@@ -32,22 +32,44 @@ suppressPackageStartupMessages({
 # -- 1. parse command line arguments with defaults
 # -------------------------------------------------
 parser <- ArgumentParser(description = "detect TAGs in duplicated genes")
-parser$add_argument("--dup_file", default = "output/statistics/duplicated_genes_info.csv",
+parser$add_argument("--dup_file", default = "output/info/duplicated_genes_info.csv",
                     help = "-- path to duplication dataframe CSV [default: %(default)s]")
 parser$add_argument("--families_file", default = "output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv",
                     help = "-- path to families dataframe CSV/TSV [default: %(default)s]")
 parser$add_argument("--spacer", type = "integer", default = 1,
                     help = "-- maximum spacer between genes in a TAG [default: %(default)s]")
-parser$add_argument("--outfile", default = NULL,
-                    help = "-- path to save the output CSV/TSV [default: output/statistics/TAGs_{spacer}.tsv]")
+parser$add_argument("--outdir", default = NULL,
+                    help = "-- dir path to save the output CSV/TSV [default:output/duplication_classes/TAGs/]")
+
+parser$add_argument("--stringency", choices = c("low", "high"), default = "low",
+                    help = "-- stringency level for duplicated genes and families [default: %(default)s]")
+
 args <- parser$parse_args()
+
+suffix=""
+if (args$stringency == "low") {
+  print("-- using low stringency duplicated genes and families, overriding any provided file paths: id30, cov50, evalue1e-10")
+  args$dup_file <- "output/info/duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv"
+  args$families_file <- "output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_evalue1e-10_wcol12_network.tsv"
+  suffix="low"
+} else if (args$stringency == "high") {
+  print("-- using high stringency duplicated genes and families, overriding any provided file paths: filter id50, cov70, evalue1e-10")
+  args$dup_file <- "output/info/duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv"
+  args$families_file <- "output/clusters/protein_families_filtered_blast_results_id50_qcov70_scov70_evalue1e-10_wcol12_network.tsv"
+  suffix="high"
+}
 
 # -------------------------------
 # -- 2. output file
 # -------------------------------
-if (is.null(args$outfile)) {
-  args$outfile <- paste0("output/statistics/TAGs_", args$spacer, ".tsv")
+if (is.null(args$outdir)) {
+  args$outdir <- paste0("output/duplication_classes/TAGs/", suffix, "/")
 }
+if (!dir.exists(args$outdir)) {
+  dir.create(args$outdir, recursive = TRUE)
+}
+
+outfile<-paste0(args$outdir,"TAGs_", args$spacer, ".tsv")
 
 # -------------------------------
 # -- 3. input data
@@ -145,7 +167,7 @@ tag_results <- tag_results %>%
 # -------------------------------
 # -- 8. saving output
 # -------------------------------
-write.table(tag_results, args$outfile, sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(tag_results, outfile, sep = "\t", row.names = FALSE, quote = FALSE)
 
 num_TAGs <- sum(tag_results$TAG != 0)
 cat("-- number of TAGs detected out of total:", num_TAGs, "/", nrow(tag_results), "\n")

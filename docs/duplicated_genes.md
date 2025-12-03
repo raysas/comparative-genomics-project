@@ -80,13 +80,36 @@ Running pipeline on different thresholds to see how results change, by comparing
 ./scripts/get_duplication_ratios.sh
 # -- outputs in output/statistics/duplication_ratios.tsv this table
 ```
+| id | cov | evalue | duplicated_genes | total_genes | duplication_ratio | largest_family_size |
+| -- | --- | ------ | ---------------- | ----------- | ----------------- | ------------------- |
+| 30 | 50  | 10e-10  | 52139            | 56679       | 91.98%            | 1326                |
+| 30 | 50  | 1e-5   | 52516            | 56679       | 92.65%            | 1311                |
+| 30 | 50  | NA     | 56145            | 56679       | 99.05%            | 1314                |
+| 30 | 60  | 10e-10  | 51870            | 56679       | 91.51%            | 1324                |
+| 30 | 60  | 1e-5   | 52227            | 56679       | 92.14%            | 1309                |
+| 30 | 70  | 10e-10  | 51196            | 56679       | 90.32%            | 1320                |
+| 30 | 70  | 1e-5   | 51526            | 56679       | 90.90%            | 1304                |
+| 30 | 70  | NA     | 54271            | 56679       | 95.75%            | 1307                |
+| 40 | 60  | 10e-10  | 51484            | 56679       | 90.83%            | 828                 |
+| 40 | 60  | 1e-5   | 51814            | 56679       | 91.41%            | 842                 |
+| 40 | 70  | 10e-10  | 50801            | 56679       | 89.62%            | 825                 |
+| 40 | 70  | 1e-5   | 51101            | 56679       | 90.15%            | 840                 |
+| 40 | 80  | 10e-10  | 49824            | 56679       | 87.90%            | 821                 |
+| 40 | 80  | 1e-5   | 50085            | 56679       | 88.36%            | 835                 |
+| 50 | 70  | 10e-10  | 50031            | 56679       | 88.27%            | 350                 |
+| 50 | 70  | 1e-5   | 50280            | 56679       | 88.71%            | 357                 |
+| 50 | 80  | 10e-10  | 49073            | 56679       | 86.58%            | 349                 |
+| 50 | 80  | 1e-5   | 49290            | 56679       | 86.96%            | 355                 |
+| 50 | 90  | 10e-10  | 48080            | 56679       | 84.82%            | 348                 |
+| 50 | 90  | 1e-5   | 48261            | 56679       | 85.14%            | 354                 |
+| 50 | 90  | NA     | 49334            | 56679       | 87.04%            | 360                 |
+| 60 | 70  | 10e-10  | 48662            | 56679       | 85.85%            | 211                 |
+| 60 | 70  | 1e-5   | 48863            | 56679       | 86.21%            | 214                 |
+| 60 | 80  | 10e-10  | 47723            | 56679       | 84.19%            | 209                 |
+| 60 | 80  | 1e-5   | 47897            | 56679       | 84.50%            | 212                 |
+| 70 | 90  | 10e-10  | 44341            | 56679       | 78.23%            | 177                 |
+| 70 | 90  | NA     | 44925            | 56679       | 79.26%            | 177                 |
 
-| cluster_file | duplicated_genes | total_genes | duplication_ratio |
-|--------------|------------------|-------------|-------------------|
-| protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv | 56145 | 56679 | 0.9905 |
-| protein_families_filtered_blast_results_id30_qcov70_scov70_wcol12_network.tsv | 54271 | 56679 | 0.9575 |
-| protein_families_filtered_blast_results_id50_qcov90_scov90_wcol12_network.tsv | 49334 | 56679 | 0.8704 |
-| protein_families_filtered_blast_results_id70_qcov90_scov90_wcol12_network.tsv | 44925 | 56679 | 0.7926 |
 
 *consider filtering by # of protein hits, [scripts/top5_per_protein.py](../scripts/top5_per_protein.py) for reference*
 
@@ -132,7 +155,7 @@ It is also recommended by the tool developers to filter the BLAST results to kee
 ```bash
 # tmux new -s mcscanx_blast
 makeblastdb -in ../../data/peptides_longest.fa -dbtype prot -out peptides_db
-blastp -query ../../data/peptides_longest.fa -db peptides_db   -evalue 1e-10 -max_target_seqs 5 -out gm.blast -outfmt 6
+blastp -query ../../data/peptides_longest.fa -db peptides_db   -evalue 10e-10 -max_target_seqs 5 -out gm.blast -outfmt 6
 ```
 
 
@@ -270,3 +293,5 @@ For retrieving sequences from coordinated (bed/gff) cna use the following R pack
 [^4]: Kim, K. D., El Baidouri, M., Abernathy, B., Iwata-Otsubo, A., Chavarro, C., Gonzales, M., ... & Jackson, S. A. (2015). A comparative epigenomic analysis of polyploidy-derived genes in soybean and common bean. Plant Physiology, 168(4), 1433-1447.
 [^5]: Yang, Y., Wang, J., & Di, J. (2013). Comparative inference of duplicated genes produced by polyploidization in soybean genome. International journal of genomics, 2013(1), 275616.
 [^6]: Rizzon, C., Ponger, L., & Gaut, B. S. (2006). Striking similarities in the genomic distribution of tandemly arrayed genes in Arabidopsis and rice. PLoS computational biology, 2(9), e115.
+
+"Genes without hits that met a threshold of e-value 10e-10 were deemed singletons"

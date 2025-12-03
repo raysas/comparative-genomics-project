@@ -1,10 +1,20 @@
-
-dup_df<-read.csv('../../output/statistics/duplicated_genes_info.csv')
+stringency='high'
+high_param='id50_qcov70_scov70_evalue1e-10'
+low_param='id30_qcov50_scov50_evalue1e-10'
+dup_df<-read.csv(paste0('../../output/info/duplicated_genes_info_',stringency,'.csv'))
 prot_df<-read.csv('../../output/statistics/protein_info_longest.csv')
-edgelist<-read.table('../../output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv')
+
 families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv', header=TRUE)
 tags_info_df<-read.table('../../output/statistics/TAGs_ratios.tsv', header=TRUE)
 tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
+
+
+# dup_df<-read.csv('../../output/statistics/duplicated_genes_info.csv')
+# prot_df<-read.csv('../../output/statistics/protein_info_longest.csv')
+# edgelist<-read.table('../../output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv')
+# families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv', header=TRUE)
+# tags_info_df<-read.table('../../output/statistics/TAGs_ratios.tsv', header=TRUE)
+# tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
 
 
 colnames(dup_df)
@@ -40,7 +50,11 @@ longest_family_members<-families_df[families_df$family==longest_family, ]$geneNa
 write.table(longest_family_members, '../../output/gene_lists/largest_family.txt', row.names=FALSE, col.names=FALSE, quote=FALSE)
 
 # -- the the cluster of the longest family
-longest_family_edgelist<-edgelist[edgelist$V1 %in% longest_family_members & edgelist$V2 %in% longest_family_members, ]
+largest_family_edgelist<-edgelist[edgelist$V1 %in% largest_fam$V1 & edgelist$V2 %in% largest_fam$V1, ]
 library(igraph)
-g<-graph_from_data_frame(longest_family_edgelist, directed=FALSE)
+g<-graph_from_data_frame(largest_family_edgelist, directed=FALSE)
 # -- large graph can not be visualized
+
+# -- viz
+plot(g, vertex.size=5, vertex.label=NA)
+# -- save graph

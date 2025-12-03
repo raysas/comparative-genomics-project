@@ -3,17 +3,6 @@ library(ggpattern)
 library(dplyr)
 library(tidyr)
 
-base_theme <- theme_minimal(base_size = 14)
-
-custom_theme <- theme(
-  plot.title = element_text( size = 18, hjust = 0.5),
-  axis.title = element_text( size = 14),
-  axis.text = element_text(size = 12),
-  panel.grid.major.x = element_blank(),
-  panel.grid.minor = element_blank(),
-  legend.position = "right"
-)
-
 total_counts <- prot_df %>% count(chromosome, name = "total_genes")
 dup_counts <- dup_df %>% count(chromosome, name = "duplicated_genes")
 
@@ -54,10 +43,7 @@ ggplot(plot_df, aes(x = chromosome, y = count, fill = chromosome, pattern = gene
 
 # -------------- tag and non tag dup genes per chromosome -----------------
 
-# -- data prep
-tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
-families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv', header=TRUE)
-dup_df<-read.csv('../../output/statistics/duplicated_genes_info.csv')
+
 
 families_tag_dup_df <- dup_df %>%
   inner_join(families_df, by = c("peptide_id"="geneName")) %>%

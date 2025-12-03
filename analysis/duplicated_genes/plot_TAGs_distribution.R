@@ -1,5 +1,9 @@
-tags_info_df<-read.table('../../output/statistics/TAGs_ratios.tsv', header=TRUE)
-tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
+stringency='low'
+
+tags_info_df<-read.table(paste0('../../output/statistics/TAGs_spacers_ratios_',stringency,'.tsv'), header=TRUE)
+
+tags_df<-read.table(paste0('../../output/duplication_classes/TAGs/',stringency,'/TAGs_1.tsv'), header=TRUE)
+
 
 library(ggplot2)
 

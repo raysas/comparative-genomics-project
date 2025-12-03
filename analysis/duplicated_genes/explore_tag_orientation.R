@@ -1,10 +1,14 @@
 
 # ------------------ for tags df -------------------------
-tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
+tags_df<-read.table('../../output/duplication_classes/TAGS/low/TAGs_1.tsv', header=TRUE)
+dup_df<-read.csv('../../output/info/duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv')
+
+dup_full_df <- dup_df[!is.na(dup_df$chromosome) & !is.na(dup_df$start_pos) & !is.na(dup_df$end_pos), ]
 
 tags_df$tag_id <- ifelse(tags_df$TAG == 0,
                          0,
                          paste0(tags_df$family, "_TAG", tags_df$TAG))
+sum(tags_df$TAG != 0) # -- 9696 tags for low
 
 # --for every pair having same tag_id, make all combinations
 tag_pairs_list <- lapply(unique(tags_df$tag_id[tags_df$tag_id != 0]), function(tid) {
@@ -72,3 +76,12 @@ orientation_counts <- tag_pairs_df %>%
   arrange(desc(count)) %>%
   mutate(percentage = (count / sum(count)) * 100)
 print(orientation_counts)
+
+observed <- table(tag_pairs_df$orientation)
+
+# Suppose genome-wide proportions are known:
+# tandem = 0.5, convergent = 0.25, divergent = 0.25
+expected_prop <- c(tandem = 0.5, convergent = 0.25, divergent = 0.25)
+expected <- sum(observed) * expected_prop[names(observed)]
+
+chisq.test(x = observed, p = expected_prop[names(observed)])

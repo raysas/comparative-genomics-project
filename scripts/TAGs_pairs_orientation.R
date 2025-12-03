@@ -4,6 +4,8 @@
 # -- script: tag_pair_orientation.R
 # -- purpose: Generate all tag-based gene pairs, compute their orientation,
 #           and summarize orientation counts.
+# Rscript scripts/TAGs_pairs_orientation.R --stringency low
+# Rscript scripts/TAGs_pairs_orientation.R --stringency high
 # ---------------------------
 
 suppressPackageStartupMessages({
@@ -15,18 +17,34 @@ suppressPackageStartupMessages({
 # -- argument parser
 # ---------------------------
 parser <- ArgumentParser(description = "Compute TAG gene pairs with orientation")
-parser$add_argument("-t", "--tags", default = "output/duplication_classes/TAGS/TAGs_1.tsv",
+parser$add_argument("-t", "--tags", default = "output/duplication_classes/TAGs/TAGs_1.tsv",
                     help = "Input TAGs file (default: %(default)s)")
-parser$add_argument("-d", "--dup", default = "output/statistics/duplicated_genes_info.csv",
+parser$add_argument("-d", "--dup", default = "output/info/duplicated_genes_info.csv",
                     help = "Input duplication full data file (default: %(default)s)")
-parser$add_argument("-o", "--output", default = "output/duplication_classes/TAGS/TAG_gene_pairs.tsv",
+parser$add_argument("-o", "--output", default = "output/duplication_classes/TAGs/TAG_gene_pairs.tsv",
                     help = "Output file for TAG gene pairs (default: %(default)s)")
+parser$add_argument("--stringency", choices = c("low", "high"), default = NULL,
+                    help = "-- stringency level for duplicated genes and families [default: %(default)s]")
 
 args <- parser$parse_args()
 
 tags_input_file <- args$tags
 dup_input_file <- args$dup
 output_file <- args$output
+
+if (!is.null(args$stringency)) {
+  if (args$stringency == "low") {
+    print("-- using low stringency duplicated genes, overriding any provided file paths: id30, cov50, evalue1e-10")
+    dup_input_file <- "output/info/duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv"
+    tags_input_file <- "output/duplication_classes/TAGs/low/TAGs_1.tsv"
+    output_file <- "output/duplication_classes/TAGs/low/TAG_gene_pairs.tsv"
+  } else if (args$stringency == "high") {
+    print("-- using high stringency duplicated genes, overriding any provided file paths: filter id50, cov70, evalue1e-10")
+      dup_input_file <- "output/info/duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv"
+      tags_input_file <- "output/duplication_classes/TAGs/high/TAGs_1.tsv"
+      output_file <- "output/duplication_classes/TAGs/high/TAG_gene_pairs.tsv"
+  }
+}
 
 # ---------------------------
 # -- load data
@@ -44,7 +62,9 @@ dup_full_df <- read.csv(dup_input_file, header = TRUE, stringsAsFactors = FALSE)
 tags_df$tag_id <- ifelse(tags_df$TAG == 0,
                          0,
                          paste0(tags_df$family, "_TAG", tags_df$TAG))
-print(paste("-- total TAGs identified (excluding 0):", length(unique(tags_df$tag_id[tags_df$tag_id != 0]))))
+
+print(paste0("-- total TAG genes identified: ", sum(tags_df$TAG != 0)))
+print(paste("-- total TAG arrays identified (excluding 0 in tag id):", length(unique(tags_df$tag_id[tags_df$tag_id != 0]))))
 
 # ---------------------------
 # -- generate all gene pairs per tag

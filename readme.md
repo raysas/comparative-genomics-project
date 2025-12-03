@@ -1,101 +1,113 @@
 # comparative-genomics-project
 
-[todo list for this project](TODO.md)
+Things done but still documenting and polishing:
+- [x] tag spacer analysis + plots for low and high (shows same pattern and ~%s)
+- [x] orientation analysis 
+- [ ] in the process: looking at biggest array of TAGs - function and viz
+- [x] largest family functional analysis (seem like a dna helicase family)
+- [ ] in the making: biggest cluster in network viz
+- [ ] refixed codes on new dir structure
+- [ ] ..........
 
-You can find the duplicated genes (gene families output, from pipeline_1) in [`output/clusters/`](output/clusters/) in 2 formats:
-- `.txt` : mcl output format (space-separated gene names per line, line=family)
-- `.tsv` : tab-separated format (geneName \t familyID, mapping of each gene to its family)
+*commiting to checkout and move some things, will fix morning*
 
-*preferable to use tsv format, easier and clearer to handle*
+At this stage we have 4 main new outputs, where almost each will comprise 2 outputs:
 
-## Important notes
+- "low" or "id30_cov50_evalue1e-10" named: low stringency dataset at filtration of 30% identity, 50% coverage and evalue 1e-10
+- "high" or "id50_cov70_evalue1e-10" named: high stringency dataset at filtration of 50% identity, 70% coverage and evalue 1e-10
 
-> [!CAUTION]
-> never at any cost merge two branches together (at least discuss first), i.e. the command `git merge...` should never be used in this project. Always work in one branch, if something is needed from another branch, first discuss it, will be made available in a proper way (risk of deleting files or messing up the code otherwise)
+*might be worth running analysis on each of them*
 
-The main directories to be aware of in master branch
-```text
-.
-├── TODO.md             # -- general todo list
-├── analysis
-│   ├── Ks
-│   ├── duplicated_genes
-│   └── TE_analysis
-├── data                # -- large data_files (hidden)
-├── docs                # -- documentation files (some notes if you wanna add something)
-├── output              # -- output files and results of pipelines and codes
-├── pipeline            # -- overall pipeline structure (merge of all sub-pipelines)
-├── pipeline_1          # -- pipeline from raw to duplicated genes
-├── pipeline_2          # -- next pipeline stage: from dup genes to Ks computation
-├── requirements.txt    # -- python packages installed for this project
-└── scripts             # -- scripts used for seperate tasks in the project
+
+1. [`output/gene_lists`](output/gene_lists): contains lists of genes classified in groups, it has them in txt files where each line is a peptide id, the groups are:
 ```
-<!-- 
-> To mark a change you've added or done to the project, please commit with a clear message on what was changed and run  
-> ``` ./dev/version_tracker.sh ```, follow the instructions (choose an option - default z unless you did a big change, write each step you've done in a seperate line and the press `ENTER` to get out of the prompt => version will be updated automatically)
- -->
-
-At the end all of our works will be merged, this is why preserving these main directory names is essential to avoid conflicts.
-Each specific branch will have a specific readme.md with an `examples` folder containing example data files to test the code and pipelines (`pipeline_2` and `general_analysis` branches already have it).
-
-These files are important, change them in your respective branches if needed, will merge later on:
-
-* requirements.txt : contains the list of python packages needed for the project (if any new package is needed, please add it to the list)
-* scripts/SETUP.sh : contains installation commands for softwares needed for the project (if any new software is needed, please add it to the script)
-* TODO.md : contains the todo list
-
-> [!NOTE]
-> Each branch has a different todo list tailored to its specific tasks, in `master` branch you will find the general todo list for the whole project
-
-
-## Branches in this repository
-
-* TE
-* dev (try moving in and out there before doing stuff on master)
-* general_analysis
-* master
-* pipeline_1
-* pipeline_2
-* ppi
-
-## Accessing branches
-
-If you already clones the repository locally, you can access any branch by running first the `fetch` command to get the latest changes from remote repository:
-```bash
-git fetch origin
+output/gene_lists/
+├── TAGs
+│   └── spacer_based
+│       ├── TAGs_high.txt
+│       └── TAGs_low.txt
+├── archive
+│   ├── H_largest_family.txt
+│   ├── TAGs.txt
+│   ├── largest_family.txt
+│   └── singleton_genes.txt
+├── largest_family
+│   ├── largest_family_high.txt
+│   ├── largest_family_id30_cov50_evalue1e-10.txt
+│   ├── largest_family_id50_cov70_evalue1e-10.txt
+│   └── largest_family_low.txt
+├── mapped_peptide_gene_ids
+│   ├── largest_family_id30_cov50_evalue1e-10_mapped.txt
+│   ├── largest_family_id50_cov70_evalue1e-10_mapped.txt
+│   ├── singletons_high_mapped.txt
+│   └── singletons_low_mapped.txt
+└── singletons
+    ├── singletons_high.txt
+    └── singletons_low.txt
 ```
 
-Then you can checkout the branch you want to work on:
-```bash
-git checkout -b <branch_name> origin/<branch_name>
+
+2. [`output/statistics`](output/statistics): contains statistics files, including the ratios of TAG genes and arrays per spacer size, in `TAGs_ratios_*.tsv` files and summary statistics in `duplication_statistics_*.tsv` files on yield of runs on different thresholds
+
+```
+output/statistics/
+├── TAGs_spacers_ratios_high.tsv
+├── TAGs_spacers_ratios_low.tsv
+└── duplication_ratios.tsv
 ```
 
-### for pipeline 2
+*will put tables in md in final version*
 
-```bash
-# -- first time accessing the branch
-git fetch origin
-git checkout -b pipeline_2 origin/pipeline_2
-# -- making sure you're on the right branch
-git branch # this should highlight pipeline_2
+1. [`output/duplication_classes/`](output/duplication_classes/): contains the main outputs of the identification of duplication types, including TAGs so far through the gene spacer based method, in `TAGs/low` and `TAGs/high` folder, with files named `TAGs_*.tsv` that correspond to different gene spcacer thresholds
 
-# -- then every time you wanna push your changes on github:
-git add .
-git commit -m "your message here"
-git push origin pipeline_2
+```
+output/duplication_classes/
+├── TAGs
+│   ├── high
+│   │   ├── TAG_gene_pairs.tsv
+│   │   ├── TAGs_0.tsv
+│   │   ├── TAGs_1.tsv
+│   │   ├── TAGs_10.tsv
+│   │   ├── TAGs_2.tsv
+│   │   ├── TAGs_3.tsv
+│   │   ├── TAGs_4.tsv
+│   │   ├── TAGs_5.tsv
+│   │   ├── TAGs_6.tsv
+│   │   ├── TAGs_7.tsv
+│   │   ├── TAGs_8.tsv
+│   │   └── TAGs_9.tsv
+│   └── low
+│       ├── TAG_gene_pairs.tsv
+│       ├── TAGs_0.tsv
+│       ├── TAGs_1.tsv
+│       ├── TAGs_10.tsv
+│       ├── TAGs_2.tsv
+│       ├── TAGs_3.tsv
+│       ├── TAGs_4.tsv
+│       ├── TAGs_5.tsv
+│       ├── TAGs_6.tsv
+│       ├── TAGs_7.tsv
+│       ├── TAGs_8.tsv
+│       └── TAGs_9.tsv
+└── singletons
+    ├── singletons_high.csv
+    └── singletons_low.csv
 ```
 
-### for general_analysis
+4. [`output/info`](output/info): contains info files used in the process, including the duplicated genes info files at different stringency levels, subsetted from `protein_longest_info.csv` which is also copied here for reference
 
-```bash
-# -- first time accessing the branch
-git fetch origin
-git checkout -b general_analysis origin/general_analysis
-# -- making sure you're on the right branch
-git branch # this should highlight general_analysis
-
-# -- then every time you wanna push your changes on github:
-git add .
-git commit -m "your message here"
-git push origin general_analysis
 ```
+output/info/
+├── duplicated_genes_info_high.csv
+├── duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv
+├── duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv
+├── duplicated_genes_info_low.csv
+└── protein_info_longest.csv
+```
+
+note: duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv=duplicated_genes_info_low.csv and duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv=duplicated_genes_info_high.csv
+
+
+## code
+
+will update tmrw
