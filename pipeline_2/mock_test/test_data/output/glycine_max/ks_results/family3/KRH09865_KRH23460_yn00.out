@@ -1,0 +1,111 @@
+YN00 /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/codon_alignments/family3/KRH09865_KRH23460_codon.aln
+
+ns =   2	ls = 294
+
+Codon position x base (3x4) table for each sequence.
+
+KRH09865            
+position  1:    T:0.22449    C:0.17347    A:0.27211    G:0.32993
+position  2:    T:0.30612    C:0.23129    A:0.23469    G:0.22789
+position  3:    T:0.34694    C:0.20748    A:0.23129    G:0.21429
+
+KRH23460            
+position  1:    T:0.21429    C:0.18027    A:0.26871    G:0.33673
+position  2:    T:0.30272    C:0.23469    A:0.23469    G:0.22789
+position  3:    T:0.34694    C:0.20408    A:0.23810    G:0.21088
+
+Average
+position  1:    T:0.21939    C:0.17687    A:0.27041    G:0.33333
+position  2:    T:0.30442    C:0.23299    A:0.23469    G:0.22789
+position  3:    T:0.34694    C:0.20578    A:0.23469    G:0.21259
+
+Codon usage for each species
+----------------------------------------------------------------------
+Phe TTT  12  12 | Ser TCT   6   6 | Tyr TAT   3   4 | Cys TGT   3   4
+    TTC   3   2 |     TCC   6   5 |     TAC   9   8 |     TGC   2   1
+Leu TTA   4   4 |     TCA   2   2 | *** TAA   0   0 | *** TGA   0   0
+    TTG  10   9 |     TCG   1   1 |     TAG   0   0 | Trp TGG   5   5
+----------------------------------------------------------------------
+Leu CTT  10   9 | Pro CCT   6   6 | His CAT   1   1 | Arg CGT   3   3
+    CTC   3   5 |     CCC   1   1 |     CAC   1   1 |     CGC   1   1
+    CTA   2   2 |     CCA   5   5 | Gln CAA   5   6 |     CGA   1   1
+    CTG   4   3 |     CCG   0   0 |     CAG   6   6 |     CGG   2   3
+----------------------------------------------------------------------
+Ile ATT   4   4 | Thr ACT   7   6 | Asn AAT   4   4 | Ser AGT   4   4
+    ATC   4   4 |     ACC   2   2 |     AAC   7   6 |     AGC   5   5
+    ATA   6   5 |     ACA   5   6 | Lys AAA   8   7 | Arg AGA   6   7
+Met ATG   6   7 |     ACG   3   3 |     AAG   5   6 |     AGG   4   3
+----------------------------------------------------------------------
+Val GTT  16  14 | Ala GCT  12  14 | Asp GAT   2   2 | Gly GGT   9   9
+    GTC   0   2 |     GCC   4   5 |     GAC   4   4 |     GGC   9   8
+    GTA   2   1 |     GCA   4   5 | Glu GAA   7   7 |     GGA  11  12
+    GTG   4   6 |     GCG   4   2 |     GAG   7   7 |     GGG   2   1
+----------------------------------------------------------------------
+
+
+Sums
+------------------------------------------------------
+Phe TTT  24 | Ser TCT  12 | Tyr TAT   7 | Cys TGT   7
+    TTC   5 |     TCC  11 |     TAC  17 |     TGC   3
+Leu TTA   8 |     TCA   4 | *** TAA   0 | *** TGA   0
+    TTG  19 |     TCG   2 |     TAG   0 | Trp TGG  10
+------------------------------------------------------
+Leu CTT  19 | Pro CCT  12 | His CAT   2 | Arg CGT   6
+    CTC   8 |     CCC   2 |     CAC   2 |     CGC   2
+    CTA   4 |     CCA  10 | Gln CAA  11 |     CGA   2
+    CTG   7 |     CCG   0 |     CAG  12 |     CGG   5
+------------------------------------------------------
+Ile ATT   8 | Thr ACT  13 | Asn AAT   8 | Ser AGT   8
+    ATC   8 |     ACC   4 |     AAC  13 |     AGC  10
+    ATA  11 |     ACA  11 | Lys AAA  15 | Arg AGA  13
+Met ATG  13 |     ACG   6 |     AAG  11 |     AGG   7
+------------------------------------------------------
+Val GTT  30 | Ala GCT  26 | Asp GAT   4 | Gly GGT  18
+    GTC   2 |     GCC   9 |     GAC   8 |     GGC  17
+    GTA   3 |     GCA   9 | Glu GAA  14 |     GGA  23
+    GTG  10 |     GCG   6 |     GAG  14 |     GGG   3
+------------------------------------------------------
+
+
+
+(A) Nei-Gojobori (1986) method
+
+
+
+Nei & Gojobori 1986. dN/dS (dN, dS)
+(Note: This matrix is not used in later ML. analysis.
+Use runmode = -2 for ML pairwise comparison.)
+
+KRH09865            
+KRH23460             0.1774 (0.0183 0.1031)
+
+
+(B) Yang & Nielsen (2000) method
+
+Yang Z, Nielsen R (2000) Estimating synonymous and nonsynonymous substitution rates under realistic evolutionary models. Mol. Biol. Evol. 17:32-43
+
+(equal weighting of pathways)
+
+seq. seq.     S       N        t   kappa   omega     dN +- SE    dS +- SE
+
+   2    1   234.8   647.2   0.1182  2.5340  0.1952 0.0188 +- 0.0054  0.0962 +- 0.0216
+
+
+(C) LWL85, LPB93 & LWLm methods
+
+Li W.-H., C.-I. Wu, Luo (1985) A new method for estimating synonymous and nonsynonymous rates of nucleotide substitutions considering the relative likelihood of nucleotide and codon changes. Mol. Biol. Evol. 2: 150-174.
+Li W-H (1993) Unbiased estimation of the rates of synonymous and nonsynonymous substitution. J. Mol. Evol. 36:96-99
+Pamilo P, Bianchi NO (1993) Evolution of the Zfx and Zfy genes - rates and interdependence between the genes. Mol. Biol. Evol. 10:271-281
+Yang Z (2006) Computational Molecular Evolution. Oxford University Press, Oxford. Eqs. 2.12 & 2.13
+
+2 (KRH23460) vs. 1 (KRH09865)
+
+L(i):      567.0     167.0     148.0  sum=    882.0
+Ns(i):    6.5000    4.5000   10.0000  sum=  21.0000
+Nv(i):    5.0000    0.0000    7.0000  sum=  12.0000
+A(i):     0.0117    0.0277    0.0759
+B(i):     0.0089   -0.0000    0.0497
+LWL85:  dS =  0.1139 dN =  0.0172 w = 0.1510 S =  203.7 N =  678.3
+LWL85m: dS =  0.0932 dN =  0.0184 w = 0.1977 S =  248.9 N =  633.1 (rho = 0.604)
+LPB93:  dS =  0.1000 dN =  0.0186 w = 0.1855
+

@@ -1,0 +1,34 @@
+Command: ../5_consolidate_results.sh -i /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/ks_results -o /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/ks_summary.tsv
+-- Parameters:
+   INPUT DIR   : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/ks_results
+   OUTPUT FILE : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/ks_summary.tsv
+-- Quality filters:
+   Max Ks      : 5.0
+   Max Ka      : 5.0
+   Max Ka/Ks   : 5.0
+   Min length  : 50 codons
+-- Consolidating PAML yn00 results...
+   Found 68 yn00 output files
+-- Parsing summary:
+   Total files: 68
+   Passed QC: 68
+   Filtered: 0
+   Failed: 0
+
+-- Results consolidation completed
+   Total pairs: 68
+   Passed QC: 68
+   Filtered: 0
+   Processing time: 0s
+   Output file: /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/ks_summary.tsv
+
+-- Summary statistics (QC-passed pairs):
+awk: cmd. line:21: (FILENAME=- FNR=68) warning: sqrt: received negative argument -1.71541
+   Ks: 1.310 ± -nan (range: 0.069 - 3.572)
+awk: cmd. line:22: (FILENAME=- FNR=68) warning: sqrt: received negative argument -0.151421
+   Ka: 0.389 ± -nan (range: 0.008 - 1.300)
+awk: cmd. line:23: (FILENAME=- FNR=68) warning: sqrt: received negative argument -0.0909652
+   Ka/Ks: 0.302 ± -nan (range: 0.072 - 0.795)
+
+-- Pipeline 2 completed successfully!
+   Final results: /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/ks_summary.tsv

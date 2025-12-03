@@ -1,0 +1,16 @@
+Command: ../1_prepare_pairs.sh -i /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/families.tsv -p /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/proteins.fa -o /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/pairs
+-- Parameters:
+   FAMILY FILE    : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/families.tsv
+   PROTEIN FASTA  : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/proteins.fa
+   OUTPUT DIR     : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/pairs
+-- Preparing pairwise protein files from gene families...
+   Processing 4 families...
+   Loaded 24 protein sequences into memory
+   Final: 4 families processed, 68 protein pairs created
+
+-- Pair preparation completed successfully
+   Processing time: 0s
+   Output directory: /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/pairs
+   Family subdirectories: output/{species}/pairs/family*/
+-- Next step: Run protein alignment on families
+   bash pipeline_2/3_align_proteins.sh

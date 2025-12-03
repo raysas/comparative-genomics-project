@@ -1,148 +1,318 @@
 #!/bin/bash
 
 # --------------------------------------------------------------------
-# -- What this script does:
-#    generates an edgelist from the filtered BLASTP results
-#    the edgelist will be of the form: protein1 protein2 weight
-#    where weight here is bit score (consider making the option more general later)
-#
-#  !SOME ISSUES WITH THE SIMILARITY NETWORK:
-#    we have symmetric edges (p1,p2,w) and (p2,p1,w) that needs to be shortned to one edge
-#    we always have a self loop (best match to p1 is p1): needs to be removed
-#    we have multiple edges between some pairs (p1,p2) with different weights (due to different alignments): need to keep only the highest weight
-#    * will create temp files during filtreation for testing and troubleshooting
-# -- Usage:
-#    bash ./pipeline_1/5_prepare_edgelist.sh [-i INPUT_FILE] [-o OUTPUT_DIR] [-w WEIGHT_COLUMN_INDEX] [-h]
-# -- default (without params) equivalent to:
-#    bash ./pipeline_1/5_prepare_edgelist.sh -i "output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv" -o "output/similarity_edgelists" -w 12
+# -- Optimized edgelist generation from BLAST results
+# -- parallel processing and efficient sorting
 # --------------------------------------------------------------------
-###########################################################################
 
-# ---------------------------------------------------------------------
-# prepare variables, get arguments, set up logging
-# ---------------------------------------------------------------------
+set -euo pipefail
 
-# -- message on what this script does
-cat <<EOF
--- this script generates an edgelist from the filtered BLASTP results
-   the edgelist will be of the form: protein1 protein2 weight
-   where weight here is bit score (consider making the option more general later)
+
+# Resolve paths to run from anywhere
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Color codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+NC='\033[0m'
+
+
+# Default parameters (species-aware, pipeline1 layout)
+INPUT_FILE=""
+OUTPUT_DIR=""
+SPECIES_NAME=""
+WEIGHT_COLUMN_INDEX=12
+NUM_JOBS=$(nproc)
+CHUNK_SIZE=10000000
+USE_MEMORY_SORT=false
+AUTO_DETECT=true
+
+while getopts "i:o:s:w:j:c:mh" flag; do
+    case "${flag}" in
+        i) INPUT_FILE="${OPTARG}"; AUTO_DETECT=false ;;
+        o) OUTPUT_DIR="${OPTARG}"; AUTO_DETECT=false ;;
+        s) SPECIES_NAME="${OPTARG}"; AUTO_DETECT=true ;;
+        w) WEIGHT_COLUMN_INDEX="${OPTARG}" ;;
+        j) NUM_JOBS="${OPTARG}" ;;
+        c) CHUNK_SIZE="${OPTARG}" ;;
+        m) USE_MEMORY_SORT=true ;;
+        h)
+                        cat <<EOF
+Usage: $0 [OPTIONS]
+
+OPTIONS:
+    -i FILE    Input filtered BLAST results
+    -o DIR     Output directory
+    -s NAME    Species name (auto-detects input/output)
+    -w NUM     Weight column index (default: 12 for bit score)
+    -j NUM     Parallel jobs (default: all CPUs)
+    -c NUM     Chunk size for processing (default: 10000000)
+    -m         Use memory-based sorting (faster for <100M edges)
+    -h         Show this help
+
+EXAMPLES:
+    # Standard usage
+    $0 -s glycine_max
+
+    # Fast processing with memory sort
+    $0 -i blast_filtered.tsv -m -j 32
+
+    # Large file with chunking
+    $0 -i huge_blast.tsv -c 50000000 -j 64
 
 EOF
-
-# -- default parameters
-INPUT_FILE='output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv'
-OUTPUT_DIR='output/similarity_edgelists'
-WEIGHT_COLUMN_INDEX=12  # -- bit score column in BLAST output
-
-# -- get arguments
-while getopts "i:o:w:h" flag; do
-    case "${flag}" in
-        i) INPUT_FILE="${OPTARG}" ;;
-        o) OUTPUT_DIR="${OPTARG}" ;;
-        w) WEIGHT_COLUMN_INDEX="${OPTARG}" ;;
-        h)
-            echo "Usage: $0 [-i input_file] [-o OUTPUT_DIR] [-w weight_column_index]"
-            echo "  -i    Input filtered BLAST results file"
-            echo "  -o    Output edgelist file"
-            echo "  -w    Column index for weight in BLAST output"
-            echo "  -h    Show this help message"
-            exit 0
-            ;;
-        *)
-            echo "Invalid option. Use -h for help."
-            exit 1
-            ;;
+                        exit 0
+                        ;;
+        *) echo "Unknown option: $1"; exit 1;;
     esac
 done
 
-# -- if weight index in input file is not a number, say sorry the weight should be a number and set to bit score column by default
 
-LOG_DIR="logs/pipeline"
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir -p "$LOG_DIR" 
+# Auto-detect input/output if not provided
+if [ "$AUTO_DETECT" = true ]; then
+    if [ -n "$SPECIES_NAME" ]; then
+        BLAST_DIR="$REPO_ROOT/output/pipeline1/${SPECIES_NAME}/filtered_networks"
+        if [ -d "$BLAST_DIR" ]; then
+            INPUT_FILE="$BLAST_DIR/filtered_blast_results_id30_qcov50_scov50.tsv"
+            OUTPUT_DIR="$REPO_ROOT/output/pipeline1/${SPECIES_NAME}/filtered_networks"
+        else
+            echo -e "${RED}ERROR:${NC} Could not find filtered BLAST results for species '$SPECIES_NAME'"; exit 1
+        fi
+    else
+        # Try to auto-detect single species
+        BLAST_DIRS=("$REPO_ROOT"/output/pipeline1/*/filtered_networks)
+        if [ ${#BLAST_DIRS[@]} -eq 1 ] && [ -d "${BLAST_DIRS[0]}" ]; then
+            INPUT_FILE="${BLAST_DIRS[0]}/filtered_blast_results_id30_qcov50_scov50.tsv"
+            OUTPUT_DIR="$(dirname "${BLAST_DIRS[0]}")/filtered_networks"
+        else
+            echo -e "${RED}ERROR:${NC} Could not auto-detect species. Use -s or specify -i/-o."; exit 1
+        fi
+    fi
 fi
-LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
-echo "Command: $0 $*"
 
+# Setup logging inside the pipeline directory regardless of where the script is run from
+LOG_DIR="${SCRIPT_DIR}/logs/pipeline"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/$(basename "$0" .sh)_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -i "$LOG_FILE") 2>&1
 
-# -- check input file exists
+# echo " OPTIMIZED EDGELIST GENERATION"
+# echo -e "====================================${NC}"
+# echo " Input:  $INPUT_FILE"
+# echo " Output: $OUTPUT_DIR"
+# echo " Weight column: $WEIGHT_COLUMN_INDEX"
+# echo " CPUs:   $NUM_JOBS"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN} Step 5: Prepare Edgelist ${NC}"
+echo -e "${GREEN}====================================${NC}"
+# echo -e " 1) Extract and normalize edges"
+# echo -e " 2) Sort and deduplicate edges"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}Input:   ${BLUE}$INPUT_FILE${NC}"
+echo -e "${GREEN}Output:  ${BLUE}$OUTPUT_DIR${NC}"
+echo -e "${GREEN}Weight column: ${YELLOW}$WEIGHT_COLUMN_INDEX${NC}"
+echo -e "${GREEN}CPUs:    ${YELLOW}$NUM_JOBS${NC}"
+if [ "$USE_MEMORY_SORT" = true ]; then
+    echo -e "${GREEN}Mode:    ${YELLOW}Memory-based sorting${NC}"
+else
+    echo -e "${GREEN}Mode:    ${YELLOW}Disk-based sorting${NC}"
+fi
+echo -e "${GREEN}====================================${NC}"
+
+# Validate inputs
 if [ ! -f "$INPUT_FILE" ]; then
-    echo "Error: input file $INPUT_FILE not found" >&2
+    echo -e "${RED}ERROR: Input file not found: $INPUT_FILE${NC}"
     exit 1
 fi
-# -- ensure output directory exists
-if [ ! -d "$OUTPUT_DIR" ]; then
-    mkdir -p "$OUTPUT_DIR"
-    echo "-- created output directory $OUTPUT_DIR"
+
+# Validate weight column is numeric
+if ! [[ "$WEIGHT_COLUMN_INDEX" =~ ^[0-9]+$ ]]; then
+    echo -e "${YELLOW}Warning: Weight column must be numeric. Using default (12)${NC}"
+    WEIGHT_COLUMN_INDEX=12
 fi
 
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
 
-OUTPUT_FILE=$OUTPUT_DIR/$(basename "${INPUT_FILE%.tsv}_wcol${WEIGHT_COLUMN_INDEX}_network.tsv")
+# Build output filename
+OUTPUT_FILE="$OUTPUT_DIR/$(basename "${INPUT_FILE%.tsv}_wcol${WEIGHT_COLUMN_INDEX}_network.tsv")"
 
-echo " -- generating edgelist from filtered BLASTP results:"
-echo "   INPUT : $INPUT_FILE"
-echo "   OUTPUT: $OUTPUT_FILE"
-echo "   WEIGHT COLUMN INDEX: $WEIGHT_COLUMN_INDEX"
-echo " -- starting with $(wc -l < "$INPUT_FILE") lines in input file"
+# Count input lines
+echo -e "${YELLOW}Analyzing input file...${NC}"
+TOTAL_LINES=$(wc -l < "$INPUT_FILE")
+echo -e "${GREEN}✓ Input lines: $TOTAL_LINES${NC}"
 
-# -------------------------------------------------------------------------
-# -- main script logic
-# -------------------------------------------------------------------------
+# Create temp directory
+TEMP_DIR=$(mktemp -d)
+trap "rm -rf $TEMP_DIR" EXIT
 
-# -- re-order columns to have first id < second id (lexico-alphabetical order)
+START_TIME=$(date +%s)
 
-# -- extract relevant columns: protein1, protein2, weight
+# ========================================
+# STEP 1: Extract and normalize edges
+# ========================================
+echo -e "${YELLOW}Step 1: Extracting edges and normalizing...${NC}"
 
-tail -n +2 "$INPUT_FILE" | awk -v weight_col="$WEIGHT_COLUMN_INDEX" 'BEGIN {
-    if (weight_col !~ /^[0-9]+$/) {
-        print "Error: Weight column index must be a number. Setting to default bit score column (12)" > "/dev/stderr"
-        weight_col = 12
+if [ "$TOTAL_LINES" -lt 50000000 ]; then
+    # Small file: single AWK pass
+    echo "  Using single-pass processing..."
+    
+    awk -v wcol="$WEIGHT_COLUMN_INDEX" '
+    NR > 1 {  # Skip header if present
+        # Skip self-loops immediately
+        if ($1 == $2) next
+        
+        # Normalize edge order (smaller ID first)
+        if ($1 < $2) {
+            print $1, $2, $(wcol)
+        } else {
+            print $2, $1, $(wcol)
+        }
+    }' "$INPUT_FILE" > "$TEMP_DIR/normalized.txt"
+    
+else
+    # Large file: parallel chunk processing
+    echo "  Using parallel chunk processing..."
+    
+    # Split into chunks
+    tail -n +2 "$INPUT_FILE" | split -l "$CHUNK_SIZE" - "$TEMP_DIR/chunk_"
+    
+    # Function to process a chunk
+    process_chunk() {
+        local chunk="$1"
+        local wcol="$2"
+        local output="${chunk}.normalized"
+        
+        awk -v wcol="$wcol" '
+        {
+            if ($1 == $2) next
+            if ($1 < $2) {
+                print $1, $2, $(wcol)
+            } else {
+                print $2, $1, $(wcol)
+            }
+        }' "$chunk" > "$output"
+        
+        echo "$output"
     }
-}
-{
-    print $1, $2, $(weight_col)
-}' > "$OUTPUT_FILE"
+    
+    export -f process_chunk
+    
+    # Process chunks in parallel
+    ls "$TEMP_DIR"/chunk_* | \
+        parallel -j "$NUM_JOBS" --progress process_chunk {} "$WEIGHT_COLUMN_INDEX" > "$TEMP_DIR/chunk_list.txt"
+    
+    # Combine chunks
+    cat $(cat "$TEMP_DIR/chunk_list.txt") > "$TEMP_DIR/normalized.txt"
+    
+    # Clean up chunks
+    rm -f "$TEMP_DIR"/chunk_* $(cat "$TEMP_DIR/chunk_list.txt")
+fi
 
-# -- reorder to have first id < second id (lexico-alphabetical order)
-# -- !! made sure to have the real query and subject ids in a row before the swapped ones (by sorting first)
-sort -d ${OUTPUT_FILE} | awk '
-{
-    if ($1 <= $2) {
-        print $0
-    } else {
-        # --swap $1 and $2, keep rest untouched
-        temp = $1
-        $1 = $2
-        $2 = temp
-        print $0
-    }
-}
-' > "${OUTPUT_FILE}.tmp"
-echo "-- reordered columns to ensure first id <= second id lexicographically"
+NORMALIZED_COUNT=$(wc -l < "$TEMP_DIR/normalized.txt")
+echo -e "${GREEN}  ✓ Normalized edges: $NORMALIZED_COUNT${NC}"
+echo "  ✓ Self-loops removed: $((TOTAL_LINES - NORMALIZED_COUNT - 1))"
 
-# -- 1.remove self loops (when col1=col2)
-awk '$1 != $2' "$OUTPUT_FILE" > "${OUTPUT_FILE}.tmp"
-mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
-rm -f "${OUTPUT_FILE}.tmp"
-echo "-- self-loops removed"
-echo "-- $(wc -l < "$OUTPUT_FILE") lines remain after removing self-loops"
+# ========================================
+# STEP 2: Sort and deduplicate
+# ========================================
+echo -e "${YELLOW}Step 2: Sorting and removing duplicates...${NC}"
 
-# -- 2.some duplicates of col1+col2, will keep only the highest weight (ALREADY SORTED)
-cat "$OUTPUT_FILE" | awk '{
-    key = $1 "_" $2
-    if (!(key in seen)) {
-        print $0
-        seen[key] = 1
-    }
-}' > "${OUTPUT_FILE}.tmp" 
+if [ "$USE_MEMORY_SORT" = true ]; then
+    echo "  Using memory-based sorting..."
+    
+    # Sort by first two columns, then by weight (descending)
+    # Keep only the highest weight for each edge pair
+    sort -k1,1 -k2,2 -k3,3nr "$TEMP_DIR/normalized.txt" | \
+        awk '{
+            edge = $1 "_" $2
+            if (!(edge in seen)) {
+                print $1, $2, $3
+                seen[edge] = 1
+            }
+        }' > "$OUTPUT_FILE"
+    
+else
+    echo "  Using disk-based sorting with parallel merge..."
+    
+    # Use GNU sort with parallel option
+    export LC_ALL=C  # Faster sorting
+    
+    sort --parallel="$NUM_JOBS" \
+         --buffer-size=2G \
+         --temporary-directory="$TEMP_DIR" \
+         -k1,1 -k2,2 -k3,3nr \
+         "$TEMP_DIR/normalized.txt" | \
+        awk '{
+            edge = $1 "_" $2
+            if (!(edge in seen)) {
+                print $1, $2, $3
+                seen[edge] = 1
+            }
+        }' > "$OUTPUT_FILE"
+fi
 
-mv "${OUTPUT_FILE}.tmp" "$OUTPUT_FILE"
-rm -f "${OUTPUT_FILE}.tmp"
-echo "-- duplicate edges removed, keeping highest weight"
-echo "-- $(wc -l < "$OUTPUT_FILE") lines remain after removing duplicate edges with different weights (multiple hits - keeping best hit)"
+# ========================================
+# STEP 3: Statistics and validation
+# ========================================
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
 
-echo "-- edgelist written to $OUTPUT_FILE"
+FINAL_COUNT=$(wc -l < "$OUTPUT_FILE")
+REMOVED_DUPLICATES=$((NORMALIZED_COUNT - FINAL_COUNT))
+
+echo ""
+echo -e "${GREEN}===================================="
+echo " EDGELIST GENERATION COMPLETE"
+echo -e "====================================${NC}"
+echo " Processing time: ${ELAPSED}s"
+echo " Input edges:     $((TOTAL_LINES - 1))"
+echo " Self-loops removed: $((TOTAL_LINES - NORMALIZED_COUNT - 1))"
+echo " Duplicates removed: $REMOVED_DUPLICATES"
+echo " Final edges:     $FINAL_COUNT"
+echo " Reduction:       $(echo "scale=1; (1 - $FINAL_COUNT / ($TOTAL_LINES - 1)) * 100" | bc)%"
+echo -e "${GREEN}====================================${NC}"
+echo " Output saved to:"
+echo " $OUTPUT_FILE"
+echo -e "${GREEN}====================================${NC}"
+
+# Additional analysis
+if [ "$FINAL_COUNT" -gt 0 ]; then
+    echo ""
+    echo "Edge weight statistics:"
+    awk '{sum+=$3; if(NR==1||$3>max)max=$3; if(NR==1||$3<min)min=$3} 
+         END {printf "  Min weight:  %.1f\n  Max weight:  %.1f\n  Mean weight: %.1f\n", min, max, sum/NR}' \
+         "$OUTPUT_FILE"
+    
+    # Check connectivity
+    echo ""
+    echo "Network connectivity:"
+    UNIQUE_NODES=$(awk '{print $1; print $2}' "$OUTPUT_FILE" | sort -u | wc -l)
+    AVG_DEGREE=$(echo "scale=1; $FINAL_COUNT * 2 / $UNIQUE_NODES" | bc)
+    
+    echo "  Unique nodes: $UNIQUE_NODES"
+    echo "  Average degree: $AVG_DEGREE"
+    
+    # Find highest degree node
+    echo -n "  Max degree node: "
+    awk '{print $1; print $2}' "$OUTPUT_FILE" | \
+        sort | uniq -c | sort -rn | head -1 | \
+        awk '{printf "%s (degree: %d)\n", $2, $1}'
+    
+    # Warning for problematic clustering
+    if (( $(echo "$AVG_DEGREE > 100" | bc -l) )); then
+        echo ""
+        echo -e "${YELLOW}⚠ WARNING: High average degree detected!${NC}"
+        echo "  This may cause large clusters in MCL."
+        echo "  Consider:"
+        echo "    1. Stricter BLAST filtering"
+        echo "    2. Higher MCL inflation (2.5-3.0)"
+        echo "    3. Edge weight threshold filtering"
+    fi
+fi
 
 exit 0
