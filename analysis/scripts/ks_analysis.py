@@ -13,9 +13,9 @@ import os
 import sys
 
 # Configuration
-KS_FILE = sys.argv[1] if len(sys.argv) > 1 else "../../output/ks_results/ks_results_filtered.tsv"
-OUTPUT_DIR = sys.argv[2] if len(sys.argv) > 2 else "figures/"
-STATS_DIR = sys.argv[3] if len(sys.argv) > 3 else "statistics/"
+KS_FILE = sys.argv[1] if len(sys.argv) > 1 else "output/ks_results/ks_results_filtered.tsv"
+OUTPUT_DIR = sys.argv[2] if len(sys.argv) > 2 else "analysis/Ks/ks_plots/age_plots/"
+STATS_DIR = sys.argv[3] if len(sys.argv) > 3 else "analysis/Ks/statistics/"
 
 # Create output directories
 os.makedirs(OUTPUT_DIR, exist_ok=True)
