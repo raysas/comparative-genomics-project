@@ -23,7 +23,7 @@ def load_gene_positions(gff_file):
             
             seqid, source, feature_type, start, end, score, strand, phase, attributes = fields
             
-            # Filter for genes only
+            # Filter for gene entries only
             if feature_type != 'gene':
                 continue
             
@@ -34,15 +34,22 @@ def load_gene_positions(gff_file):
                     key, value = item.split('=', 1)
                     attrs[key.strip()] = value.strip()
             
-            gene_id = attrs.get('ID', attrs.get('gene_id', ''))
+            # Extract gene_id (e.g., GLYMA_01G000100)
+            gene_id = attrs.get('gene_id', '')
+            if not gene_id:
+                # Fallback: parse from ID field (gene:GLYMA_01G000100)
+                id_field = attrs.get('ID', '')
+                if 'gene:' in id_field:
+                    gene_id = id_field.split('gene:')[1]
             
-            genes.append({
-                'Gene_ID': gene_id,
-                'Chromosome': seqid,
-                'Start': int(start),
-                'End': int(end),
-                'Strand': strand
-            })
+            if gene_id:
+                genes.append({
+                    'gene_id': gene_id,
+                    'Chromosome': seqid,
+                    'Start': int(start),
+                    'End': int(end),
+                    'Strand': strand
+                })
     
     return pd.DataFrame(genes)
 
@@ -55,36 +62,33 @@ def identify_tags_distance_based(gene_families, gene_positions, max_distance_bp=
     print(f"Identifying TAGs with distance criterion: {max_distance_bp} bp...")
     
     # Merge gene families with positions
-    df = gene_families.merge(gene_positions, on='Gene_ID', how='inner')
-    
+    df = gene_families.merge(gene_positions, on=['gene_id', 'family'], how='inner')
+    print(f"  Merged {len(df)} genes with positions")
     # Sort by chromosome and position
     df = df.sort_values(['Chromosome', 'Start'])
     
     tag_pairs = []
     tag_clusters = defaultdict(set)
-    
-    # Group by family
-    for family_id, family_df in df.groupby('Family_ID'):
+    print(f"  DataFrame columns: {df.columns.tolist()}")
+    for family_id, family_df in df.groupby(df.columns[df.columns.str.lower() == 'family'][0]):
         family_genes = family_df.to_dict('records')
-        
         # Compare all pairs within family
         for i in range(len(family_genes)):
             for j in range(i+1, len(family_genes)):
                 gene1 = family_genes[i]
                 gene2 = family_genes[j]
-                
                 # Check if on same chromosome
                 if gene1['Chromosome'] != gene2['Chromosome']:
                     continue
-                
                 # Calculate distance (between closest ends)
                 distance = abs(gene1['Start'] - gene2['Start'])
-                
                 # Check if within distance threshold
                 if distance <= max_distance_bp:
                     tag_pairs.append({
-                        'Gene1': gene1['Gene_ID'],
-                        'Gene2': gene2['Gene_ID'],
+                        'Gene1': gene1.get('peptide_id', gene1.get('geneName', '')),
+                        'Gene2': gene2.get('peptide_id', gene2.get('geneName', '')),
+                        'Gene1_name': gene1['gene_id'],
+                        'Gene2_name': gene2['gene_id'],
                         'Family_ID': family_id,
                         'Chromosome': gene1['Chromosome'],
                         'Distance_bp': distance,
@@ -94,10 +98,9 @@ def identify_tags_distance_based(gene_families, gene_positions, max_distance_bp=
                         'Strand2': gene2['Strand'],
                         'Same_Orientation': gene1['Strand'] == gene2['Strand']
                     })
-                    
                     # Add to cluster
-                    tag_clusters[family_id].add(gene1['Gene_ID'])
-                    tag_clusters[family_id].add(gene2['Gene_ID'])
+                    tag_clusters[family_id].add(gene1.get('peptide_id', gene1.get('geneName', '')))
+                    tag_clusters[family_id].add(gene2.get('peptide_id', gene2.get('geneName', '')))
     
     return pd.DataFrame(tag_pairs), tag_clusters
 
@@ -110,8 +113,9 @@ def identify_tags_gene_count(gene_families, gene_positions, max_genes_apart=10):
     print(f"Identifying TAGs with gene count criterion: {max_genes_apart} genes apart...")
     
     # Merge and sort
-    df = gene_families.merge(gene_positions, on='Gene_ID', how='inner')
+    df = gene_families.merge(gene_positions, on='gene_id', how='inner')
     df = df.sort_values(['Chromosome', 'Start'])
+    print(f"  Merged {len(df)} genes with positions")
     
     # Add gene rank within chromosome
     df['Gene_Rank'] = df.groupby('Chromosome').cumcount() + 1
@@ -119,8 +123,17 @@ def identify_tags_gene_count(gene_families, gene_positions, max_genes_apart=10):
     tag_pairs = []
     tag_clusters = defaultdict(set)
     
+    
     # Group by family
-    for family_id, family_df in df.groupby('Family_ID'):
+    print(f"  DataFrame columns: {df.columns.tolist()}")
+    # Prefer 'family_x', fallback to 'family_y', else error
+    if 'family_x' in df.columns:
+        family_col = 'family_x'
+    elif 'family_y' in df.columns:
+        family_col = 'family_y'
+    else:
+        raise KeyError(f"No 'family' column found in DataFrame columns: {df.columns.tolist()}")
+    for family_id, family_df in df.groupby(family_col):
         family_genes = family_df.to_dict('records')
         
         # Compare all pairs
@@ -139,8 +152,10 @@ def identify_tags_gene_count(gene_families, gene_positions, max_genes_apart=10):
                 # Check if within gene count threshold
                 if gene_distance <= max_genes_apart:
                     tag_pairs.append({
-                        'Gene1': gene1['Gene_ID'],
-                        'Gene2': gene2['Gene_ID'],
+                        'Gene1': gene1.get('peptide_id', gene1.get('geneName', '')),
+                        'Gene2': gene2.get('peptide_id', gene2.get('geneName', '')),
+                        'Gene1_name': gene1['gene_id'],
+                        'Gene2_name': gene2['gene_id'],
                         'Family_ID': family_id,
                         'Chromosome': gene1['Chromosome'],
                         'Genes_Apart': gene_distance,
@@ -149,47 +164,65 @@ def identify_tags_gene_count(gene_families, gene_positions, max_genes_apart=10):
                         'Strand2': gene2['Strand'],
                         'Same_Orientation': gene1['Strand'] == gene2['Strand']
                     })
-                    
-                    tag_clusters[family_id].add(gene1['Gene_ID'])
-                    tag_clusters[family_id].add(gene2['Gene_ID'])
+                    tag_clusters[family_id].add(gene1.get('peptide_id', gene1.get('geneName', '')))
+                    tag_clusters[family_id].add(gene2.get('peptide_id', gene2.get('geneName', '')))
     
     return pd.DataFrame(tag_pairs), tag_clusters
 
 def main():
     parser = argparse.ArgumentParser(description='Identify Tandemly Arrayed Genes (TAGs)')
-    parser.add_argument('--families', default='../../output/clusters/protein_families_network_50families_max5.tsv',
-                       help='Gene families file (TSV: Gene_ID, Family_ID)')
-    parser.add_argument('--gff', default='../../data/annotations/Glycine_max.gff3',
+    parser.add_argument('--families', default='../../output/pipeline1/glycine_max/clusters/protein_families_filtered_blast_results_id50_qcov70_scov70_wcol12_network.tsv',
+                       help='Gene families file (TSV: geneName, family)')
+    parser.add_argument('--gff', default='../../data/glycine_max/genome.gff',
                        help='Gene annotation GFF file')
-    parser.add_argument('--gene-pos', default='../../data/reference/gene_positions.tsv',
-                       help='Pre-computed gene positions file (optional, will parse GFF if not provided)')
+    parser.add_argument('--protein-info', default='../../data/glycine_max/processed/protein_info_longest.csv',
+                       help='Protein info file to map peptide IDs to gene IDs')
     parser.add_argument('--method', choices=['distance', 'gene_count', 'both'], default='both',
                        help='TAG identification method')
     parser.add_argument('--max-distance', type=int, default=100000,
                        help='Maximum distance in bp for distance-based method (default: 100kb)')
     parser.add_argument('--max-genes', type=int, default=10,
                        help='Maximum genes apart for gene-count method (default: 10)')
-    parser.add_argument('--output-dir', default='../../output/statistics/',
+    parser.add_argument('--output-dir', default='output/TAGs',
                        help='Output directory')
     
     args = parser.parse_args()
     
-    # Load gene families
+    # create output directory
+    import os
+    os.makedirs(args.output_dir, exist_ok=True)
+    
+    # Load gene families (peptide IDs in geneName column)
     print(f"Loading gene families from {args.families}...")
-    gene_families = pd.read_csv(args.families, sep='\t', names=['Gene_ID', 'Family_ID'])
-    print(f"  Loaded {len(gene_families)} genes in {gene_families['Family_ID'].nunique()} families")
+    gene_families = pd.read_csv(args.families, sep='\t')
+    print(f"  Loaded {len(gene_families)} genes in {gene_families['family'].nunique()} families")
     
-    # Load gene positions
-    if args.gene_pos and pd.io.common.file_exists(args.gene_pos):
-        print(f"Loading gene positions from {args.gene_pos}...")
-        gene_positions = pd.read_csv(args.gene_pos, sep='\t')
-    else:
-        print(f"Parsing gene positions from GFF: {args.gff}...")
-        gene_positions = load_gene_positions(args.gff)
-        # Save for future use
-        gene_positions.to_csv(f"{args.output_dir}/gene_positions.tsv", sep='\t', index=False)
+    # Load protein info to map peptide_id to gene_id
+    print(f"Loading protein info from {args.protein_info}...")
+    protein_info = pd.read_csv(args.protein_info)
+    print(f"  Loaded {len(protein_info)} protein entries")
     
-    print(f"  Loaded positions for {len(gene_positions)} genes")
+    # Merge gene families with protein info to get gene_id
+    gene_families = gene_families.merge(
+        protein_info[['peptide_id', 'gene_id', 'chromosome', 'start_pos', 'end_pos', 'strand']],
+        left_on='geneName',
+        right_on='peptide_id',
+        how='inner'
+    )
+    print(f"  Mapped {len(gene_families)} genes to gene IDs")
+    
+    # Load gene positions from GFF
+    print(f"Parsing gene positions from GFF: {args.gff}...")
+    gene_positions_gff = load_gene_positions(args.gff)
+    print(f"  Loaded positions for {len(gene_positions_gff)} genes from GFF")
+    
+    # Merge with protein info to get final positions (use GFF positions, keep peptide_id)
+    gene_positions = gene_families[['peptide_id', 'gene_id', 'family']].merge(
+        gene_positions_gff,
+        on='gene_id',
+        how='inner'
+    )
+    print(f"  Final dataset: {len(gene_positions)} genes with positions")
     
     # Identify TAGs
     if args.method in ['distance', 'both']:
@@ -229,7 +262,7 @@ def main():
         print(f"  Same orientation: {same_orient}/{total} ({same_orient/total*100:.1f}%)")
     
     # Create gene annotation file (TAG vs non-TAG)
-    all_genes = gene_families['Gene_ID'].unique()
+    all_genes = gene_families['peptide_id'].unique()
     if args.method == 'distance':
         tag_genes = set().union(*tag_clusters_dist.values())
     elif args.method == 'gene_count':
@@ -238,7 +271,7 @@ def main():
         tag_genes = set().union(*tag_clusters_dist.values(), *tag_clusters_genes.values())
     
     gene_annotation = pd.DataFrame({
-        'Gene_ID': all_genes,
+        'Peptide_ID': all_genes,
         'Is_TAG': [gene in tag_genes for gene in all_genes]
     })
     
