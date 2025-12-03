@@ -85,7 +85,7 @@ Main results for each can be found in files suffixed with `_low` and `_high` res
 ### gene spacer based indentification
 
 The first approach used to identify tandemly arrayed genes (TAGs) was based on several works like [^1], also mentioned in this review [^2].
-In the review [^1], Tandemly arrayed genes are defined as genes that are physically close on the chromosome and share high sequence similarity. As we have dealth previously with the definition of "sequence similarity" to be considered duplicated, what's left to define is "physically close". The gene spacer strategy revolves aroung setting a max spacer number, i.e. threshold of intervening genes, to consider two genes as tandemly duplicated. Usually this spacer number ranges between 0 (a perfect TAG cluster with no intervening genes) to 10, with 1, 5 and 10 being common choices. To choose ours, we refer to Shoja & Zhang (2006) [^2] who tried the 11 different spacer numbers from 0 to 11 on 3 different genomes (human, mouse, rat) and observed the increase in the number of TAGs detected with increasing spacer number. 
+In the review [^1], Tandemly arrayed genes are defined as genes that are physically close on the chromosome and share high sequence similarity. As we have dealth previously with the definition of "sequence similarity" to be considered duplicated, what's left to define is "physically close". The gene spacer strategy revolves aroung setting a max spacer number, i.e. threshold of intervening genes, to consider two genes as tandemly duplicated. Usually this spacer number ranges between 0 (a perfect TAG cluster with no intervening genes) to 10, with 1, 5 and 10 being common choices. To choose ours, we refer to Shoja & Zhang (2006) [^2] who tried the 11 different spacer numbers from 0 to 10 on 3 different genomes (human, mouse, rat) and observed the increase in the number of TAGs detected with increasing spacer number. 
 
 We tried the same approach on our data, running the detection of TAGs with spacer numbers from 0 to 10 and plotting the results. We observed a similar trend as in[^2], with a rapid increase in the number of TAGs detected from spacer 0 to 1, then a slower one follows. Bsed on the same approach, we will consider spacer number 1 as our threshold to define TAGs in our data, this is from running the script `script/compute_TAGs.sh` which uses the R script `scripts/detect_TAGs.R` to detect TAGs with a given spacer number on 0:10 range.
 
@@ -96,6 +96,7 @@ Rscript scripts/TAGs_detect.R --help
 ```
 
 * low stringency dataset ([`output/statistics/TAGs_spacers_ratios_low.tsv`](../output/statistics/TAGs_spacers_ratios_low.tsv) )
+
 | spacer | n_TAG_genes | n_TAG_arrays | TAG_genes_percent |
 |--------|-------------|--------------|--------------------|
 | 0      | 8563        | 1263         | 15.107% |
@@ -111,6 +112,7 @@ Rscript scripts/TAGs_detect.R --help
 | 10     | 11370       | 1499         | 20.060% |
 
 * high stringency dataset ([`output/statistics/TAGs_spacers_ratios_high.tsv`](../output/statistics/TAGs_spacers_ratios_high.tsv) )
+
 | spacer | n_TAG_genes | n_TAG_arrays | TAG_genes_percent |
 |--------|-------------|--------------|--------------------|
 | 0      | 7524        | 1597         | 13.274% |
@@ -128,9 +130,20 @@ Rscript scripts/TAGs_detect.R --help
 
 Both datasets showed the same trends with %s being more or less similar:
 
-*will insert plots here*
 
-So for TAGs, gene spacer=1 is chosen as threshold for both datasets
+| low | high |
+|-----|------|
+| ![](./assets/TAGs_spacers_low.png) | ![](./assets/TAGs_spacers_high.png) |
+| ![](./assets/TAGs_array_spacers_high.png) | ![](./assets/TAGs_array_spacers_low.png) |
+
+So for TAGs, gene spacer=1 is chosen as threshold for both datasets. Looking closely at them we see:
+
+| low | high |
+|-----|------|
+| ![](./assets/TAGs_size_low.png) | ![](./assets/TAGs_size_high.png) |
+| ![](./assets/TAGs_chr_low.png) | ![](./assets/TAGs_chr_high.png) | 
+
+same distribution in general, if u dont want to show it, maybe eya or nhi can show their part (if relevant) as preperation to justify that functional analysis for the low and high will overall give similar results
 
 ### yazid mcscan and kbs part
 
