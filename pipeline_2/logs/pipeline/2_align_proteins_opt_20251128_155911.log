@@ -1,0 +1,14 @@
+Command: ./2_align_proteins_opt.sh -i ../output/pipeline2_full/glycine_max/pairs/ -o ../output/pipeline2_full/glycine_max/alignments/
+Start time: Fri Nov 28 15:59:11 CET 2025
+-- Parameters:
+   INPUT DIR     : ../output/pipeline2_full/glycine_max/pairs/
+   OUTPUT DIR    : ../output/pipeline2_full/glycine_max/alignments/
+   PARALLEL JOBS : 16
+   BATCH SIZE    : 100
+   CPU CORES     : 16
+-- Checking dependencies...
+   ✓ MAFFT: v7.490 (2021/Oct/30)
+   ✓ GNU Parallel: GNU parallel 20210822
+-- Setting up output directory structure...
+   Found 7221 families with 2458898 protein pairs
+-- Preparing alignment jobs...

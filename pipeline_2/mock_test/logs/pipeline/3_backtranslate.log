@@ -1,0 +1,90 @@
+Command: ../3_backtranslate.sh -i /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/alignments -o /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/codon_alignments -c /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/cds.fa
+-- Parameters:
+   INPUT DIR  : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/alignments
+   OUTPUT DIR : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/codon_alignments
+   CDS FILE   : /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/cds.fa
+-- Back-translating protein alignments to codon alignments...
+   Found 68 protein alignments to back-translate
+   Loading CDS sequences...
+▶ Processing family1
+   ✓ KRH39305_KRH48366 -> KRH39305_KRH48366_codon.aln
+   ✓ KRH39305_KRH60272 -> KRH39305_KRH60272_codon.aln
+   ✓ KRH41560_KRH39305 -> KRH41560_KRH39305_codon.aln
+   ✓ KRH41560_KRH48366 -> KRH41560_KRH48366_codon.aln
+   ✓ KRH41560_KRH60272 -> KRH41560_KRH60272_codon.aln
+   ✓ KRH60272_KRH48366 -> KRH60272_KRH48366_codon.aln
+▶ Processing family2
+   ✓ KRH22886_KRH26406 -> KRH22886_KRH26406_codon.aln
+   ✓ KRH22886_KRH29912 -> KRH22886_KRH29912_codon.aln
+   ✓ KRH22886_KRH49155 -> KRH22886_KRH49155_codon.aln
+   ✓ KRH26406_KRH29912 -> KRH26406_KRH29912_codon.aln
+   ✓ KRH26406_KRH49155 -> KRH26406_KRH49155_codon.aln
+   ✓ KRH49155_KRH29912 -> KRH49155_KRH29912_codon.aln
+▶ Processing family3
+   ✓ KRH09865_KRH23460 -> KRH09865_KRH23460_codon.aln
+   ✓ KRH09865_KRH47041 -> KRH09865_KRH47041_codon.aln
+   ✓ KRH23460_KRH47041 -> KRH23460_KRH47041_codon.aln
+   ✓ KRH39533_KRH09865 -> KRH39533_KRH09865_codon.aln
+   ✓ KRH39533_KRH23460 -> KRH39533_KRH23460_codon.aln
+   ✓ KRH39533_KRH45455 -> KRH39533_KRH45455_codon.aln
+   ✓ KRH39533_KRH47041 -> KRH39533_KRH47041_codon.aln
+   ✓ KRH39533_KRH74426 -> KRH39533_KRH74426_codon.aln
+   ✓ KRH39533_KRH75622 -> KRH39533_KRH75622_codon.aln
+   ✓ KRH44361_KRH09865 -> KRH44361_KRH09865_codon.aln
+   ✓ KRH44361_KRH23460 -> KRH44361_KRH23460_codon.aln
+   ✓ KRH44361_KRH39533 -> KRH44361_KRH39533_codon.aln
+   ✓ KRH44361_KRH45455 -> KRH44361_KRH45455_codon.aln
+   ✓ KRH44361_KRH47041 -> KRH44361_KRH47041_codon.aln
+   ✓ KRH44361_KRH74426 -> KRH44361_KRH74426_codon.aln
+   ✓ KRH44361_KRH75622 -> KRH44361_KRH75622_codon.aln
+   ✓ KRH45455_KRH09865 -> KRH45455_KRH09865_codon.aln
+   ✓ KRH45455_KRH23460 -> KRH45455_KRH23460_codon.aln
+   ✓ KRH45455_KRH47041 -> KRH45455_KRH47041_codon.aln
+   ✓ KRH45455_KRH74426 -> KRH45455_KRH74426_codon.aln
+   ✓ KRH45455_KRH75622 -> KRH45455_KRH75622_codon.aln
+   ✓ KRH74426_KRH09865 -> KRH74426_KRH09865_codon.aln
+   ✓ KRH74426_KRH23460 -> KRH74426_KRH23460_codon.aln
+   ✓ KRH74426_KRH47041 -> KRH74426_KRH47041_codon.aln
+   ✓ KRH74426_KRH75622 -> KRH74426_KRH75622_codon.aln
+   ✓ KRH75622_KRH09865 -> KRH75622_KRH09865_codon.aln
+   ✓ KRH75622_KRH23460 -> KRH75622_KRH23460_codon.aln
+   ✓ KRH75622_KRH47041 -> KRH75622_KRH47041_codon.aln
+▶ Processing family4
+   ✓ KRG88755_KRH05554 -> KRG88755_KRH05554_codon.aln
+   ✓ KRG88755_KRH28330 -> KRG88755_KRH28330_codon.aln
+   ✓ KRG88755_KRH52124 -> KRG88755_KRH52124_codon.aln
+   ✓ KRG88755_KRH55660 -> KRG88755_KRH55660_codon.aln
+   ✓ KRG88755_KRH58142 -> KRG88755_KRH58142_codon.aln
+   ✓ KRG88755_KRH61438 -> KRG88755_KRH61438_codon.aln
+   ✓ KRG88755_KRH77156 -> KRG88755_KRH77156_codon.aln
+   ✓ KRH05554_KRH28330 -> KRH05554_KRH28330_codon.aln
+   ✓ KRH05554_KRH52124 -> KRH05554_KRH52124_codon.aln
+   ✓ KRH05554_KRH55660 -> KRH05554_KRH55660_codon.aln
+   ✓ KRH05554_KRH58142 -> KRH05554_KRH58142_codon.aln
+   ✓ KRH05554_KRH61438 -> KRH05554_KRH61438_codon.aln
+   ✓ KRH05554_KRH77156 -> KRH05554_KRH77156_codon.aln
+   ✓ KRH28330_KRH52124 -> KRH28330_KRH52124_codon.aln
+   ✓ KRH28330_KRH55660 -> KRH28330_KRH55660_codon.aln
+   ✓ KRH28330_KRH58142 -> KRH28330_KRH58142_codon.aln
+   ✓ KRH28330_KRH61438 -> KRH28330_KRH61438_codon.aln
+   ✓ KRH28330_KRH77156 -> KRH28330_KRH77156_codon.aln
+   ✓ KRH52124_KRH55660 -> KRH52124_KRH55660_codon.aln
+   ✓ KRH52124_KRH58142 -> KRH52124_KRH58142_codon.aln
+   ✓ KRH52124_KRH61438 -> KRH52124_KRH61438_codon.aln
+   ✓ KRH52124_KRH77156 -> KRH52124_KRH77156_codon.aln
+   ✓ KRH58142_KRH55660 -> KRH58142_KRH55660_codon.aln
+   ✓ KRH58142_KRH61438 -> KRH58142_KRH61438_codon.aln
+   ✓ KRH58142_KRH77156 -> KRH58142_KRH77156_codon.aln
+   ✓ KRH61438_KRH55660 -> KRH61438_KRH55660_codon.aln
+   ✓ KRH61438_KRH77156 -> KRH61438_KRH77156_codon.aln
+   ✓ KRH77156_KRH55660 -> KRH77156_KRH55660_codon.aln
+
+-- Back-translation completed
+   Total processed: 68
+   Successful: 68
+   Failed: 0
+   Processing time: 4s
+   Output directory: /mnt/c/Users/user/Desktop/projects/GENIOMHE/CG/pipeline_2/test/test_data/output/glycine_max/codon_alignments
+
+-- Next step: Calculate Ks values
+   bash pipeline_2/5_calculate_ks.sh

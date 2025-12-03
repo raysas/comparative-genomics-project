@@ -1,0 +1,9 @@
+Command: ./3_backtranslate.sh -i /tmp/pipeline2_full/alignments/ -o /tmp/pipeline2_full/codon_alignments_test/ -c /tmp/pipeline2_full/cds.fa
+-- Parameters:
+   INPUT DIR  : /tmp/pipeline2_full/alignments/
+   OUTPUT DIR : /tmp/pipeline2_full/codon_alignments_test/
+   CDS FILE   : /tmp/pipeline2_full/cds.fa
+-- Back-translating protein alignments to codon alignments...
+   Found 2386135 protein alignments to back-translate
+   Loading CDS sequences...
+▶ Processing family1
