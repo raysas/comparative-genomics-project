@@ -1,4 +1,4 @@
-stringency='low'
+stringency='high'
 
 tags_info_df<-read.table(paste0('../../output/statistics/TAGs_spacers_ratios_',stringency,'.tsv'), header=TRUE)
 
@@ -57,6 +57,7 @@ ggplot(tags_info_df, aes(x = spacer, y = n_TAG_arrays)) +
 # ------------- TAG size distribution (s=1) ------------------
 
 # -- taking spacer=1
+library(dplyr)
 tags_df$tag_id <- ifelse(tags_df$TAG != 0,
                          paste0(tags_df$family, "_TAG", tags_df$TAG),0)
 
@@ -73,7 +74,7 @@ size_counts_df<-size_counts_df %>%
   arrange(tag_size)
 
 ggplot(size_counts_df, aes(x=tag_size, y=count)) +
-  geom_col(fill = "#ff6f61", color = "white", width = 0.8) +
+  geom_col(fill = "#00a8e8", color = "white", width = 0.8) +
   #geom_line(linewidth = 1, color='#ff9f87') +
   geom_point(size = 2) +
   geom_text(aes(label = count),

@@ -3,6 +3,9 @@ library(ggpattern)
 library(dplyr)
 library(tidyr)
 
+dup_df<-read.csv('../../output/info/duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv')
+prot_df<-read.csv('../../output/info/protein_info_longest.csv')
+
 total_counts <- prot_df %>% count(chromosome, name = "total_genes")
 dup_counts <- dup_df %>% count(chromosome, name = "duplicated_genes")
 

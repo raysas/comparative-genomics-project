@@ -1,27 +1,27 @@
 {
-    "id": "DA1AAB5E",
-    "path": "~/saclay/courses/comparative-genomics/project/analysis/duplicated_genes/explore_largest_family.R",
-    "project_path": "explore_largest_family.R",
+    "id": "1B0D494C",
+    "path": "~/saclay/courses/comparative-genomics/project/analysis/duplicated_genes/explore_tag_orientation.R",
+    "project_path": "explore_tag_orientation.R",
     "type": "r_source",
     "hash": "0",
     "contents": "",
     "dirty": false,
-    "created": 1764541405079.0,
+    "created": 1764544847836.0,
     "source_on_save": false,
-    "relative_order": 3,
+    "relative_order": 5,
     "properties": {
         "tempName": "Untitled2",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "29,16",
-        "scrollLine": "13"
+        "cursorPosition": "4,0",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1764729246,
+    "lastKnownWriteTime": 1764790126,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1764729246967,
+    "last_content_update": 1764790126,
     "read_only": false,
     "read_only_alternatives": []
 }
