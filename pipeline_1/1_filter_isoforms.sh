@@ -36,13 +36,13 @@ FASTA_FILE=''
 FEATURE_FILE=''
 AUTO_DETECT=false
 
-cat <<EOF
--- this script filters the initial fasta file to keep only the longest isoform per gene
-   and creates:
-     1) a filtered fasta file (peptides_longest.fa)
-     2) a filtered protein info file (protein_info_longest.csv)
+# cat <<EOF
+# -- this script filters the initial fasta file to keep only the longest isoform per gene
+#    and creates:
+#      1) a filtered fasta file (peptides_longest.fa)
+#      2) a filtered protein info file (protein_info_longest.csv)
      
-EOF
+# EOF
 
 # -- get arguments if provided any
 while getopts "f:i:s:h" flag; do
@@ -140,7 +140,7 @@ exec > >(tee -i "$LOG_FILE") 2>&1
 echo "Command: $0 $*"
 
 echo -e "${GREEN}=========================================${NC}"
-echo -e "${GREEN} LONGEST ISOFORM FILTER (Pipeline 1 / Step 1) ${NC}"
+echo -e "${GREEN}  Step 1: LONGEST ISOFORM FILTER ${NC}"
 echo -e "${GREEN}=========================================${NC}"
 echo -e "Input Files:"
 echo -e "  FASTA    : ${BLUE}$FASTA_FILE${NC}"
@@ -163,7 +163,7 @@ TMP_IDS="${FEATURE_DIR}/_tmp_longest_ids.txt"
 # columns in protein_info.csv:
 # peptide_id,gene_id,transcript_id,genome,chromosome,start_pos,end_pos,strand,description,length
 # --------------------------------------------------------------------
-echo -e "${YELLOW}Step 1:${NC} Selecting longest isoform per gene (by length)"
+# echo -e "${YELLOW}Step 1:${NC} Selecting longest isoform per gene (by length)"
 
 # header
 head -n 1 "$FEATURE_FILE" > "$FEATURE_FILTERED"
@@ -190,12 +190,12 @@ cat "$TMP_METADATA" >> "$FEATURE_FILTERED"
 cut -d',' -f1 "$TMP_METADATA" > "$TMP_IDS"
 
 N_GENES=$(wc -l < "$TMP_IDS" || echo 0)
-echo -e "${GREEN}✓ Step 1 complete:${NC} kept $N_GENES genes (one isoform each)"
+# echo -e "${GREEN}✓ Step 1 complete:${NC} kept $N_GENES genes (one isoform each)"
 
 # --------------------------------------------------------------------
 # 2) filter FASTA to keep only selected peptide IDs
 # --------------------------------------------------------------------
-echo -e "${YELLOW}Step 2:${NC} Filtering FASTA to keep selected peptide IDs"
+# echo -e "${YELLOW}Step 2:${NC} Filtering FASTA to keep selected peptide IDs"
 echo -e "  Output FASTA: ${BLUE}$FASTA_FILTERED${NC}"
 
 python3 - "$FASTA_FILE" "$TMP_IDS" "$FASTA_FILTERED" << 'EOF'
@@ -216,8 +216,8 @@ with open(fasta_path) as fin, open(out_path, "w") as out:
             out.write(line)
 EOF
 
-echo -e "${GREEN}✓ Step 2 complete${NC}"
-echo ""
+# echo -e "${GREEN}✓ Step 2 complete${NC}"
+# echo ""
 echo -e "${GREEN}=========================================${NC}"
 echo -e "${GREEN} FILTERING COMPLETED ${NC}"
 echo -e "${GREEN}=========================================${NC}"

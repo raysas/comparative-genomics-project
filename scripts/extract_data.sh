@@ -71,7 +71,7 @@ OPTIONS:
   -h                Show this help
 
 Example:
-    $0 -S oryza_sativa -r 41 -v 1 -t pep
+    $0 -S oryza_sativa -r 41 -t pep
 
 URL FORMAT:
   http://ftp.ensemblgenomes.org/pub/release-{RELEASE}/plants/fasta/{SPECIES}/{TYPE}/{Species}.{GENOME_VERSION}.{TYPE}.all.fa.gz

@@ -16,11 +16,11 @@
 # prepare variables, get arguments, set up logging
 # ---------------------------------------------------------------------
 # -- message on what this script does
-cat <<EOF
--- this script:
-  1) creates a BLAST database from a given peptide fasta file
-  2) runs a BLASTP search of the peptides against themselves
-EOF
+# cat <<EOF
+# -- this script:
+#   1) creates a BLAST database from a given peptide fasta file
+#   2) runs a BLASTP search of the peptides against themselves
+# EOF
 
 # Resolve paths to run from anywhere and improve UX
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -166,7 +166,7 @@ exec > >(tee -i "$LOG_FILE") 2>&1
 echo "Command: $0 $*"
 
 echo -e "${GREEN}====================================${NC}"
-echo -e "${GREEN} PIPELINE 1 / Step 2: BLAST ${NC}"
+echo -e "${GREEN} Step 2: BLAST ${NC}"
 echo -e "${GREEN}====================================${NC}"
 echo -e "Parameters:"
 echo -e "  INPUT  : ${BLUE}$INPUT_FILE${NC}"

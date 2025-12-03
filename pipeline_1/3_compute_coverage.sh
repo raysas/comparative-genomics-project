@@ -31,10 +31,10 @@ BLUE='\033[1;34m'
 NC='\033[0m'
 
 echo -e "${GREEN}====================================${NC}"
-echo -e "${GREEN} PIPELINE 1 / Step 3: Coverage ${NC}"
+echo -e "${GREEN} Step 3: Coverage ${NC}"
 echo -e "${GREEN}====================================${NC}"
-echo -e " 1) Prepare BLAST output with lengths"
-echo -e " 2) Compute query/subject coverage and append"
+# echo -e " 1) Prepare BLAST output with lengths"
+# echo -e " 2) Compute query/subject coverage and append"
 
 # -- default parameters
 INPUT_FILE=''
@@ -104,9 +104,9 @@ if [ "$AUTO_DETECT" = true ]; then
             PROTEIN_INFO_FILE="${SPECIES_DIR}/processed/protein_info_longest.csv"
             [ ! -f "$PROTEIN_INFO_FILE" ] && PROTEIN_INFO_FILE="${SPECIES_DIR}/protein_info_longest.csv"
             echo -e "   Detected species: ${GREEN}$SPECIES_NAME${NC}"
-            echo -e "   Input : ${BLUE}$INPUT_FILE${NC}"
-            echo -e "   Output: ${BLUE}$OUTPUT_FILE${NC}"
-            echo -e "   Protein info: ${BLUE}$PROTEIN_INFO_FILE${NC}"
+            # echo -e "   Input : ${BLUE}$INPUT_FILE${NC}"
+            # echo -e "   Output: ${BLUE}$OUTPUT_FILE${NC}"
+            # echo -e "   Protein info: ${BLUE}$PROTEIN_INFO_FILE${NC}"
         else
             echo -e "${RED}ERROR:${NC} Species directories not found for '$SPECIES_NAME'"
             exit 1
@@ -225,8 +225,8 @@ awk -F'\t' -v protein_file="$PROTEIN_INFO_FILE" 'BEGIN {
     qlength = protein_lengths[qseqid]
     slength = protein_lengths[sseqid]
     
-    # Skip if either protein not found
-    if (qlength == "" || slength == "") {
+    # Skip if either protein not found or length is not a positive integer
+    if (qlength == "" || slength == "" || qlength <= 0 || slength <= 0) {
         missing++
         next
     }
