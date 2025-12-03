@@ -1,42 +1,87 @@
 # comparative-genomics-project
 
-[todo list for this project](TODO.md)
+Hey, best place to put your code is in analysis, if you can make a folder called `family_sizes` or smtg unqiue to your analysis. Kindly find the output files in the output folder
 
-## Important notes
+At this stage we have 4 main new outputs, where almost each will comprise 2 outputs:
 
-> [!CAUTION]
-> never at any cost merge two branches together (at least discuss first), i.e. the command `git merge...` should never be used in this project. Always work in one branch, if something is needed from another branch, first discuss it, will be made available in a proper way (risk of deleting files or messing up the code otherwise)
+- "low" or "id30_cov50_evalue1e-10" named: low stringency dataset at filtration of 30% identity, 50% coverage and evalue 1e-10
+- "high" or "id50_cov70_evalue1e-10" named: high stringency dataset at filtration of 50% identity, 70% coverage and evalue 1e-10
 
-The main directories to be aware of in master branch
-```text
-.
-├── TODO.md             # -- general todo list
-├── analysis
-│   ├── Ks
-│   ├── family_sizes    # -- analysis of this part here
-│   ├── duplicated_genes
-│   └── TE_analysis
-├── figures/
-│   └── family_sizes    # -- figures from family sizes analysis
-├── data                # -- large data_files (hidden)
-├── docs                # -- documentation files (some notes if you wanna add something)
-└── output              # -- output files and results of pipelines and codes
-    ├── gene_lists      # -- here can put .txt files with lists of genes (small_families.txt, large_families.txt...)
-    └── family_sizes    # -- any output files from family sizes analysis
+*might be worth running analysis on each of them*
+
+This is a description of each, i assume you might need gene_lists/ the most, to get full list of genes (dups and non dups, u can use output/info/protein_longest_info.csv to get full info on all genes including non duplicated one or create non tag duplicated genes from there as well)*
+
+1. [`output/gene_lists`](output/gene_lists): contains lists of genes classified in groups, it has them in txt files where each line is a peptide id, the groups are:
 ```
-<!-- 
-> To mark a change you've added or done to the project, please commit with a clear message on what was changed and run  
-> ``` ./dev/version_tracker.sh ```, follow the instructions (choose an option - default z unless you did a big change, write each step you've done in a seperate line and the press `ENTER` to get out of the prompt => version will be updated automatically)
- -->
-
-## Accessing branches
-
-If you already clones the repository locally, you can access any branch by running first the `fetch` command to get the latest changes from remote repository:
-```bash
-git fetch origin
+output/gene_lists/
+├── TAGs
+│   └── spacer_based
+│       ├── TAGs_high.txt
+│       └── TAGs_low.txt
+├── archive
+│   ├── H_largest_family.txt
+│   ├── TAGs.txt
+│   ├── largest_family.txt
+│   └── singleton_genes.txt
+├── largest_family
+│   ├── largest_family_high.txt
+│   ├── largest_family_id30_cov50_evalue1e-10.txt
+│   ├── largest_family_id50_cov70_evalue1e-10.txt
+│   └── largest_family_low.txt
+├── mapped_peptide_gene_ids
+│   ├── largest_family_id30_cov50_evalue1e-10_mapped.txt
+│   ├── largest_family_id50_cov70_evalue1e-10_mapped.txt
+│   ├── singletons_high_mapped.txt
+│   └── singletons_low_mapped.txt
+└── singletons
+    ├── singletons_high.txt
+    └── singletons_low.txt
 ```
 
-Then you can checkout the branch you want to work on:
-```bash
-git checkout -b <branch_name> origin/<branch_name>
+
+2. [`output/statistics`](output/statistics): contains statistics files, including the ratios of TAG genes and arrays per spacer size, in `TAGs_ratios_*.tsv` files and summary statistics in `duplication_statistics_*.tsv` files on yield of runs on different thresholds
+
+```
+output/statistics/
+├── TAGs_spacers_ratios_high.tsv
+├── TAGs_spacers_ratios_low.tsv
+└── duplication_ratios.tsv
+```
+
+*will put tables in md in final version*
+
+1. [`output/duplication_classes/`](output/duplication_classes/): contains the main outputs of the identification of duplication types, including TAGs so far through the gene spacer based method, in `TAGs/low` and `TAGs/high` folder, with files named `TAGs_*.tsv` that correspond to different gene spcacer thresholds
+
+```
+output/duplication_classes/
+├── TAGs
+│   ├── high
+│   │   ├── TAG_gene_pairs.tsv
+│   │   ├── TAGs_0.tsv
+│   │   ├── TAGs_1.tsv
+│   │   ├── TAGs_10.tsv
+│   │   ├── TAGs_2.tsv
+│   │   ├── TAGs_3.tsv
+│   │   ├── TAGs_4.tsv
+│   │   ├── TAGs_5.tsv
+│   │   ├── TAGs_6.tsv
+│   │   ├── TAGs_7.tsv
+│   │   ├── TAGs_8.tsv
+│   │   └── TAGs_9.tsv
+│   └── low
+│       ├── TAG_gene_pairs.tsv
+│       ├── TAGs_0.tsv
+│       ├── TAGs_1.tsv
+│       ├── TAGs_10.tsv
+│       ├── TAGs_2.tsv
+│       ├── TAGs_3.tsv
+│       ├── TAGs_4.tsv
+│       ├── TAGs_5.tsv
+│       ├── TAGs_6.tsv
+│       ├── TAGs_7.tsv
+│       ├── TAGs_8.tsv
+│       └── TAGs_9.tsv
+└── singletons
+    ├── singletons_high.csv
+    └── singletons_low.csv
 ```
