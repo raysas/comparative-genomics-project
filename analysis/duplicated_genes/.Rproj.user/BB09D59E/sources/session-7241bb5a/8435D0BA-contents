@@ -25,7 +25,7 @@ y_min <- min(tags_info_df$n_TAG_genes)-1000
 y_max <- max(tags_info_df$n_TAG_genes)
 
 ggplot(tags_info_df, aes(x = spacer, y = n_TAG_genes)) +
-  geom_col(fill = "#007ea7", color = "white", width = 0.8) +
+  geom_col(fill = "#7A0177", color = "white", width = 0.8) +
   geom_line(linewidth = 1, color='#00a8e8') +
   geom_point(size = 2) +
   geom_text(aes(label = paste0(round(ratio_TAG_genes, 3)*100, "%")),
@@ -43,7 +43,7 @@ y_min <- min(tags_info_df$n_TAG_arrays)
 y_max <- max(tags_info_df$n_TAG_arrays)
 
 ggplot(tags_info_df, aes(x = spacer, y = n_TAG_arrays)) +
-  geom_col(fill = "#007ea7", color = "white", width = 0.8) +
+  geom_col(fill = "#7A0177", color = "white", width = 0.8) +
   geom_line(linewidth = 1, color='#00a8e8') +
   geom_point(size = 2) +
   # geom_text(aes(label = paste0(round(ratio_TAG_genes, 3)*100, "%")), vjust = -0.5, size = 4) +
@@ -74,7 +74,7 @@ size_counts_df<-size_counts_df %>%
   arrange(tag_size)
 
 ggplot(size_counts_df, aes(x=tag_size, y=count)) +
-  geom_col(fill = "#00a8e8", color = "white", width = 0.8) +
+  geom_col(fill = "#084594", color = "white", width = 0.8) +
   #geom_line(linewidth = 1, color='#ff9f87') +
   geom_point(size = 2) +
   geom_text(aes(label = count),

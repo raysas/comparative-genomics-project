@@ -4,6 +4,16 @@ library(dplyr)
 library(tidyr)
 
 dup_df<-read.csv('../../output/info/duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv')
+families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id50_qcov70_scov70_evalue1e-10_wcol12_network.tsv', header=TRUE)
+tags_df<-read.table('../../output/duplication_classes/TAGS/high/TAGs_1.tsv', header=TRUE)
+
+
+dup_df<-read.csv('../../output/info/duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv')
+families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_evalue1e-10_wcol12_network.tsv', header=TRUE)
+tags_df<-read.table('../../output/duplication_classes/TAGS/low/TAGs_1.tsv', header=TRUE)
+
+
+
 prot_df<-read.csv('../../output/info/protein_info_longest.csv')
 
 total_counts <- prot_df %>% count(chromosome, name = "total_genes")
@@ -62,6 +72,8 @@ tag_dup_counts <- families_tag_dup_df %>%
   summarise(count = n()) %>%
   ungroup()
 tag_dup_counts$is_TAG <- ifelse(tag_dup_counts$is_TAG, "TAG duplicated genes", "non-TAG duplicated genes")
+
+chrom_colors<- c("#7A0177","#084594")
 
 ggplot(tag_dup_counts, aes(x = chromosome, y = count, fill = is_TAG)) +
   geom_bar(stat = "identity",
