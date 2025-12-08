@@ -35,6 +35,7 @@ purifying_genes  <- df %>% filter(selection_class == "Purifying_selection") %>% 
 positive_genes   <- df %>% filter(selection_class == "Positive_selection") %>% pull(GLYMA_ID) %>% unique()
 
 df <- df %>% mutate(ks_group = ifelse(ks_used <= 2, "<=2", ">2"))
+
 ks_le2_genes <- df %>% filter(ks_group == "<=2") %>% pull(GLYMA_ID) %>% unique()
 ks_gt2_genes <- df %>% filter(ks_group == ">2")  %>% pull(GLYMA_ID) %>% unique()
 
@@ -97,10 +98,10 @@ res_kgt2   <- run_gprof(ks_gt2_genes,    "Ks_gt_2")
 # 4. VISUALIZATION FUNCTIONS
 # ==========================================================
 
-# ---- A. Dotplot (BP only) ----
-plot_dot <- function(res, title, filename){
+# ---- A. Dotplot (BP or MF) ----
+plot_dot <- function(res, title, filename, ont = "GO:BP"){
   df <- res %>% 
-    filter(source == "GO:BP") %>% 
+    filter(source == ont) %>% 
     mutate(p_value = as.numeric(p_value)) %>% 
     filter(!is.na(p_value)) %>% 
     arrange(p_value) %>% 
@@ -111,15 +112,20 @@ plot_dot <- function(res, title, filename){
     geom_point(size = 4, color = "#084594") +
     coord_flip() +
     theme_minimal() +
-    labs(title = title, x = "GO term (BP)", y = "-log10(p-value)")
+    labs(title = title,
+         x = paste("GO term (", ont, ")"),
+         y = "-log10(p-value)")
   
-  ggsave(file.path(out_fig_dir, paste0(filename, "_dotplot.png")), p, width = 10, height = 6)
+  ggsave(
+    file.path(out_fig_dir, paste0(filename, "_dot_", ont, ".png")),
+    p, width = 10, height = 6
+  )
 }
 
-# ---- B. Barplot (BP only) ----
-plot_bar <- function(res, title, filename){
+# ---- B. Barplot (BP or MF) ----
+plot_bar <- function(res, title, filename, ont = "GO:BP"){
   df <- res %>% 
-    filter(source == "GO:BP") %>% 
+    filter(source == ont) %>% 
     mutate(p_value = as.numeric(p_value)) %>% 
     filter(!is.na(p_value)) %>% 
     arrange(p_value) %>% 
@@ -130,12 +136,17 @@ plot_bar <- function(res, title, filename){
     geom_bar(stat = "identity", fill = "#7A0177") +
     coord_flip() +
     theme_minimal() +
-    labs(title = title, x = "GO term (BP)", y = "-log10(p-value)")
+    labs(title = title,
+         x = paste("GO term (", ont, ")"),
+         y = "-log10(p-value)")
   
-  ggsave(file.path(out_fig_dir, paste0(filename, "_barplot.png")), p, width = 10, height = 6)
+  ggsave(
+    file.path(out_fig_dir, paste0(filename, "_bar_", ont, ".png")),
+    p, width = 10, height = 6
+  )
 }
 
-# ---- C. Bubble Plot (BP + MF) ----
+# ---- C. Bubble Plot (BP or MF) ----
 plot_bubble <- function(res, title, filename, ont = "GO:BP"){
   df <- res %>% 
     filter(source == ont) %>% 
@@ -145,7 +156,7 @@ plot_bubble <- function(res, title, filename, ont = "GO:BP"){
       query_size        = as.numeric(query_size)
     ) %>% 
     filter(!is.na(p_value), p_value > 0,
-           !is.na(intersection_size), !is.na(query_size)) %>%
+           !is.na(intersection_size), !is.na(query_size)) %>% 
     mutate(
       GeneRatio = intersection_size / query_size,
       neglog10p = -log10(p_value)
@@ -161,7 +172,7 @@ plot_bubble <- function(res, title, filename, ont = "GO:BP"){
     colour = neglog10p
   )) +
     geom_point(alpha = 0.85) +
-    scale_colour_gradient(low = "#81199b", high = "#401191") +
+    scale_colour_gradientn(colours = c("#9ECAE1", "#084594", "#7A0177")) +
     theme_minimal() +
     labs(
       title = title,
@@ -172,28 +183,30 @@ plot_bubble <- function(res, title, filename, ont = "GO:BP"){
     )
   
   suffix <- ifelse(ont == "GO:BP", "BP", "MF")
-
-  ggsave(file.path(out_fig_dir, paste0(filename, "_", suffix, "_bubble.png")),
-      p, width = 10, height = 6)
-
+  
+  ggsave(
+    file.path(out_fig_dir, paste0(filename, "_bubble_", suffix, ".png")),
+    p, width = 10, height = 6
+  )
 }
 
 
 # ==========================================================
-# 5. GENERATE ALL PLOTS (BP + MF bubble only)
+# 5. GENERATE ALL PLOTS (BP + MF)
 # ==========================================================
 
 make_plots <- function(res, title, filename){
   if (!is.null(res)){
-
+    
     # BP plots
-    plot_dot(res, title, filename)
-    plot_bar(res, title, filename)
-    plot_bubble(res, title, filename, ont = "GO:BP")
-
-    # MF bubble only
-    plot_bubble(res, paste(title, "(MF)"), filename, ont = "GO:MF")
-
+    plot_dot(res, paste(title, "(BP)"), filename, ont="GO:BP")
+    plot_bar(res, paste(title, "(BP)"), filename, ont="GO:BP")
+    plot_bubble(res, paste(title, "(BP)"), filename, ont="GO:BP")
+    
+    # MF plots
+    plot_dot(res, paste(title, "(MF)"), filename, ont="GO:MF")
+    plot_bar(res, paste(title, "(MF)"), filename, ont="GO:MF")
+    plot_bubble(res, paste(title, "(MF)"), filename, ont="GO:MF")
   }
 }
 
@@ -201,6 +214,5 @@ make_plots(res_recent, "Recent duplicates",       "recent")
 make_plots(res_old,    "Old duplicates",          "old")
 make_plots(res_pur,    "Purifying selection",     "purifying")
 make_plots(res_pos,    "Positive selection",      "positive")
-
 
 message("All enrichments and visualisations done!")
