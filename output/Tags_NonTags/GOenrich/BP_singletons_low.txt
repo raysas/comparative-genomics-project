@@ -1,0 +1,75 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20240807)
+Annotation Version and Release Date:	PANTHER version 19.0 Released 2024-06-20
+Analyzed List:	singletons_low.txt (Glycine max)
+Reference List:	Glycine max (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+PANTHER GO-Slim Biological Process	Glycine max - REFLIST (55853)	singletons_low.txt (717)	singletons_low.txt (expected)	singletons_low.txt (over/under)	singletons_low.txt (fold Enrichment)	singletons_low.txt (raw P-value)	singletons_low.txt (FDR)
+mitotic G2 DNA damage checkpoint signaling (GO:0007095)	5	3	.06	+	46.74	2.07E-05	8.00E-04
+mitotic intra-S DNA damage checkpoint signaling (GO:0031573)	4	2	.05	+	38.95	9.71E-04	2.42E-02
+mitotic DNA damage checkpoint signaling (GO:0044773)	13	5	.17	+	29.96	4.06E-07	3.78E-05
+signal transduction in response to DNA damage (GO:0042770)	19	7	.24	+	28.70	2.46E-09	1.14E-06
+DNA damage checkpoint signaling (GO:0000077)	19	7	.24	+	28.70	2.46E-09	8.57E-07
+mitotic DNA integrity checkpoint signaling (GO:0044774)	19	6	.24	+	24.60	1.03E-07	1.20E-05
+negative regulation of G2/M transition of mitotic cell cycle (GO:0010972)	16	5	.21	+	24.34	1.34E-06	9.80E-05
+mitotic G2/M transition checkpoint (GO:0044818)	16	5	.21	+	24.34	1.34E-06	9.31E-05
+negative regulation of cell cycle G2/M phase transition (GO:1902750)	16	5	.21	+	24.34	1.34E-06	8.87E-05
+mitotic DNA replication checkpoint signaling (GO:0033314)	12	3	.15	+	19.47	4.25E-04	1.19E-02
+DNA integrity checkpoint signaling (GO:0031570)	32	7	.41	+	17.04	1.42E-07	1.52E-05
+regulation of cell cycle G2/M phase transition (GO:1902749)	28	5	.36	+	13.91	2.65E-05	9.70E-04
+regulation of G2/M transition of mitotic cell cycle (GO:0010389)	28	5	.36	+	13.91	2.65E-05	9.46E-04
+tRNA methylation (GO:0030488)	35	6	.45	+	13.35	5.18E-06	3.01E-04
+mitotic cell cycle checkpoint signaling (GO:0007093)	41	6	.53	+	11.40	1.34E-05	5.68E-04
+meiotic cell cycle process (GO:1903046)	57	8	.73	+	10.93	6.74E-07	5.87E-05
+negative regulation of mitotic cell cycle (GO:0045930)	44	6	.56	+	10.62	2.04E-05	8.14E-04
+cell cycle checkpoint signaling (GO:0000075)	56	7	.72	+	9.74	7.50E-06	3.87E-04
+negative regulation of mitotic cell cycle phase transition (GO:1901991)	41	5	.53	+	9.50	1.76E-04	5.21E-03
+negative regulation of cell cycle (GO:0045786)	59	7	.76	+	9.24	1.07E-05	4.96E-04
+negative regulation of cell cycle process (GO:0010948)	59	7	.76	+	9.24	1.07E-05	4.80E-04
+negative regulation of cell cycle phase transition (GO:1901988)	59	7	.76	+	9.24	1.07E-05	4.65E-04
+tRNA modification (GO:0006400)	102	11	1.31	+	8.40	8.95E-08	1.13E-05
+meiotic nuclear division (GO:0140013)	39	4	.50	+	7.99	1.55E-03	3.54E-02
+meiosis I cell cycle process (GO:0061982)	39	4	.50	+	7.99	1.55E-03	3.49E-02
+tRNA processing (GO:0008033)	130	11	1.67	+	6.59	1.06E-06	8.66E-05
+establishment of organelle localization (GO:0051656)	62	5	.80	+	6.28	1.22E-03	2.92E-02
+regulation of cell cycle phase transition (GO:1901987)	89	7	1.14	+	6.13	1.55E-04	4.69E-03
+regulation of cell cycle process (GO:0010564)	104	8	1.34	+	5.99	6.19E-05	2.01E-03
+meiotic cell cycle (GO:0051321)	130	10	1.67	+	5.99	7.64E-06	3.80E-04
+regulation of mitotic cell cycle phase transition (GO:1901990)	66	5	.85	+	5.90	1.61E-03	3.57E-02
+regulation of mitotic cell cycle (GO:0007346)	80	6	1.03	+	5.84	5.89E-04	1.61E-02
+sexual reproduction (GO:0019953)	135	10	1.73	+	5.77	1.07E-05	5.13E-04
+double-strand break repair via homologous recombination (GO:0000724)	143	10	1.84	+	5.45	1.77E-05	7.24E-04
+RNA methylation (GO:0001510)	86	6	1.10	+	5.43	8.64E-04	2.19E-02
+DNA recombination (GO:0006310)	188	13	2.41	+	5.39	1.14E-06	8.84E-05
+recombinational repair (GO:0000725)	151	10	1.94	+	5.16	2.83E-05	9.61E-04
+double-strand break repair (GO:0006302)	185	12	2.37	+	5.05	5.67E-06	3.16E-04
+macromolecule methylation (GO:0043414)	124	7	1.59	+	4.40	1.15E-03	2.81E-02
+DNA damage response (GO:0006974)	417	23	5.35	+	4.30	7.52E-09	1.75E-06
+tRNA metabolic process (GO:0006399)	248	13	3.18	+	4.08	2.31E-05	8.70E-04
+DNA repair (GO:0006281)	403	21	5.17	+	4.06	8.76E-08	1.22E-05
+DNA metabolic process (GO:0006259)	586	28	7.52	+	3.72	4.32E-09	1.20E-06
+reproductive process (GO:0022414)	220	10	2.82	+	3.54	6.12E-04	1.64E-02
+reproduction (GO:0000003)	220	10	2.82	+	3.54	6.12E-04	1.61E-02
+regulation of cell cycle (GO:0051726)	207	9	2.66	+	3.39	1.54E-03	3.57E-02
+ncRNA processing (GO:0034470)	446	19	5.73	+	3.32	6.83E-06	3.66E-04
+ncRNA metabolic process (GO:0034660)	574	23	7.37	+	3.12	2.13E-06	1.35E-04
+RNA modification (GO:0009451)	375	14	4.81	+	2.91	4.13E-04	1.17E-02
+heterocycle biosynthetic process (GO:0018130)	622	21	7.98	+	2.63	7.13E-05	2.26E-03
+cellular response to stress (GO:0033554)	767	25	9.85	+	2.54	2.71E-05	9.43E-04
+cell cycle process (GO:0022402)	430	14	5.52	+	2.54	1.53E-03	3.62E-02
+nucleic acid metabolic process (GO:0090304)	2079	63	26.69	+	2.36	4.73E-10	6.60E-07
+RNA processing (GO:0006396)	882	26	11.32	+	2.30	1.08E-04	3.35E-03
+organic cyclic compound biosynthetic process (GO:1901362)	727	21	9.33	+	2.25	6.52E-04	1.68E-02
+heterocycle metabolic process (GO:0046483)	2731	75	35.06	+	2.14	8.47E-10	5.90E-07
+nucleobase-containing compound metabolic process (GO:0006139)	2543	68	32.65	+	2.08	2.04E-08	3.55E-06
+organic cyclic compound metabolic process (GO:1901360)	2899	75	37.22	+	2.02	1.27E-08	2.53E-06
+cellular aromatic compound metabolic process (GO:0006725)	2809	70	36.06	+	1.94	1.64E-07	1.63E-05
+cellular nitrogen compound metabolic process (GO:0034641)	3056	76	39.23	+	1.94	4.99E-08	7.72E-06
+RNA metabolic process (GO:0016070)	1518	37	19.49	+	1.90	2.75E-04	7.99E-03
+phosphorylation (GO:0016310)	1054	1	13.53	-	.07	3.86E-05	1.28E-03
+protein phosphorylation (GO:0006468)	986	0	12.66	-	 < 0.01	4.94E-06	2.99E-04

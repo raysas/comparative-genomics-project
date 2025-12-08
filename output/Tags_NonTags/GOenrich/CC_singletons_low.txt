@@ -1,0 +1,34 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20240807)
+Annotation Version and Release Date:	PANTHER version 19.0 Released 2024-06-20
+Analyzed List:	singletons_low.txt (Glycine max)
+Reference List:	Glycine max (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+PANTHER GO-Slim Cellular Component	Glycine max - REFLIST (55853)	singletons_low.txt (717)	singletons_low.txt (expected)	singletons_low.txt (over/under)	singletons_low.txt (fold Enrichment)	singletons_low.txt (raw P-value)	singletons_low.txt (FDR)
+nuclear pre-replicative complex (GO:0005656)	5	2	.06	+	31.16	1.60E-03	3.71E-02
+pre-replicative complex (GO:0036387)	5	2	.06	+	31.16	1.60E-03	3.49E-02
+elongator holoenzyme complex (GO:0033588)	6	2	.08	+	25.97	2.39E-03	4.41E-02
+mitochondrial intermembrane space (GO:0005758)	6	2	.08	+	25.97	2.39E-03	4.20E-02
+condensed nuclear chromosome (GO:0000794)	9	3	.12	+	25.97	1.67E-04	6.87E-03
+condensed chromosome (GO:0000793)	60	8	.77	+	10.39	1.01E-06	3.73E-04
+mitochondrial respiratory chain complex I (GO:0005747)	37	4	.47	+	8.42	1.27E-03	3.36E-02
+NADH dehydrogenase complex (GO:0030964)	50	5	.64	+	7.79	4.52E-04	1.67E-02
+respiratory chain complex I (GO:0045271)	42	4	.54	+	7.42	2.05E-03	3.99E-02
+nuclear chromosome (GO:0000228)	144	8	1.85	+	4.33	5.79E-04	1.78E-02
+nucleoplasm (GO:0005654)	407	13	5.22	+	2.49	2.62E-03	4.40E-02
+membrane-enclosed lumen (GO:0031974)	912	29	11.71	+	2.48	1.00E-05	1.24E-03
+intracellular organelle lumen (GO:0070013)	912	29	11.71	+	2.48	1.00E-05	9.29E-04
+organelle lumen (GO:0043233)	912	29	11.71	+	2.48	1.00E-05	7.43E-04
+nuclear lumen (GO:0031981)	821	25	10.54	+	2.37	1.03E-04	5.44E-03
+chromosome (GO:0005694)	565	17	7.25	+	2.34	1.85E-03	3.81E-02
+nuclear protein-containing complex (GO:0140513)	1080	27	13.86	+	1.95	1.39E-03	3.43E-02
+catalytic complex (GO:1902494)	1438	34	18.46	+	1.84	7.70E-04	2.19E-02
+protein-containing complex (GO:0032991)	3757	73	48.23	+	1.51	5.19E-04	1.75E-02
+membrane (GO:0016020)	4950	34	63.54	-	.54	3.73E-05	2.30E-03
+plasma membrane (GO:0005886)	2071	9	26.59	-	.34	1.31E-04	6.08E-03
+cell periphery (GO:0071944)	2449	9	31.44	-	.29	3.32E-06	6.14E-04

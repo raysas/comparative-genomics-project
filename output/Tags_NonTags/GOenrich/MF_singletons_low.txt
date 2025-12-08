@@ -1,0 +1,33 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20240807)
+Annotation Version and Release Date:	PANTHER version 19.0 Released 2024-06-20
+Analyzed List:	singletons_low.txt (Glycine max)
+Reference List:	Glycine max (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+PANTHER GO-Slim Molecular Function	Glycine max - REFLIST (55853)	singletons_low.txt (717)	singletons_low.txt (expected)	singletons_low.txt (over/under)	singletons_low.txt (fold Enrichment)	singletons_low.txt (raw P-value)	singletons_low.txt (FDR)
+RNA methyltransferase activity (GO:0008173)	53	5	.68	+	7.35	5.93E-04	2.08E-02
+protein methyltransferase activity (GO:0008276)	90	6	1.16	+	5.19	1.10E-03	2.99E-02
+catalytic activity, acting on DNA (GO:0140097)	251	11	3.22	+	3.41	4.52E-04	1.85E-02
+catalytic activity, acting on a nucleic acid (GO:0140640)	711	28	9.13	+	3.07	2.44E-07	1.20E-04
+catalytic activity, acting on RNA (GO:0140098)	439	17	5.64	+	3.02	6.71E-05	3.66E-03
+methyltransferase activity (GO:0008168)	291	11	3.74	+	2.94	1.50E-03	3.88E-02
+transferase activity, transferring one-carbon groups (GO:0016741)	318	12	4.08	+	2.94	9.50E-04	2.74E-02
+Unclassified (UNCLASSIFIED)	39491	563	506.96	+	1.11	2.35E-06	2.88E-04
+molecular_function (GO:0003674)	16362	154	210.04	-	.73	2.35E-06	2.31E-04
+binding (GO:0005488)	6122	50	78.59	-	.64	3.69E-04	1.65E-02
+organic cyclic compound binding (GO:0097159)	3916	28	50.27	-	.56	5.20E-04	1.97E-02
+protein binding (GO:0005515)	1539	7	19.76	-	.35	1.72E-03	4.03E-02
+transcription regulator activity (GO:0140110)	1298	3	16.66	-	.18	8.45E-05	4.15E-03
+kinase activity (GO:0016301)	1401	3	17.99	-	.17	3.09E-05	1.90E-03
+transcription cis-regulatory region binding (GO:0000976)	793	1	10.18	-	.10	6.81E-04	2.23E-02
+transcription regulatory region nucleic acid binding (GO:0001067)	793	1	10.18	-	.10	6.81E-04	2.09E-02
+DNA-binding transcription factor activity (GO:0003700)	1117	1	14.34	-	.07	1.87E-05	1.31E-03
+phosphotransferase activity, alcohol group as acceptor (GO:0016773)	1339	1	17.19	-	.06	8.75E-07	2.15E-04
+RNA polymerase II transcription regulatory region sequence-specific DNA binding (GO:0000977)	536	0	6.88	-	 < 0.01	1.63E-03	4.00E-02
+protein serine/threonine kinase activity (GO:0004674)	898	0	11.53	-	 < 0.01	1.58E-05	1.30E-03
+protein kinase activity (GO:0004672)	1089	0	13.98	-	 < 0.01	1.65E-06	2.71E-04
