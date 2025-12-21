@@ -1,0 +1,4 @@
+Duplication_Type	N_pairs	Percentage	Mean_Ks	Median_Ks	SD_Ks	Min_Ks	Max_Ks	Mean_Ka_Ks	Median_Ka_Ks	Mean_bp_distance	Median_bp_distance	Mean_gene_distance	Median_gene_distance	MCScanX_tandem_validated	MCScanX_anchor_validated
+WGD	137621	5.70%	2.7998	3.2651	1.3891	0.0015	4.9991	0.2225	0.1895					0	137621
+Proximal	131003	5.43%	3.2313	3.6444	1.2631	0.0010	4.9978	0.2446	0.1908	15502246.9259	9989410.0000			0	778
+TAG	16659	0.69%	1.2479	0.7090	1.2807	0.0010	4.9208	0.3980	0.3191	48200.5845	26262.0000	4.5455	3.0000	4053	14
