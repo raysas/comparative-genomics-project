@@ -102,4 +102,4 @@ if __name__ == '__main__':
     output_dir = Path(sys.argv[2])
     output_dir.mkdir(exist_ok=True)
     
-    plot_ks_wgd(str(tsv_file), output_dir, max_ks=1.5, sample_size=100000)
+    plot_ks_wgd(str(tsv_file), output_dir, max_ks=2.5, sample_size=100000)

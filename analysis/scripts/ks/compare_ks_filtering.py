@@ -64,7 +64,7 @@ def load_ks_files(input_dir):
         params = extract_filter_params(f.name)
         df = pd.read_csv(f, sep='\t')
         # Filter to reasonable Ks range
-        df_filtered = df[(df['ks'] > 0) & (df['ks'] <= 2)].copy()
+        df_filtered = df[(df['ks'] > 0) & (df['ks'] <= 5)].copy()
         
         data[params['label']] = {
             'df': df_filtered,
@@ -114,7 +114,7 @@ def plot_overlaid_distributions(data, output_prefix):
         
         # Density line
         density = gaussian_kde(ks_vals)
-        xs = np.linspace(0, 2, 300)
+        xs = np.linspace(0, 5, 300)
         ax.plot(xs, density(xs), color=colors[idx], linewidth=2, alpha=0.8)
     
     ax.set_xlabel('Ks (synonymous substitutions per site)', fontsize=12)
@@ -122,7 +122,7 @@ def plot_overlaid_distributions(data, output_prefix):
     ax.set_title('Ks Distribution Comparison Across Filtering Thresholds', 
                  fontsize=14, fontweight='bold')
     ax.legend(loc='upper right', fontsize=9)
-    ax.set_xlim(0, 2)
+    ax.set_xlim(0, 5)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
@@ -152,7 +152,7 @@ def plot_subplots_grid(data, output_prefix):
         
         # Density line
         density = gaussian_kde(ks_vals)
-        xs = np.linspace(0, 2, 300)
+        xs = np.linspace(0, 5, 300)
         ax.plot(xs, density(xs), 'r-', linewidth=2, label='Density')
         
         # Median line
@@ -172,7 +172,7 @@ def plot_subplots_grid(data, output_prefix):
         ax.set_xlabel('Ks')
         ax.set_ylabel('Density')
         ax.legend(fontsize=8)
-        ax.set_xlim(0, 2)
+        ax.set_xlim(0, 5)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
     
@@ -278,7 +278,7 @@ def plot_combined_figure(data, output_prefix):
         ax1.hist(ks_vals, bins=100, alpha=0.35, label=f"{label} (n={len(ks_vals):,})",
                 color=colors[idx], density=True, edgecolor='none')
         density = gaussian_kde(ks_vals)
-        xs = np.linspace(0, 2, 300)
+        xs = np.linspace(0, 5, 300)
         ax1.plot(xs, density(xs), color=colors[idx], linewidth=2.5, alpha=0.9)
     
     ax1.set_xlabel('Ks (synonymous substitutions per site)', fontsize=12)
@@ -286,7 +286,7 @@ def plot_combined_figure(data, output_prefix):
     ax1.set_title('Ks Distribution Comparison Across Filtering Thresholds', 
                   fontsize=14, fontweight='bold')
     ax1.legend(loc='upper right', fontsize=9, framealpha=0.9)
-    ax1.set_xlim(0, 2)
+    ax1.set_xlim(0, 5)
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
     ax1.grid(alpha=0.3)

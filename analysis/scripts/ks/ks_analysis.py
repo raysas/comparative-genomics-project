@@ -13,7 +13,7 @@ import os
 import sys
 
 # Configuration
-KS_FILE = sys.argv[1] if len(sys.argv) > 1 else "output/ks_results/ks_results_filtered.tsv"
+KS_FILE = sys.argv[1] if len(sys.argv) > 1 else "output/pipeline2/ks_results/ks_results_filtered.tsv"
 OUTPUT_DIR = sys.argv[2] if len(sys.argv) > 2 else "analysis/Ks/ks_plots/age_plots/"
 STATS_DIR = sys.argv[3] if len(sys.argv) > 3 else "analysis/Ks/statistics/"
 
@@ -22,7 +22,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(STATS_DIR, exist_ok=True)
 
 # Set plotting style
-sns.set_style("whitegrid")
+sns.set_style("white")
 plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['font.size'] = 10
 
@@ -36,8 +36,8 @@ print("\nApplying quality filters...")
 print(f"  Original pairs: {len(ks_data)}")
 
 # Filter saturated pairs (Ks > 5)
-ks_filtered = ks_data[(ks_data['ks'] <=1.4) & (ks_data['ks'] > 0)].copy()
-print(f"  After Ks filter (0 < Ks <= 5): {len(ks_filtered)}")
+ks_filtered = ks_data[(ks_data['ks'] <=2.5) & (ks_data['ks'] > 0)].copy()
+print(f"  After Ks filter (0 < Ks <= 2.5): {len(ks_filtered)}")
 
 # Additional QC filters (adjust column names as needed)
 # ks_filtered = ks_filtered[(ks_filtered['Ka_Ks'] < 5) & (ks_filtered['Alignment_Length'] > 100)]
@@ -53,17 +53,17 @@ print(f"SD Ks: {ks_filtered['ks'].std():.3f}")
 print("\nGenerating Ks distribution plot...")
 
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.hist(ks_filtered['ks'], bins=100, density=True, alpha=0.7, color='steelblue', label='Data')
+ax.hist(ks_filtered['ks'], bins=100, density=True, alpha=0.7, color='#084594', label='Data')
 
 # Add density line
 from scipy.stats import gaussian_kde
 density = gaussian_kde(ks_filtered['ks'])
 xs = np.linspace(ks_filtered['ks'].min(), ks_filtered['ks'].max(), 200)
-ax.plot(xs, density(xs), 'r-', linewidth=2, label='Density')
+ax.plot(xs, density(xs), color='#7A0177', linewidth=2, label='Density')
 
 # Add median line
 median_ks = ks_filtered['ks'].median()
-ax.axvline(median_ks, color='darkgreen', linestyle='--', linewidth=2, label=f'Median: {median_ks:.3f}')
+ax.axvline(median_ks, color='#7A0177', linestyle='--', linewidth=2, label=f'Median: {median_ks:.3f}')
 
 ax.set_xlabel('Ks (synonymous substitutions per site)')
 ax.set_ylabel('Density')
@@ -89,7 +89,7 @@ print("Fitting Gaussian mixture model...")
 
 try:
     # Focus on Ks < 2 for WGD detection
-    ks_wgd = ks_filtered[ks_filtered['ks'] < 1.4]['ks'].values.reshape(-1, 1)
+    ks_wgd = ks_filtered[ks_filtered['ks'] < 2.5]['ks'].values.reshape(-1, 1)
     
     # Fit 2-component mixture
     gmm = GaussianMixture(n_components=2, random_state=42, max_iter=1000)
@@ -120,12 +120,12 @@ try:
     mixture_density = comp1 + comp2
     
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(ks_wgd, bins=50, density=True, alpha=0.5, color='steelblue', label='Data')
-    ax.plot(x_vals, mixture_density, 'r-', linewidth=2, label='Mixture model')
-    ax.plot(x_vals, comp1, 'orange', linestyle='--', linewidth=1.5, label=f'Component 1 (μ={means[0]:.3f})')
-    ax.plot(x_vals, comp2, 'purple', linestyle='--', linewidth=1.5, label=f'Component 2 (μ={means[1]:.3f})')
-    ax.axvline(means[0], color='orange', linestyle=':', linewidth=1)
-    ax.axvline(means[1], color='purple', linestyle=':', linewidth=1)
+    ax.hist(ks_wgd, bins=50, density=True, alpha=0.5, color='#084594', label='Data')
+    ax.plot(x_vals, mixture_density, color='#7A0177', linewidth=2, label='Mixture model')
+    ax.plot(x_vals, comp1, color='#084594', linestyle='--', linewidth=1.5, label=f'Component 1 (μ={means[0]:.3f})')
+    ax.plot(x_vals, comp2, color='#7A0177', linestyle='--', linewidth=1.5, label=f'Component 2 (μ={means[1]:.3f})')
+    ax.axvline(means[0], color='#084594', linestyle=':', linewidth=1)
+    ax.axvline(means[1], color='#7A0177', linestyle=':', linewidth=1)
     
     ax.set_xlabel('Ks (synonymous substitutions per site)')
     ax.set_ylabel('Density')
@@ -140,7 +140,7 @@ try:
     plt.close()
     
     # Convert Ks to age (MYA)
-    lambda_rate = 6.5e-9  # substitutions per site per year (legumes)
+    lambda_rate = 6.1e-9  # substitutions per site per year (legumes)
     age1 = means[0] / (2 * lambda_rate) / 1e6  # Convert to millions of years
     age2 = means[1] / (2 * lambda_rate) / 1e6
     
@@ -166,35 +166,45 @@ except Exception as e:
 # === Age Conversion ===
 print("\nConverting Ks to divergence time...")
 
-lambda_rate = 4.1e-9  # substitutions per site per year
+lambda_rate = 6.1e-9  # substitutions per site per year
 ks_filtered['Age_MYA'] = ks_filtered['ks'] / (2 * lambda_rate) / 1e6
 
 # Age distribution plot
 age_data = ks_filtered[ks_filtered['Age_MYA'] < 200]
 
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.hist(age_data['Age_MYA'], bins=100, density=True, alpha=0.7, color='darkgreen', label='Data')
+ax.hist(age_data['Age_MYA'], bins=100, density=True, alpha=0.7, color='#084594', label='Data')
 
 # Add density line
 density = gaussian_kde(age_data['Age_MYA'])
 xs = np.linspace(age_data['Age_MYA'].min(), age_data['Age_MYA'].max(), 200)
-ax.plot(xs, density(xs), 'r-', linewidth=2, label='Density')
+ax.plot(xs, density(xs), color='#7A0177', linewidth=2, label='Density')
 
 # Add known WGD events
-ax.axvline(13, color='blue', linestyle='--', linewidth=2)
-ax.axvline(59, color='blue', linestyle='--', linewidth=2)
+ax.axvline(13, color='#7A0177', linestyle='--', linewidth=2)
+ax.axvline(59, color='#7A0177', linestyle='--', linewidth=2)
 ax.text(13, ax.get_ylim()[1] * 0.95, '~13 MYA\n(known WGD)', 
-        ha='left', va='top', color='blue', fontsize=9)
+    ha='left', va='top', color='#7A0177', fontsize=9)
 ax.text(59, ax.get_ylim()[1] * 0.95, '~59 MYA\n(known WGD)', 
-        ha='left', va='top', color='blue', fontsize=9)
+    ha='left', va='top', color='#7A0177', fontsize=9)
 
 ax.set_xlabel('Age (Million Years Ago)')
 ax.set_ylabel('Density')
 ax.set_title(f'Duplication Age Distribution\nConversion: Age (MYA) = Ks / (2 × λ), λ = {lambda_rate:.1e}', 
-             fontweight='bold')
+             fontweight='bold', pad=20)
 ax.legend()
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
+
+# Add secondary x-axis for Ks
+def age_to_ks(age):
+    return age * 2 * lambda_rate * 1e6
+def ks_to_age(ks):
+    return ks / (2 * lambda_rate) / 1e6
+secax = ax.secondary_xaxis('top', functions=(age_to_ks, ks_to_age))
+secax.set_xlabel('Ks (synonymous substitutions per site)')
+ks_max = ks_filtered['ks'].max()
+secax.set_ticks(np.arange(0, ks_max+0.1, 0.1))
 
 plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, 'age_distribution.pdf'))

@@ -5,8 +5,7 @@ Parse MCScanX .collinearity anchors, join with Ks results, and plot.
 Inputs:
   --col   output/mcscanx/soybean.collinearity
   --ks    output/ks_results/ks_results_filtered.tsv (columns: gene1, gene2, ks, ...)
-  --out   output/mcscanx/soybean_anchors_with_ks.tsv
-  --plots output/mcscanx/soybean_anchors_plots (prefix)
+  --out   output/mcscanx/soybean_anchors_output/
 """
 
 import argparse
@@ -51,7 +50,10 @@ def parse_collinearity(col_path: str) -> pd.DataFrame:
                     'gene2': g2,
                     'anchor_evalue': ev
                 })
-    return pd.DataFrame(anchors)
+    # save as file
+    anchors_df = pd.DataFrame(anchors)
+    anchors_df.to_csv(col_path + ".anchors.tsv", sep='\t', index=False)
+    return anchors_df
 
 
 def load_ks(ks_path: str) -> pd.DataFrame:
