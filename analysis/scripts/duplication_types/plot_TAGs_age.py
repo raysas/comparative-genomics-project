@@ -63,7 +63,7 @@ def main():
     print(f"  Non-TAG pairs: {(~ks['Is_TAG']).sum()}")
     
     # Filter valid Ks values
-    ks_valid = ks[ks[ks_col].notna() & (ks[ks_col] > 0) & (ks[ks_col] < 5)]
+    ks_valid = ks[ks[ks_col].notna() & (ks[ks_col] > 0) & (ks[ks_col] < 2)]
     
     # === Statistical Tests ===
     ks_tag = ks_valid[ks_valid['Duplication_Type'] == 'TAG'][ks_col].dropna()

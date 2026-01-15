@@ -123,11 +123,11 @@ xs = np.linspace(df['Age_MYA'].min(), df['Age_MYA'].max(), 200)
 ax.plot(xs, density(xs), color='#7A0177', linewidth=2, label='Density')
 
 # Highlight known WGD events
-ax.axvline(13, color='#7A0177', linestyle='--', linewidth=2)
-ax.axvline(59, color='#7A0177', linestyle='--', linewidth=2)
-ax.text(13, ax.get_ylim()[1] * 0.95, '~13 MYA\n(known WGD)', 
+ax.axvline(10, color='#7A0177', linestyle='--', linewidth=2)
+ax.axvline(56.5, color='#7A0177', linestyle='--', linewidth=2)
+ax.text(10, ax.get_ylim()[1] * 0.95, '~10 MYA\n(known WGD)', 
     ha='left', va='top', color='#7A0177', fontsize=9)
-ax.text(59, ax.get_ylim()[1] * 0.95, '~59 MYA\n(known WGD)', 
+ax.text(56.5, ax.get_ylim()[1] * 0.95, '~56.5 MYA\n(known WGD)', 
     ha='left', va='top', color='#7A0177', fontsize=9)
 
 ax.set_xlabel('Age (Million Years Ago)')

@@ -32,13 +32,13 @@ plt.rcParams['font.size'] = 10
 plt.rcParams['figure.dpi'] = 150
 
 # Define structural regions
-TELOMERE_DISTANCE = 4_000_000  # 1Mb from chromosome ends
-PERICENTROMERIC_DISTANCE = 2_000_000  # 2Mb from centromere (approximate)
+TELOMERE_DISTANCE = 4_000_000  # 4Mb from chromosome ends
+PERICENTROMERIC_DISTANCE = 2_000_000  # 2Mb from centromere (conservative)
 CLUSTERING_WINDOW = 500_000  # 500kb window for clustering analysis
 
 
-def load_data(classified_path: Path, protein_info_path: Path):
-    """Load classified gene pairs and protein metadata."""
+def load_data(classified_path: Path, protein_info_path: Path, centromere_path: Path = None):
+    """Load classified gene pairs, protein metadata, and optionally centromere locations."""
     print("Loading data...")
     
     classified_df = pd.read_csv(classified_path, sep='\t')
@@ -47,7 +47,12 @@ def load_data(classified_path: Path, protein_info_path: Path):
     print(f"  ✓ Loaded {len(classified_df)} classified gene pairs")
     print(f"  ✓ Loaded {len(protein_df)} genes")
     
-    return classified_df, protein_df
+    centromere_df = None
+    if centromere_path and Path(centromere_path).exists():
+        centromere_df = pd.read_csv(centromere_path, sep='\t')
+        print(f"  ✓ Loaded {len(centromere_df)} centromere regions")
+    
+    return classified_df, protein_df, centromere_df
 
 
 def get_chromosome_lengths(protein_df):
@@ -56,16 +61,20 @@ def get_chromosome_lengths(protein_df):
     
     chr_lengths = {}
     for chrom in protein_df['chromosome'].unique():
+        if pd.isna(chrom):
+            continue
+        # Convert to string for consistent key format
+        chrom_str = str(int(chrom))
         chr_genes = protein_df[protein_df['chromosome'] == chrom]
         max_pos = chr_genes['end_pos'].max()
-        chr_lengths[chrom] = max_pos
+        chr_lengths[chrom_str] = max_pos
     
     print(f"  ✓ Calculated lengths for {len(chr_lengths)} chromosomes")
     return chr_lengths
 
 
 def classify_telomeric_region(pos, chr_length, distance=TELOMERE_DISTANCE):
-    """Check if position is in telomeric region."""
+    """Check if position is in telomeric region (4Mb from ends)."""
     if pd.isna(pos) or pd.isna(chr_length):
         return 'Unknown'
     
@@ -73,6 +82,20 @@ def classify_telomeric_region(pos, chr_length, distance=TELOMERE_DISTANCE):
         return 'Telomere-proximal'
     elif pos >= chr_length - distance:
         return 'Telomere-proximal'
+    else:
+        return 'Internal'
+
+
+def classify_pericentromeric_region(pos, centromere_start, centromere_end, distance=PERICENTROMERIC_DISTANCE):
+    """Check if position is in pericentromeric region (4Mb from centromere)."""
+    if pd.isna(pos) or pd.isna(centromere_start) or pd.isna(centromere_end):
+        return 'Unknown'
+    
+    # Check distance from centromere (use closest edge)
+    dist_to_center = min(abs(pos - centromere_start), abs(pos - centromere_end))
+    
+    if dist_to_center <= distance:
+        return 'Pericentromeric'
     else:
         return 'Internal'
 
@@ -96,9 +119,22 @@ def classify_position_zone(pos, chr_length):
         return 'Q5 (80-100%)'
 
 
-def add_structural_features(classified_df, protein_df, chr_lengths):
+def add_structural_features(classified_df, protein_df, chr_lengths, centromere_df=None):
     """Add structural feature annotations to gene pairs."""
     print("Adding structural feature annotations...")
+    
+    # Create centromere lookup
+    centromere_map = {}
+    if centromere_df is not None:
+        for _, row in centromere_df.iterrows():
+            chrom = row['chromosome'] if 'chromosome' in row else row.get('chrom')
+            # Convert chromosome to string for consistent matching
+            chrom = str(int(chrom)) if not pd.isna(chrom) else None
+            if chrom:
+                centromere_map[chrom] = {
+                    'start': row['start'] if 'start' in row else row.get('centromere_start'),
+                    'end': row['end'] if 'end' in row else row.get('centromere_end')
+                }
     
     # Create gene info lookup
     gene_info = protein_df.set_index('peptide_id')[
@@ -123,8 +159,8 @@ def add_structural_features(classified_df, protein_df, chr_lengths):
             info1 = gene_info[gene1]
             info2 = gene_info[gene2]
             
-            chr1 = info1['chromosome']
-            chr2 = info2['chromosome']
+            chr1 = str(int(info1['chromosome'])) if not pd.isna(info1['chromosome']) else None
+            chr2 = str(int(info2['chromosome'])) if not pd.isna(info2['chromosome']) else None
             pos1 = info1['start_pos']
             pos2 = info2['start_pos']
             
@@ -148,12 +184,38 @@ def add_structural_features(classified_df, protein_df, chr_lengths):
                     pos2, chr_lengths[chr2]
                 )
             
+            # Pericentromeric regions (if centromere data available)
+            if centromere_df is not None:
+                if chr1 in centromere_map:
+                    features['gene1_pericentromeric_region'] = classify_pericentromeric_region(
+                        pos1, centromere_map[chr1]['start'], centromere_map[chr1]['end']
+                    )
+                else:
+                    features['gene1_pericentromeric_region'] = 'Unknown'
+                
+                if chr2 in centromere_map:
+                    features['gene2_pericentromeric_region'] = classify_pericentromeric_region(
+                        pos2, centromere_map[chr2]['start'], centromere_map[chr2]['end']
+                    )
+                else:
+                    features['gene2_pericentromeric_region'] = 'Unknown'
+            
             # Both in telomeric regions?
             if features.get('gene1_telomere_region') == 'Telomere-proximal' and \
-               features.get('gene2_telomere_region') == 'Telomeric-proximal':
+               features.get('gene2_telomere_region') == 'Telomere-proximal':
                 features['both_telomeric'] = True
             else:
                 features['both_telomeric'] = False
+            
+            # Both in pericentromeric regions?
+            if centromere_df is not None:
+                if features.get('gene1_pericentromeric_region') == 'Pericentromeric' and \
+                   features.get('gene2_pericentromeric_region') == 'Pericentromeric':
+                    features['both_pericentromeric'] = True
+                else:
+                    features['both_pericentromeric'] = False
+            else:
+                features['both_pericentromeric'] = False
             
             # Distance to chromosome end (for same chr pairs)
             if chr1 == chr2 and chr1 in chr_lengths:
@@ -295,18 +357,14 @@ def analyze_ks_by_location(features_df, outdir: Path):
 
 
 def plot_telomere_patterns(features_df, outdir: Path):
-    """Plot association with telomeric regions."""
+    """Plot association with telomeric regions - separate plots."""
     print("Generating telomere pattern plots...")
     
     subset = features_df[features_df['duplication_type'].isin(['TAG', 'WGD'])].copy()
-    
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle('Duplication Patterns: Telomeric Regions', fontsize=14, fontweight='bold')
-    
     colors = {'TAG': '#e74c3c', 'WGD': '#2ecc71'}
     
     # 1. Stacked bar: Gene 1 telomeric status
-    ax = axes[0, 0]
+    fig, ax = plt.subplots(figsize=(10, 6))
     telomere_data = pd.crosstab(
         subset['duplication_type'],
         subset['gene1_telomere_region'],
@@ -314,51 +372,41 @@ def plot_telomere_patterns(features_df, outdir: Path):
     ) * 100
     telomere_data.plot(kind='bar', stacked=True, ax=ax, 
                        color=['#95a5a6', '#e67e22'], alpha=0.8)
-    ax.set_ylabel('Percentage (%)')
-    ax.set_title('Gene 1: Telomeric Region Distribution')
+    ax.set_ylabel('Percentage (%)', fontsize=12)
+    ax.set_title('Gene 1: Telomeric Region Distribution', fontsize=14, fontweight='bold')
     ax.legend(title='Region', bbox_to_anchor=(1.05, 1))
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=0)
     ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'telomere_gene1_distribution.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'telomere_gene1_distribution.pdf', bbox_inches='tight')
+    plt.close()
     
     # 2. Both genes in telomeric regions
-    ax = axes[0, 1]
+    fig, ax = plt.subplots(figsize=(10, 6))
     both_telomeric = subset.groupby('duplication_type')['both_telomeric'].sum()
     both_total = subset.groupby('duplication_type').size()
     both_pct = (both_telomeric / both_total * 100).fillna(0)
     
     bars = ax.bar(both_pct.index, both_pct.values, 
                   color=[colors.get(t, 'gray') for t in both_pct.index],
-                  alpha=0.8, edgecolor='black')
-    ax.set_ylabel('Percentage (%)')
-    ax.set_title('Both Genes in Telomeric Regions')
+                  alpha=0.8, edgecolor='black', width=0.6)
+    ax.set_ylabel('Percentage (%)', fontsize=12)
+    ax.set_title('Both Genes in Telomeric Regions', fontsize=14, fontweight='bold')
     ax.grid(alpha=0.3, axis='y')
     
-    # Add count labels
     for bar, count in zip(bars, both_telomeric.values):
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width()/2, height,
-               f'n={int(count)}', ha='center', va='bottom', fontsize=10)
+               f'n={int(count)}', ha='center', va='bottom', fontsize=11, fontweight='bold')
     
-    # 3. Distance to chromosome end (same chr pairs only)
-    ax = axes[1, 0]
-    same_chr = subset[subset['same_chromosome']].copy()
+    plt.tight_layout()
+    plt.savefig(outdir / 'telomere_both_genes.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'telomere_both_genes.pdf', bbox_inches='tight')
+    plt.close()
     
-    for dtype in ['TAG', 'WGD']:
-        data = same_chr[same_chr['duplication_type'] == dtype]['min_dist_to_end'].dropna()
-        if len(data) > 0:
-            ax.hist(data / 1_000_000, bins=50, alpha=0.6, label=dtype, 
-                   color=colors.get(dtype, 'gray'), edgecolor='black')
-    
-    ax.axvline(TELOMERE_DISTANCE / 1_000_000, color='red', linestyle='--', 
-              linewidth=2, label='Telomere threshold (<4Mb)')
-    ax.set_xlabel('Distance to chromosome end (Mb)')
-    ax.set_ylabel('Frequency')
-    ax.set_title('Distribution: Distance to Chromosome Ends')
-    ax.legend()
-    ax.grid(alpha=0.3, axis='y')
-    
-    # 4. Box plot: Ks by telomeric region
-    ax = axes[1, 1]
+    # 3. Box plot: Ks by telomeric region
+    fig, ax = plt.subplots(figsize=(10, 6))
     plot_data = []
     for dtype in ['TAG', 'WGD']:
         for region in ['Telomere-proximal', 'Internal']:
@@ -376,71 +424,79 @@ def plot_telomere_patterns(features_df, outdir: Path):
         bp_labels = [f"{d['Type']}\n{d['Region']}" for d in plot_data]
         bp = ax.boxplot(bp_data, labels=bp_labels, patch_artist=True)
         
-        # Color boxes
-        color_idx = 0
         for i, patch in enumerate(bp['boxes']):
             dtype = plot_data[i]['Type']
             patch.set_facecolor(colors.get(dtype, 'gray'))
             patch.set_alpha(0.7)
         
-        ax.set_ylabel('Ks')
-        ax.set_title('Ks Distribution by Region')
+        ax.set_ylabel('Ks', fontsize=12)
+        ax.set_title('Ks Distribution by Telomeric Region', fontsize=14, fontweight='bold')
         ax.grid(alpha=0.3, axis='y')
     
     plt.tight_layout()
-    outpath = outdir / 'structural_telomere_patterns.png'
-    plt.savefig(outpath, dpi=300, bbox_inches='tight')
-    plt.savefig(outdir / 'structural_telomere_patterns.pdf', bbox_inches='tight')
+    plt.savefig(outdir / 'telomere_ks_boxplot.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'telomere_ks_boxplot.pdf', bbox_inches='tight')
     plt.close()
-    print(f"  ✓ Saved telomere pattern plots to {outpath}")
+    
+    print(f"  ✓ Saved telomere pattern plots")
 
 
 def plot_zone_distribution(features_df, outdir: Path):
-    """Plot distribution across chromosome zones."""
+    """Plot distribution across chromosome zones - separate plots."""
     print("Generating chromosome zone distribution plots...")
     
     subset = features_df[features_df['duplication_type'].isin(['TAG', 'WGD'])].copy()
-    
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle('Duplication Patterns: Chromosome Zones', fontsize=14, fontweight='bold')
-    
     colors = {'TAG': '#e74c3c', 'WGD': '#2ecc71'}
     zone_order = ['Q1 (0-20%)', 'Q2 (20-40%)', 'Q3 (40-60%)', 'Q4 (60-80%)', 'Q5 (80-100%)']
     
     # 1. Stacked bar: Absolute counts
-    ax = axes[0, 0]
+    fig, ax = plt.subplots(figsize=(10, 6))
     zone_counts = pd.crosstab(subset['duplication_type'], subset['gene1_zone'])
     zone_counts = zone_counts[[col for col in zone_order if col in zone_counts.columns]]
     zone_counts.plot(kind='bar', stacked=False, ax=ax, width=0.8)
-    ax.set_ylabel('Number of gene pairs')
-    ax.set_title('Distribution: Gene Pair Counts by Zone')
-    ax.legend(title='Zone', bbox_to_anchor=(1.05, 1), fontsize=8)
+    ax.set_ylabel('Number of gene pairs', fontsize=12)
+    ax.set_title('Distribution: Gene Pair Counts by Zone', fontsize=14, fontweight='bold')
+    ax.legend(title='Zone', bbox_to_anchor=(1.05, 1), fontsize=9)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=0)
     ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'zone_counts.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'zone_counts.pdf', bbox_inches='tight')
+    plt.close()
     
     # 2. Stacked bar: Percentages
-    ax = axes[0, 1]
+    fig, ax = plt.subplots(figsize=(10, 6))
     zone_pct = pd.crosstab(subset['duplication_type'], subset['gene1_zone'], normalize='index') * 100
     zone_pct = zone_pct[[col for col in zone_order if col in zone_pct.columns]]
     zone_pct.plot(kind='bar', stacked=True, ax=ax, width=0.8)
-    ax.set_ylabel('Percentage (%)')
-    ax.set_title('Distribution: Gene Pair Percentages by Zone')
-    ax.legend(title='Zone', bbox_to_anchor=(1.05, 1), fontsize=8)
+    ax.set_ylabel('Percentage (%)', fontsize=12)
+    ax.set_title('Distribution: Gene Pair Percentages by Zone', fontsize=14, fontweight='bold')
+    ax.legend(title='Zone', bbox_to_anchor=(1.05, 1), fontsize=9)
     plt.setp(ax.xaxis.get_majorticklabels(), rotation=0)
     ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'zone_percentages.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'zone_percentages.pdf', bbox_inches='tight')
+    plt.close()
     
     # 3. Mean Ks by zone
-    ax = axes[1, 0]
+    fig, ax = plt.subplots(figsize=(10, 6))
     zone_ks_mean = subset.groupby(['duplication_type', 'gene1_zone'])['ks'].mean().unstack()
     zone_ks_mean = zone_ks_mean[[col for col in zone_order if col in zone_ks_mean.columns]]
     zone_ks_mean.plot(ax=ax, marker='o', linewidth=2)
-    ax.set_ylabel('Mean Ks')
-    ax.set_title('Mean Ks by Chromosome Zone')
-    ax.legend(title='Zone', bbox_to_anchor=(1.05, 1), fontsize=8)
+    ax.set_ylabel('Mean Ks', fontsize=12)
+    ax.set_xlabel('Duplication Type', fontsize=12)
+    ax.set_title('Mean Ks by Chromosome Zone', fontsize=14, fontweight='bold')
+    ax.legend(title='Zone', bbox_to_anchor=(1.05, 1), fontsize=9)
     ax.grid(alpha=0.3)
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=0)
+    plt.tight_layout()
+    plt.savefig(outdir / 'zone_ks_mean.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'zone_ks_mean.pdf', bbox_inches='tight')
+    plt.close()
     
     # 4. Violin plot: Ks distribution across zones
-    ax = axes[1, 1]
+    fig, ax = plt.subplots(figsize=(14, 6))
     plot_df = []
     for dtype in ['TAG', 'WGD']:
         for zone in zone_order:
@@ -454,66 +510,304 @@ def plot_zone_distribution(features_df, outdir: Path):
         plot_df = pd.DataFrame(plot_df)
         sns.violinplot(data=plot_df, x='Zone', y='Ks', hue='Type', ax=ax, 
                       palette=colors, inner='quartile')
-        ax.set_xlabel('Chromosome Zone')
-        ax.set_ylabel('Ks')
-        ax.set_title('Ks Distribution across Chromosome Zones')
+        ax.set_xlabel('Chromosome Zone', fontsize=12)
+        ax.set_ylabel('Ks', fontsize=12)
+        ax.set_title('Ks Distribution across Chromosome Zones', fontsize=14, fontweight='bold')
         plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
         ax.grid(alpha=0.3, axis='y')
     
     plt.tight_layout()
-    outpath = outdir / 'structural_zone_distribution.png'
-    plt.savefig(outpath, dpi=300, bbox_inches='tight')
-    plt.savefig(outdir / 'structural_zone_distribution.pdf', bbox_inches='tight')
+    plt.savefig(outdir / 'zone_ks_violin.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'zone_ks_violin.pdf', bbox_inches='tight')
     plt.close()
-    print(f"  ✓ Saved zone distribution plots to {outpath}")
+    
+    print(f"  ✓ Saved zone distribution plots")
+
+
+def plot_pericentromeric_patterns(features_df, outdir: Path):
+    """Plot association with pericentromeric regions - separate plots."""
+    print("Generating pericentromeric pattern plots...")
+    
+    # Check if pericentromeric data exists
+    if 'gene1_pericentromeric_region' not in features_df.columns:
+        print("  ⚠ Centromere data not available, skipping pericentromeric analysis")
+        return
+    
+    subset = features_df[features_df['duplication_type'].isin(['TAG', 'WGD'])].copy()
+    subset = subset[subset['gene1_pericentromeric_region'] != 'Unknown']
+    
+    if len(subset) == 0:
+        print("  ⚠ No pericentromeric data available, skipping")
+        return
+    
+    colors = {'TAG': '#e74c3c', 'WGD': '#2ecc71'}
+    
+    # 1. Stacked bar: Gene 1 pericentromeric status
+    fig, ax = plt.subplots(figsize=(10, 6))
+    peri_data = pd.crosstab(
+        subset['duplication_type'],
+        subset['gene1_pericentromeric_region'],
+        normalize='index'
+    ) * 100
+    peri_data.plot(kind='bar', stacked=True, ax=ax, 
+                   color=['#95a5a6', '#e67e22'], alpha=0.8)
+    ax.set_ylabel('Percentage (%)', fontsize=12)
+    ax.set_title('Gene 1: Pericentromeric Region Distribution (4Mb)', fontsize=14, fontweight='bold')
+    ax.legend(title='Region', bbox_to_anchor=(1.05, 1))
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=0)
+    ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'pericentromeric_gene1_distribution.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'pericentromeric_gene1_distribution.pdf', bbox_inches='tight')
+    plt.close()
+    
+    # 2. Both genes in pericentromeric regions
+    fig, ax = plt.subplots(figsize=(10, 6))
+    both_peri = subset.groupby('duplication_type')['both_pericentromeric'].sum()
+    both_total = subset.groupby('duplication_type').size()
+    both_pct = (both_peri / both_total * 100).fillna(0)
+    
+    bars = ax.bar(both_pct.index, both_pct.values, 
+                  color=[colors.get(t, 'gray') for t in both_pct.index],
+                  alpha=0.8, edgecolor='black', width=0.6)
+    ax.set_ylabel('Percentage (%)', fontsize=12)
+    ax.set_title('Both Genes in Pericentromeric Regions', fontsize=14, fontweight='bold')
+    ax.grid(alpha=0.3, axis='y')
+    
+    for bar, count in zip(bars, both_peri.values):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2, height,
+               f'n={int(count)}', ha='center', va='bottom', fontsize=11, fontweight='bold')
+    
+    plt.tight_layout()
+    plt.savefig(outdir / 'pericentromeric_both_genes.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'pericentromeric_both_genes.pdf', bbox_inches='tight')
+    plt.close()
+    
+    # 3. Comparison: Telomeric vs Pericentromeric
+    fig, ax = plt.subplots(figsize=(10, 6))
+    comparison_data = []
+    for dtype in ['TAG', 'WGD']:
+        subset_dtype = subset[subset['duplication_type'] == dtype]
+        telomeric = (subset_dtype['gene1_telomere_region'] == 'Telomere-proximal').sum()
+        pericentromeric = (subset_dtype['gene1_pericentromeric_region'] == 'Pericentromeric').sum()
+        comparison_data.append({'Type': dtype, 'Telomeric': telomeric, 'Pericentromeric': pericentromeric})
+    
+    comp_df = pd.DataFrame(comparison_data).set_index('Type')
+    comp_df.plot(kind='bar', ax=ax, alpha=0.8, 
+                color=['#e74c3c', '#3498db'], edgecolor='black', width=0.6)
+    ax.set_ylabel('Number of pairs', fontsize=12)
+    ax.set_title('Distribution: Telomeric vs Pericentromeric Regions (4Mb)', fontsize=14, fontweight='bold')
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=0)
+    ax.legend(title='Region')
+    ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'pericentromeric_telomeric_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'pericentromeric_telomeric_comparison.pdf', bbox_inches='tight')
+    plt.close()
+    
+    # 4. Box plot: Ks by pericentromeric region
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plot_data = []
+    for dtype in ['TAG', 'WGD']:
+        for region in ['Pericentromeric', 'Internal']:
+            subset_region = subset[(subset['duplication_type'] == dtype) & 
+                                   (subset['gene1_pericentromeric_region'] == region)]['ks'].dropna()
+            if len(subset_region) > 0:
+                plot_data.append({
+                    'Type': dtype,
+                    'Region': region,
+                    'Ks': subset_region.values
+                })
+    
+    if plot_data:
+        bp_data = [d['Ks'] for d in plot_data]
+        bp_labels = [f"{d['Type']}\n{d['Region']}" for d in plot_data]
+        bp = ax.boxplot(bp_data, labels=bp_labels, patch_artist=True)
+        
+        for i, patch in enumerate(bp['boxes']):
+            dtype = plot_data[i]['Type']
+            patch.set_facecolor(colors.get(dtype, 'gray'))
+            patch.set_alpha(0.7)
+        
+        ax.set_ylabel('Ks', fontsize=12)
+        ax.set_title('Ks Distribution by Pericentromeric Region', fontsize=14, fontweight='bold')
+        ax.grid(alpha=0.3, axis='y')
+    
+    plt.tight_layout()
+    plt.savefig(outdir / 'pericentromeric_ks_boxplot.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'pericentromeric_ks_boxplot.pdf', bbox_inches='tight')
+    plt.close()
+    
+    print(f"  ✓ Saved pericentromeric pattern plots")
+
+
+def plot_distance_to_end_per_chromosome(features_df, classified_df, protein_df, centromere_df, outdir: Path):
+    """Plot distance-to-end histograms per chromosome with centromere locations."""
+    print("Generating per-chromosome distance-to-end plots...")
+    
+    if centromere_df is None or len(centromere_df) == 0:
+        print("  ⚠ Centromere data not available, skipping per-chromosome analysis")
+        return
+    
+    # Filter to same chromosome TAG/WGD pairs
+    subset = features_df[features_df['duplication_type'].isin(['TAG', 'WGD'])].copy()
+    subset = subset[subset['same_chromosome']].copy()
+    
+    # Map pair_id back to gene names from classified_df
+    classified_df['pair_id_temp'] = classified_df['gene1'] + '_' + classified_df['gene2']
+    gene_lookup = classified_df.set_index('pair_id_temp')[['gene1', 'gene2']].to_dict('index')
+    
+    subset['gene1'] = subset['pair_id'].map(lambda x: gene_lookup.get(x, {}).get('gene1'))
+    subset = subset.dropna(subset=['gene1'])
+    
+    # Create gene to chromosome lookup
+    gene_info = protein_df.set_index('peptide_id')['chromosome'].to_dict()
+    
+    # Add chromosome info
+    subset['chromosome'] = subset['gene1'].map(gene_info)
+    subset = subset.dropna(subset=['chromosome'])
+    subset['chromosome'] = subset['chromosome'].apply(lambda x: str(int(x)))
+    
+    # Get chromosome lengths
+    chr_lengths = {}
+    for chrom in protein_df['chromosome'].unique():
+        if pd.isna(chrom):
+            continue
+        chrom_str = str(int(chrom))
+        chr_genes = protein_df[protein_df['chromosome'] == chrom]
+        chr_lengths[chrom_str] = chr_genes['end_pos'].max()
+    
+    # Create centromere map
+    centromere_map = {}
+    for _, row in centromere_df.iterrows():
+        chrom = str(int(row['chromosome'])) if not pd.isna(row['chromosome']) else None
+        if chrom:
+            centromere_map[chrom] = {
+                'start': row['start'],
+                'end': row['end']
+            }
+    
+    colors = {'TAG': '#e74c3c', 'WGD': '#2ecc71'}
+    
+    # Get chromosomes with data, plot first 5
+    chromosomes_to_plot = sorted(subset['chromosome'].unique())[:5]
+    
+    for chrom in chromosomes_to_plot:
+        chr_data = subset[subset['chromosome'] == chrom].copy()
+        
+        if len(chr_data) == 0:
+            continue
+        
+        print(f"  Chromosome {chrom}: {len(chr_data)} pairs")
+        print(f"    Distance range: {chr_data['min_dist_to_end'].min()/1e6:.2f} - {chr_data['min_dist_to_end'].max()/1e6:.2f} Mb")
+        
+        # Create histogram
+        fig, ax = plt.subplots(figsize=(11, 6))
+        for dtype in ['TAG', 'WGD']:
+            data = chr_data[chr_data['duplication_type'] == dtype]['min_dist_to_end'].dropna()
+            if len(data) > 0:
+                ax.hist(data / 1_000_000, bins=40, alpha=0.6, label=f'{dtype} (n={len(data)})',
+                       color=colors.get(dtype, 'gray'), edgecolor='black')
+        
+        # Highlight centromere region if available
+        if chrom in centromere_map:
+            cent = centromere_map[chrom]
+            chr_len = chr_lengths.get(chrom, 1)
+            
+            # Distance from centromere center to nearest end
+            cent_center = (cent['start'] + cent['end']) / 2
+            dist_to_left = cent_center
+            dist_to_right = chr_len - cent_center
+            cent_dist_from_end = min(dist_to_left, dist_to_right) / 1_000_000
+            
+            # Show centromere region
+            ax.axvspan(max(0, cent_dist_from_end - PERICENTROMERIC_DISTANCE / 1_000_000),
+                      cent_dist_from_end + PERICENTROMERIC_DISTANCE / 1_000_000,
+                      alpha=0.2, color='#9b59b6', label='Centromere ±2Mb')
+            ax.axvline(cent_dist_from_end, color='#9b59b6', linestyle=':', 
+                      linewidth=2, label=f'Centromere ({cent_dist_from_end:.0f}Mb from end)')
+        
+        # Telomere threshold
+        ax.axvline(TELOMERE_DISTANCE / 1_000_000, color='red', linestyle='--',
+                  linewidth=2, label=f'Telomere threshold ({TELOMERE_DISTANCE/1_000_000:.0f}Mb)')
+        
+        ax.set_xlabel('Distance to chromosome end (Mb)', fontsize=12)
+        ax.set_ylabel('Frequency', fontsize=12)
+        ax.set_title(f'Chromosome {chrom}: Distance to Chromosome Ends\n(Purple = centromere region)', 
+                    fontsize=14, fontweight='bold')
+        ax.legend(loc='upper right', fontsize=9)
+        ax.grid(alpha=0.3, axis='y')
+        plt.tight_layout()
+        plt.savefig(outdir / f'distance_to_end_chr{chrom}_histogram.png', dpi=300, bbox_inches='tight')
+        plt.savefig(outdir / f'distance_to_end_chr{chrom}_histogram.pdf', bbox_inches='tight')
+        plt.close()
+    
+    print(f"  ✓ Saved per-chromosome distance-to-end plots for {len(chromosomes_to_plot)} chromosomes")
 
 
 def plot_distance_to_end(features_df, outdir: Path):
-    """Detailed analysis of distance to chromosome ends."""
+    """Detailed analysis of distance to chromosome ends - separate plots."""
     print("Generating distance-to-end analysis plots...")
     
     subset = features_df[features_df['same_chromosome']].copy()
     subset = subset[subset['duplication_type'].isin(['TAG', 'WGD'])]
-    
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle('Proximity to Chromosome Ends', fontsize=14, fontweight='bold')
-    
     colors = {'TAG': '#e74c3c', 'WGD': '#2ecc71'}
     
+    # Calculate expected centromere distance (roughly in the middle of chromosomes)
+    # For Glycine max (~120Mb avg chromosome), centromere is ~40-60Mb from nearest end
+    centromere_min_dist = 30_000_000  # 30Mb (conservative estimate from nearest end)
+    centromere_max_dist = 60_000_000  # 60Mb (conservative estimate from nearest end)
+    
     # 1. Histogram: Distance to end
-    ax = axes[0, 0]
+    fig, ax = plt.subplots(figsize=(10, 6))
     for dtype in ['TAG', 'WGD']:
         data = subset[subset['duplication_type'] == dtype]['min_dist_to_end'].dropna()
         if len(data) > 0:
             ax.hist(data / 1_000_000, bins=60, alpha=0.6, label=dtype,
                    color=colors.get(dtype, 'gray'), edgecolor='black')
     
+    # Highlight expected centromere region
+    # ax.axvspan(centromere_min_dist / 1_000_000, centromere_max_dist / 1_000_000, 
+    #           alpha=0.2, color='#9b59b6', label='Expected centromere region')
+    
+    # Telomere threshold line
     ax.axvline(TELOMERE_DISTANCE / 1_000_000, color='red', linestyle='--',
-              linewidth=2, label='Threshold (<4Mb)')
-    ax.set_xlabel('Distance to chromosome end (Mb)')
-    ax.set_ylabel('Frequency')
-    ax.set_title('Distribution of Distances')
-    ax.legend()
+              linewidth=2.5, label=f'Telomere threshold ({TELOMERE_DISTANCE/1_000_000:.0f}Mb)')
+    
+    ax.set_xlabel('Distance to chromosome end (Mb)', fontsize=12)
+    ax.set_ylabel('Frequency', fontsize=12)
+    ax.set_title('Distance to Chromosome Ends: Histogram\n(Purple = expected centromere region)', 
+                fontsize=14, fontweight='bold')
+    ax.legend(loc='upper right', fontsize=10)
     ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'distance_to_end_histogram.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'distance_to_end_histogram.pdf', bbox_inches='tight')
+    plt.close()
     
     # 2. CDF
-    ax = axes[0, 1]
+    fig, ax = plt.subplots(figsize=(10, 6))
     for dtype in ['TAG', 'WGD']:
         data = subset[subset['duplication_type'] == dtype]['min_dist_to_end'].dropna() / 1_000_000
         data_sorted = np.sort(data)
         ax.plot(data_sorted, np.arange(1, len(data_sorted) + 1) / len(data_sorted),
-               label=dtype, linewidth=2, color=colors.get(dtype, 'gray'))
+               label=dtype, linewidth=2.5, color=colors.get(dtype, 'gray'))
     
     ax.axvline(TELOMERE_DISTANCE / 1_000_000, color='red', linestyle='--',
-              linewidth=2, label='Threshold (<4Mb)')
-    ax.set_xlabel('Distance to chromosome end (Mb)')
-    ax.set_ylabel('Cumulative Fraction')
-    ax.set_title('Cumulative Distribution')
+              linewidth=2, label=f'Threshold ({TELOMERE_DISTANCE/1_000_000:.0f}Mb)')
+    ax.set_xlabel('Distance to chromosome end (Mb)', fontsize=12)
+    ax.set_ylabel('Cumulative Fraction', fontsize=12)
+    ax.set_title('Distance to Chromosome Ends: CDF', fontsize=14, fontweight='bold')
     ax.legend()
     ax.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(outdir / 'distance_to_end_cdf.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'distance_to_end_cdf.pdf', bbox_inches='tight')
+    plt.close()
     
     # 3. Box plot
-    ax = axes[1, 0]
+    fig, ax = plt.subplots(figsize=(10, 6))
     bp_data = []
     bp_labels = []
     for dtype in ['TAG', 'WGD']:
@@ -529,13 +823,17 @@ def plot_distance_to_end(features_df, outdir: Path):
     
     ax.axhline(TELOMERE_DISTANCE / 1_000_000, color='red', linestyle='--',
               linewidth=2, label='Threshold')
-    ax.set_ylabel('Distance to chromosome end (Mb)')
-    ax.set_title('Distance Distribution (Box Plot)')
+    ax.set_ylabel('Distance to chromosome end (Mb)', fontsize=12)
+    ax.set_title('Distance to Chromosome Ends: Box Plot', fontsize=14, fontweight='bold')
     ax.legend()
     ax.grid(alpha=0.3, axis='y')
+    plt.tight_layout()
+    plt.savefig(outdir / 'distance_to_end_boxplot.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'distance_to_end_boxplot.pdf', bbox_inches='tight')
+    plt.close()
     
     # 4. Percentage within threshold
-    ax = axes[1, 1]
+    fig, ax = plt.subplots(figsize=(10, 6))
     pct_within = []
     labels = []
     for dtype in ['TAG', 'WGD']:
@@ -548,25 +846,24 @@ def plot_distance_to_end(features_df, outdir: Path):
     
     bars = ax.bar(range(len(labels)), pct_within, 
                   color=[colors.get(l.split('\n')[0], 'gray') for l in labels],
-                  alpha=0.8, edgecolor='black')
+                  alpha=0.8, edgecolor='black', width=0.6)
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels)
-    ax.set_ylabel('Percentage within <4Mb of end (%)')
-    ax.set_title(f'Pairs Near Chromosome Ends (threshold={TELOMERE_DISTANCE/1_000_000}Mb)')
+    ax.set_ylabel('Percentage within 4Mb of end (%)', fontsize=12)
+    ax.set_title('Pairs Near Chromosome Ends', fontsize=14, fontweight='bold')
     ax.grid(alpha=0.3, axis='y')
     ax.set_ylim(0, 100)
     
-    # Add percentage labels
     for bar, pct in zip(bars, pct_within):
         ax.text(bar.get_x() + bar.get_width()/2, bar.get_height(),
-               f'{pct:.1f}%', ha='center', va='bottom', fontweight='bold')
+               f'{pct:.1f}%', ha='center', va='bottom', fontweight='bold', fontsize=11)
     
     plt.tight_layout()
-    outpath = outdir / 'structural_distance_to_end.png'
-    plt.savefig(outpath, dpi=300, bbox_inches='tight')
-    plt.savefig(outdir / 'structural_distance_to_end.pdf', bbox_inches='tight')
+    plt.savefig(outdir / 'distance_to_end_percentage.png', dpi=300, bbox_inches='tight')
+    plt.savefig(outdir / 'distance_to_end_percentage.pdf', bbox_inches='tight')
     plt.close()
-    print(f"  ✓ Saved distance-to-end plots to {outpath}")
+    
+    print(f"  ✓ Saved distance-to-end plots")
 
 
 def create_summary_report(features_df, outdir: Path):
@@ -681,6 +978,8 @@ def main():
     parser.add_argument('--protein-info', type=Path, 
                        default=Path('data/protein_info_longest.csv'),
                        help='Protein/gene metadata CSV')
+    parser.add_argument('--centromeres', type=Path, default=None,
+                       help='(Optional) Centromere locations TSV with columns: chromosome, start, end')
     parser.add_argument('--outdir', type=Path, 
                        default=Path('analysis/structural_analysis'),
                        help='Output directory')
@@ -690,17 +989,19 @@ def main():
     
     print("=" * 80)
     print("CHROMOSOMAL STRUCTURAL PATTERN ANALYSIS")
-    print("WGD/TAG duplicates vs chromosome architecture")
+    print("WGD/TAG duplicates vs chromosome architecture (4Mb thresholds)")
     print("=" * 80)
     
     # Load data
-    classified_df, protein_df = load_data(args.classified, args.protein_info)
+    classified_df, protein_df, centromere_df = load_data(
+        args.classified, args.protein_info, args.centromeres
+    )
     
     # Get chromosome lengths
     chr_lengths = get_chromosome_lengths(protein_df)
     
     # Add structural features
-    features_df = add_structural_features(classified_df, protein_df, chr_lengths)
+    features_df = add_structural_features(classified_df, protein_df, chr_lengths, centromere_df)
     
     # Save annotated dataset
     features_path = args.outdir / 'gene_pairs_with_structural_features.tsv'
@@ -714,8 +1015,10 @@ def main():
     
     # Generate visualizations
     plot_telomere_patterns(features_df, args.outdir)
+    plot_pericentromeric_patterns(features_df, args.outdir)
     plot_zone_distribution(features_df, args.outdir)
     plot_distance_to_end(features_df, args.outdir)
+    plot_distance_to_end_per_chromosome(features_df, classified_df, protein_df, centromere_df, args.outdir)
     
     # Create summary report
     create_summary_report(features_df, args.outdir)
@@ -727,6 +1030,7 @@ def main():
     print("\nGenerated files:")
     print("  - gene_pairs_with_structural_features.tsv")
     print("  - structural_telomere_patterns.png/pdf")
+    print("  - structural_pericentromeric_patterns.png/pdf (if centromere data provided)")
     print("  - structural_zone_distribution.png/pdf")
     print("  - structural_distance_to_end.png/pdf")
     print("  - structural_patterns_summary.txt")
