@@ -1,0 +1,207 @@
+LOGFILE for COMPARATIVE GENOMICS project
+M2 GENIOMHE | 2025-2026
+Author: Yazid HOBLOS
+
+For reference, you may check my commits history for my detailed contributions, particularly on the refactor/ branch, on our GitHub repository. 
+Please note that the dates of what was done do not always directly match the corresponding commit dates.
+
+---
+* 16 November 2025 *
+---
+
+Today I started exploring the datasets that will be used in our project. I downloaded the proteome, CDS fasta, and GFF files for our species and inspected their formats.
+I began drafting an overall plan for the project, trying to define a workflow from data extraction -> BLAST -> filtering -> clustering -> (...) -> Ks computation -> downstream analysis.
+
+I started writing some helper scripts in Python to inspect the number of sequences per gene and check for duplicates.
+
+---
+* 18 November 2025 *
+---
+
+I tested my initial scripts for preprocessing and isoform handling.
+I also started exploring parallelization options, since some steps (like pairwise BLAST) will be computationally heavy.
+
+---
+* 23 November 2025 *
+---
+
+I started refactoring Pipeline 1, building upon Rayane's work.
+I focused on optimizing BLAST execution, adjusting parameters for speed and coverage.
+I also wrote scripts to calculate coverage for each BLAST hit.
+
+Problem: the computation is slow when many pairs are analyzed, so I started thinking about chunking the data and using parallel processing.
+I managed to significantly increase the efficiency (1.5h after VS ~16h before)
+
+Files modified:
+- pipeline_1/2_blast.sh: BLAST execution parameters and speed optimization
+
+---
+* 24 November 2025 *
+---
+
+I worked on helper scripts for project setup and parallelization.
+I also started analyzing some initial BLAST results:
+- checking number of hits per sequence
+- verifying filtering logic
+
+I documented everything in a TODO list for the next steps.
+
+---
+* 26 November 2025 *
+---
+
+Continued refactoring Pipeline 1 with detailed optimizations:
+
+- extract_data: optimized metadata extraction from GFF/FASTA files
+- filter_isoforms: added auto-detection and adjusted parameters
+- blast: optimized speed, adjusted parameters, and added progress monitoring
+- compute_coverage: optimized coverage computation and adjusted parameters
+
+I also wrote scripts to compute coverage for each pair efficiently.
+
+I did a first analysis of the BLAST results and found some interesting patterns in duplication types.
+
+Files created/modified:
+* pipeline_1/0_extract_data.sh: optimized metadata extraction
+* pipeline_1/1_filter_isoforms.sh: auto-detection and parameter adjustments
+* pipeline_1/2_blast.sh: speed optimization and monitoring
+* pipeline_1/3_compute_coverage.sh: efficient coverage computation
+* scripts/parallel_helpers.sh: helper scripts for parallelization
+* scripts/setup_project.sh: project setup utilities
+* scripts/analyze_blast_results.sh: BLAST results analysis
+* analysis/blast_results/: summary files, paralog counts, top gene families
+
+---
+* 27 November 2025 *
+---
+
+Refactoring continued with filter and edge-list preparation:
+
+- filter_pairs: optimized filtering logic with parallel chunking
+- prepare_edgelist: implemented efficient edge generation, sorting, and parallel chunking
+
+The pipeline now is more automated and runs much faster on large datasets.
+
+Files created/modified:
+* pipeline_1/4_filter_pairs.sh: optimized filtering with parallel chunking
+* pipeline_1/5_prepare_edgelist.sh: optimized edge generation and sorting
+* pipeline_1/archive/: archived previous versions of scripts
+
+---
+* 28 November 2025 *
+---
+
+Building on Nhi's initial scripts and notebooks, I started refactoring Pipeline 2, which focuses on Ks computation:
+- Step 1: pairs preparation (1_prepare_pairs_opt.sh)
+- Step 2: MAFFT alignment per pair (2_align_proteins_opt.sh)
+- Step 3: back-translation of alignments (3_backtranslate_opt.sh)
+- Step 4: Ks computation with PAML yn00 (4_calculate_ks_opt.sh)
+- Step 5: processing Ks results (5_consolidate_results_opt.sh)
+
+I also refactored cluster_families in Pipeline 1 for better parallel post-processing.
+Completed a comprehensive mock test for Pipeline 2 with test data and full automation.
+Initial Ks results look consistent.
+
+Files created/modified:
+* pipeline_2/1_prepare_pairs_opt.sh: pairs extraction from families
+* pipeline_2/2_align_proteins_opt.sh: MAFFT alignment optimization
+* pipeline_2/3_backtranslate_opt.sh: alignment back-translation
+* pipeline_2/4_calculate_ks_opt.sh: PAML yn00 Ks computation
+* pipeline_2/5_consolidate_results_opt.sh: results consolidation
+* pipeline_2/archive/: logs and previous versions (v0, v1)
+* pipeline_2/mock_test/: comprehensive mock test setup with 4 families and complete output structure
+
+---
+* 1 December 2025 *
+---
+
+I finally got the final Ks results for all 2.4+ million pairs (based on 30% identity and 50% coverage BLAST thresholds). I have been running pipeline 2, step-by-step, while optimizing it. This took me 3 days to finish (total run time of 72 hours given the steps I had to repeats due to issues...). This also costed me ~80Gb storing all intermediary files (pairs FASTA, alignments, codon alignments...)! My laptop is much slower now :\
+
+Initial analysis is promising! I can see the two expected peaks, corresponding to soybean known WGD events. 
+
+---
+* 2 December 2025 *
+---
+
+Today I focused on cleaning outputs and artifacts to avoid clutter before proceeding with analyses.
+I started working on duplicates classification and analysis.
+
+I also reviewed Pipeline 1 scripts and debugged small issues.
+Updated my TODO list to keep track of remaining analyses.
+
+Files created/modified:
+- pipeline_1/6_cluster_families.sh: optimization with parallel post-processing
+- Created TODO tracking and changelog updates
+- Ks and duplication types analyses scripts:
+
+analysis/scripts
+├── duplication_types
+│  ├── analyze_structural_patterns.py: analyze TAD/WGD closeness to telomeres (based on insight from Yang et al., 2013)
+│  ├── classify_duplications.py: classify pairs into TAG, WGD, and dispered; based on MCScanX (validated with Ks proximity to peaks for WGD, and Rayane's script for TAGs prediction)
+│  ├── compare_tags_overlap.py: venn diagram for the different methods of TAG predictions
+│  ├── identify_singletons.py
+│  ├── identify_TAGs.py: includes 3 approaches: genes-spacers, distance (in bp), and MCScanX
+│  ├── plot_TAG_orientation.py: plots TAG orientations (based on insight from Rayane)
+│  └── plot_TAGs_age.py: plot the Ks distribution of TAGs vs Non-TAGs
+├── general
+│  ├── analyze_blast_results.sh: descriptive analysis
+│  ├── genome_statistics.py
+│  └── infer_centromeres.py: infer centromeres per chromosome based on gaps in GFF file
+├── ks
+│  ├── compare_ks_filtering.py: compare Ks plots across different filtering (6 total)
+│  ├── ks_analysis.py
+│  ├── plot_anchors_ks_age.py
+│  ├── plot_ks_results.py
+│  └── plot_ks_wgd.py
+
+
+
+---
+* 3 December 2025 *
+---
+
+* Set up and ran MCScanX for anchor detection and synteny analysis
+
+- output/mcscanx/: MCScanX setup and results
+- output/figures/: Ks comparison visualizations
+- Comprehensive updates to pipeline logs and documentation
+
+analysis/scripts
+├── mcscanx
+│  ├── annotate_mcscanx_anchors_with_ks.py: adds Ks value for anchor pairs from MCScanX prediction
+│  ├── detect_collinearity.py: replication attempt of MCScanX collinearity detection approach
+│  ├── filter_collinearity.py
+│  ├── make_synvisio_track.py: creates track for synvisio visualization
+│  ├── plot_anchors_age_ks.py: generate the Ks distribution plot with MCScanX anchors
+│  └── run_mcscanx.sh: MCScanX execution script
+├── synteny
+│  ├── analyze_wgd_chromosomes.py: match best-match chromosomes from each of the two WGD events 
+│  ├── plot_wgd_chromosomes.py
+│  └── plot_wgd_summary_clean.py
+
+Used SynVisio to visualize synteny and dot plots based on MCScanX results.
+
+---
+* 5 December 2025 - 21 December 2025 *
+---
+
+Reviewed analysis (based on presentation feedback) and restructuring:
+- added centromeres to structural analysis historgram
+- venn diagram discrepancies analysis
+- reviewed MCSCANX underlying methodology
+
+Consolidation and cleanup:
+- Restructured and removed artifacts from repository
+- Updated TAGs classification
+- Implemented automated data extraction pipeline
+- Optimized Pipeline 1 for efficient automation across datasets
+- Reviewed and debugged Pipeline 1 scripts for stability
+
+All pipelines now fully functional, tested, and integrated with complete analysis workflows.
+
+---
+* 7 January 2026 - 15 January 2026 *
+---
+
+Report preparation, figure selection, interpretation of results, and consolidation of analyses into the final report.
+
