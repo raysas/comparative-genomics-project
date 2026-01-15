@@ -313,6 +313,6 @@ if [ "$FINAL_COUNT" -gt 0 ]; then
         echo "    2. Higher MCL inflation (2.5-3.0)"
         echo "    3. Edge weight threshold filtering"
     fi
-fi
 
 exit 0
+fi

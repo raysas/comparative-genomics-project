@@ -1,0 +1,8 @@
+COLLINEARITY DETECTION VALIDATION
+================================================================================
+
+MCScanX anchors: 228054
+Our anchors:    13182
+Overlap:        15 (0.0%)
+MCScanX-only:   228039
+Ours-only:      13167

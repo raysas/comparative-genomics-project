@@ -1,0 +1,47 @@
+CHROMOSOMAL STRUCTURAL PATTERNS ANALYSIS
+================================================================================
+
+1. OVERALL SUMMARY
+   Total gene pairs analyzed: 154,280
+   - TAG duplicates: 16,659
+   - WGD duplicates: 137,621
+
+2. TELOMERIC REGION ASSOCIATION
+   Gene 1 in telomeric regions:
+   - TAG: 5128 / 16659 (30.8%)
+   - WGD: 42462 / 137621 (30.9%)
+
+3. CHROMOSOME ZONE DISTRIBUTION (Quintiles)
+   Percentages by duplication type:
+
+   TAG:
+     Q1 (0-20%): 31.8%
+     Q2 (20-40%): 13.9%
+     Q3 (40-60%): 4.2%
+     Q4 (60-80%): 14.2%
+     Q5 (80-100%): 35.9%
+
+   WGD:
+     Q1 (0-20%): 31.5%
+     Q2 (20-40%): 14.7%
+     Q3 (40-60%): 9.1%
+     Q4 (60-80%): 13.0%
+     Q5 (80-100%): 31.8%
+
+4. KS VALUES BY CHROMOSOMAL LOCATION
+   Mean Ks by region:
+
+   TAG:
+     Telomeric: mean=1.2652, median=0.6409, n=5128
+     Internal: mean=1.2403, median=0.7386, n=11531
+
+   WGD:
+     Telomeric: mean=2.7985, median=3.2896, n=42462
+     Internal: mean=2.8004, median=3.2555, n=95159
+
+5. DISTANCE TO CHROMOSOME ENDS (Same chromosome pairs only)
+   Pairs within <4Mb> of chromosome ends:
+   - TAG: 5152 / 16659 (30.9%)
+   - WGD: 2580 / 5239 (49.2%)
+
+================================================================================
