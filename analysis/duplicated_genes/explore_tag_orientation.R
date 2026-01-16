@@ -1,14 +1,21 @@
 
 # ------------------ for tags df -------------------------
+<<<<<<< HEAD
 tags_df<-read.table('../../output/duplication_classes/TAGS/low/TAGs_1.tsv', header=TRUE)
 dup_df<-read.csv('../../output/info/duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv')
 
 dup_full_df <- dup_df[!is.na(dup_df$chromosome) & !is.na(dup_df$start_pos) & !is.na(dup_df$end_pos), ]
+=======
+tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
+>>>>>>> general_analysis
 
 tags_df$tag_id <- ifelse(tags_df$TAG == 0,
                          0,
                          paste0(tags_df$family, "_TAG", tags_df$TAG))
+<<<<<<< HEAD
 sum(tags_df$TAG != 0) # -- 9696 tags for low
+=======
+>>>>>>> general_analysis
 
 # --for every pair having same tag_id, make all combinations
 tag_pairs_list <- lapply(unique(tags_df$tag_id[tags_df$tag_id != 0]), function(tid) {

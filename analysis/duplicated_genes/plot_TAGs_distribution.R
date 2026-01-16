@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 stringency='high'
 
 tags_info_df<-read.table(paste0('../../output/statistics/TAGs_spacers_ratios_',stringency,'.tsv'), header=TRUE)
 
 tags_df<-read.table(paste0('../../output/duplication_classes/TAGs/',stringency,'/TAGs_1.tsv'), header=TRUE)
 
+=======
+tags_info_df<-read.table('../../output/statistics/TAGs_ratios.tsv', header=TRUE)
+tags_df<-read.table('../../output/duplication_classes/TAGS/TAGs_1.tsv', header=TRUE)
+>>>>>>> general_analysis
 
 library(ggplot2)
 
@@ -25,7 +30,11 @@ y_min <- min(tags_info_df$n_TAG_genes)-1000
 y_max <- max(tags_info_df$n_TAG_genes)
 
 ggplot(tags_info_df, aes(x = spacer, y = n_TAG_genes)) +
+<<<<<<< HEAD
   geom_col(fill = "#7A0177", color = "white", width = 0.8) +
+=======
+  geom_col(fill = "#007ea7", color = "white", width = 0.8) +
+>>>>>>> general_analysis
   geom_line(linewidth = 1, color='#00a8e8') +
   geom_point(size = 2) +
   geom_text(aes(label = paste0(round(ratio_TAG_genes, 3)*100, "%")),
@@ -43,7 +52,11 @@ y_min <- min(tags_info_df$n_TAG_arrays)
 y_max <- max(tags_info_df$n_TAG_arrays)
 
 ggplot(tags_info_df, aes(x = spacer, y = n_TAG_arrays)) +
+<<<<<<< HEAD
   geom_col(fill = "#7A0177", color = "white", width = 0.8) +
+=======
+  geom_col(fill = "#007ea7", color = "white", width = 0.8) +
+>>>>>>> general_analysis
   geom_line(linewidth = 1, color='#00a8e8') +
   geom_point(size = 2) +
   # geom_text(aes(label = paste0(round(ratio_TAG_genes, 3)*100, "%")), vjust = -0.5, size = 4) +
@@ -57,7 +70,10 @@ ggplot(tags_info_df, aes(x = spacer, y = n_TAG_arrays)) +
 # ------------- TAG size distribution (s=1) ------------------
 
 # -- taking spacer=1
+<<<<<<< HEAD
 library(dplyr)
+=======
+>>>>>>> general_analysis
 tags_df$tag_id <- ifelse(tags_df$TAG != 0,
                          paste0(tags_df$family, "_TAG", tags_df$TAG),0)
 
@@ -74,7 +90,11 @@ size_counts_df<-size_counts_df %>%
   arrange(tag_size)
 
 ggplot(size_counts_df, aes(x=tag_size, y=count)) +
+<<<<<<< HEAD
   geom_col(fill = "#084594", color = "white", width = 0.8) +
+=======
+  geom_col(fill = "#ff6f61", color = "white", width = 0.8) +
+>>>>>>> general_analysis
   #geom_line(linewidth = 1, color='#ff9f87') +
   geom_point(size = 2) +
   geom_text(aes(label = count),

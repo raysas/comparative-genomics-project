@@ -20,7 +20,10 @@ barplot(size_distribution,
         las = 1,
         col='dodgerblue2')
 
+<<<<<<< HEAD
 # head(families_df)
 # geneName family
 # 1 KRG88517      1
 # 2 KRG88592      1
+=======
+>>>>>>> general_analysis

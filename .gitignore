@@ -1,6 +1,8 @@
 test/
 results/
 data/
+output/ks_results.tsv
+output/ks_results_filtered.tsv
 output/*
 !output/clusters/
 !output/clusters/**
@@ -10,10 +12,6 @@ output/*
 !output/duplication_classes/**
 !output/gene_lists/
 !output/gene_lists/**
-<<<<<<< HEAD
 output/duplication_classes/proximal/
 !output/info/
 !output/info/**
-=======
-output/duplication_classes/proximal/
->>>>>>> family_sizes

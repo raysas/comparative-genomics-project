@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 cluster_file	duplicated_genes	total_genes	duplication_ratio	largest_family_size
 protein_families_filtered_blast_results_id30_qcov50_scov50_evalue10e-10_wcol12_network.tsv	52139	56679	.9198	1326
 <<<<<<< HEAD
@@ -66,3 +67,10 @@ protein_families_filtered_blast_results_id60_qcov80_scov80_evalue1e-5_wcol12_net
 protein_families_filtered_blast_results_id70_qcov90_scov90_evalue10e-10_wcol12_network.tsv	44341	56679	.7823	177
 >>>>>>> family_sizes
 protein_families_filtered_blast_results_id70_qcov90_scov90_wcol12_network.tsv	44925	56679	.7926	177
+=======
+cluster_file	duplicated_genes	total_genes	duplication_ratio
+protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv	56145	56679	.9905
+protein_families_filtered_blast_results_id30_qcov70_scov70_wcol12_network.tsv	54271	56679	.9575
+protein_families_filtered_blast_results_id50_qcov90_scov90_wcol12_network.tsv	49334	56679	.8704
+protein_families_filtered_blast_results_id70_qcov90_scov90_wcol12_network.tsv	44925	56679	.7926
+>>>>>>> general_analysis

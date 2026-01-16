@@ -1,5 +1,6 @@
 # TODO
 
+<<<<<<< HEAD
 Family sizes analysis:
 
 - [ ] functional annotation of gene families based on sizes (seperate to small, and large families + singletons maybe)
@@ -26,3 +27,12 @@ Extensions:
 - [ ] Comparative orthologs analysis: based on fully reproducible one-liner pipeline integration
 - [ ] Functional analysis of duplicated genes: at least GO enrichment (could be on panther or using R packages like clusterProfiler, it should be following the same ORA method based on statistical tests)
 - [ ] Localization and orientation of TAGs (also can do some functional/ppi types of analysis to compare)
+=======
+## Duplicated Genes
+
+- [ ] functional analysis related to Ks and Ka and age
+- [ ] functional analysis in relation to duplication type
+- [ ] functional analysis related to family sizes
+- [ ] WGD genes retrieval and analysis
+- [ ] MCScanX and circos
+>>>>>>> general_analysis
