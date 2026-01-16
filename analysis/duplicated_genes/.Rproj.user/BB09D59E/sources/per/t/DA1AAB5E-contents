@@ -16,14 +16,14 @@
 # -- the rest are split to 168 different TAG blocks
 
 edgelist<-read.table('../../output/similarity_edgelists/filtered_blast_results_id50_qcov70_scov70_evalue1e-10_wcol12_network.tsv')
-largest_fam<-read.table('../../output/gene_lists/largest_family/largest_family_high.txt', header=FALSE)
+largest_fam<-read.table('../../output/gene_lists/largest_family/largest_family_low.txt', header=FALSE)
 largest_family_edgelist<-edgelist[edgelist$V1 %in% largest_fam$V1 & edgelist$V2 %in% largest_fam$V1, ]
 library(igraph)
 g<-graph_from_data_frame(largest_family_edgelist, directed=FALSE)
 # -- large graph can not be visualized
 
 # -- viz
-plot(g, vertex.size=5, vertex.label=NA)
+plot(g, vertex.size=5, vertex.label=NA, vertex.color='#084594')
   
 # -- save graph in file
 library(ggraph)

@@ -6,13 +6,21 @@ library(tidyr)
 dup_df<-read.csv('../../output/info/duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv')
 families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id50_qcov70_scov70_evalue1e-10_wcol12_network.tsv', header=TRUE)
 tags_df<-read.table('../../output/duplication_classes/TAGS/high/TAGs_1.tsv', header=TRUE)
-
+singletons_df<-read.table('../../output/gene_lists/singletons/singletons_high.txt')
+singleton_vector=singletons_df$V1
 
 dup_df<-read.csv('../../output/info/duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv')
 families_df<-read.table('../../output/clusters/protein_families_filtered_blast_results_id30_qcov50_scov50_evalue1e-10_wcol12_network.tsv', header=TRUE)
 tags_df<-read.table('../../output/duplication_classes/TAGS/low/TAGs_1.tsv', header=TRUE)
+singletons_df<-read.table('../../output/gene_lists/singletons/singletons_low.txt')
+singleton_vector=singletons_df$V1
 
 
+ggplot(data=families_df%>%count(family),aes(x=n)) +
+  geom_bar(fill='#7A0177') +
+  my_labs +
+  my_theme +
+  xlim(0,30) 
 
 prot_df<-read.csv('../../output/info/protein_info_longest.csv')
 

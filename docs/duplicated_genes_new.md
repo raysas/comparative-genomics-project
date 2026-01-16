@@ -65,6 +65,12 @@ Running pipeline on different thresholds to see how results change, by comparing
 | 70  | 90   | 90   | 1e-10 | 44341 | 56679 | 78.23% | 177 |
 <!-- | 70  | 90   | 90   | none  | 44925 | 56679 | 79.26% | 177 | -->
 
+| id  | qcov | scov | evalue | duplicated_genes | total_genes | duplication_percent | largest_family_size |
+|-----|------|------|--------|------------------|-------------|----------------------|----------------------|
+| 30  | 50   | 50   | 1e-10 | 52031 | 56679 | 91.79% | 1323 |
+| 50  | 70   | 70   | 1e-10 | 50031 | 56679 | 88.27% | 350 |
+
+
 We chose 2 datasets to work with for the rest of the analysis:
 - Low stringency: 30% id, 50% cov, 1e-10 evalue => 91.98% duplication rate
 - High stringency: 50% id, 70% cov, 1e-10 evalue => 88.27% duplication rate
@@ -186,6 +192,14 @@ Rscript scripts/TAGs_pairs_orientation.R --stringency high
     data:  observed
     X-squared = 6812, df = 2, p-value < 2.2e-16
     ```
+
+|  | Low Stringency (count, %) | High Stringency (count, %) |
+|------------|---------------------------|-----------------------------|
+| Tandem     | 14,425 (82.5%)            | 12,685 (83.5%)              |
+| Convergent | 1,637 (9.36%)             | 1,320 (8.69%)               |
+| Divergent  | 1,423 (8.14%)             | 1,192 (7.84%)               |
+| **Chi-square test** | X² = 7392.3, df = 2, p < 2.2e-16 | X² = 6812, df = 2, p < 2.2e-16 |
+
 
 *table and results copied from Rscript output*  
 The extremely low p-value indicates that the observed distribution of TAG gene pair orientations is significantly different from what would be expected by chance, suggesting a strong bias towards tandem orientation among TAGs in this dataset.
