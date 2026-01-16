@@ -39,4 +39,4 @@ conda install -c bioconda mummer
 sudo apt install gnuplot
 
 # ------------- R packages ------------------
-conda install --solver=classic -c conda-forge r-ggplot2 r-dplyr r-rcolorbrewerg
+conda install --solver=classic -c conda-forge r-ggplot2 r-dplyr r-rcolorbrewer
