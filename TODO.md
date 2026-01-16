@@ -1,6 +1,7 @@
 # TODO
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 Family sizes analysis:
 
 - [ ] functional annotation of gene families based on sizes (seperate to small, and large families + singletons maybe)
@@ -36,3 +37,10 @@ Extensions:
 - [ ] WGD genes retrieval and analysis
 - [ ] MCScanX and circos
 >>>>>>> general_analysis
+=======
+- [ ] TE annotation
+- [ ] Comaprison between databases
+- [ ] Coverage computation
+- [ ] TE landscape plots (?)
+- [ ] Integration with duplicated genes and Ks plots (??)
+>>>>>>> TE
