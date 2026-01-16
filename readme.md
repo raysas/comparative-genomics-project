@@ -1,113 +1,57 @@
-# comparative-genomics-project
+# Gene Duplication and Transposable Elements in *Glycine max*
 
-Things done but still documenting and polishing:
-- [x] tag spacer analysis + plots for low and high (shows same pattern and ~%s)
-- [x] orientation analysis 
-- [ ] in the process: looking at biggest array of TAGs - function and viz
-- [x] largest family functional analysis (seem like a dna helicase family)
-- [ ] in the making: biggest cluster in network viz
-- [ ] refixed codes on new dir structure
-- [ ] ..........
+![Domain](https://img.shields.io/badge/comparative%20genomics-plant-green)
+![Pipeline](https://img.shields.io/badge/pipeline-passing-brightgreen)
+![Status](https://img.shields.io/badge/status-course_project-orange)  
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![R](https://img.shields.io/badge/R-276DC3?logo=r&logoColor=white)
+![Perl](https://img.shields.io/badge/Perl-39457E?logo=perl&logoColor=white)
+![Bash](https://img.shields.io/badge/Bash-4EAA25?logo=gnubash&logoColor=white)
 
-*commiting to checkout and move some things, will fix morning*
+## Overview
+Computational genomics analysis of gene duplication mechanisms and transposable element (TE) dynamics in the *Glycine max* genome.  
+The project integrates large-scale sequence clustering, Ks-based duplication dating, statistical testing, and comparative genomics to study the impact of whole-genome duplication, tandem duplication, and TE activity on soybean genome evolution.
 
-At this stage we have 4 main new outputs, where almost each will comprise 2 outputs:
+---
 
-- "low" or "id30_cov50_evalue1e-10" named: low stringency dataset at filtration of 30% identity, 50% coverage and evalue 1e-10
-- "high" or "id50_cov70_evalue1e-10" named: high stringency dataset at filtration of 50% identity, 70% coverage and evalue 1e-10
+## Data
+- *Glycine max* genome and annotations (EnsemblPlants v2.0)
+- Protein and CDS FASTA files
+- GO Slim functional annotations (PANTHER v19.0)
+- Transposable element annotations (APTEdb)
 
-*might be worth running analysis on each of them*
+---
 
-
-1. [`output/gene_lists`](output/gene_lists): contains lists of genes classified in groups, it has them in txt files where each line is a peptide id, the groups are:
-```
-output/gene_lists/
-├── TAGs
-│   └── spacer_based
-│       ├── TAGs_high.txt
-│       └── TAGs_low.txt
-├── archive
-│   ├── H_largest_family.txt
-│   ├── TAGs.txt
-│   ├── largest_family.txt
-│   └── singleton_genes.txt
-├── largest_family
-│   ├── largest_family_high.txt
-│   ├── largest_family_id30_cov50_evalue1e-10.txt
-│   ├── largest_family_id50_cov70_evalue1e-10.txt
-│   └── largest_family_low.txt
-├── mapped_peptide_gene_ids
-│   ├── largest_family_id30_cov50_evalue1e-10_mapped.txt
-│   ├── largest_family_id50_cov70_evalue1e-10_mapped.txt
-│   ├── singletons_high_mapped.txt
-│   └── singletons_low_mapped.txt
-└── singletons
-    ├── singletons_high.txt
-    └── singletons_low.txt
-```
+## Pipeline
+The analysis is implemented as a **fully scripted, modular pipeline** to generate gene families and Ks values.  
+Will provide reproducible instructions for running the pipeline on new datasets.
 
 
-2. [`output/statistics`](output/statistics): contains statistics files, including the ratios of TAG genes and arrays per spacer size, in `TAGs_ratios_*.tsv` files and summary statistics in `duplication_statistics_*.tsv` files on yield of runs on different thresholds
 
-```
-output/statistics/
-├── TAGs_spacers_ratios_high.tsv
-├── TAGs_spacers_ratios_low.tsv
-└── duplication_ratios.tsv
-```
+## Analyses
+- Protein family inference using BLASTP and MCL
+- Ks estimation via protein-guided codon alignments (MAFFT, PAL2NAL, PAML)
+- Tandemly arrayed gene (TAG) detection and orientation analysis
+- Functional enrichment analysis (Fisher’s exact test, FDR correction)
+- Transposable element abundance, coverage, and nesting analyses
+- Gene–TE spatial proximity analysis
+- Statistical testing and visualization in R and Python
 
-*will put tables in md in final version*
+---
 
-1. [`output/duplication_classes/`](output/duplication_classes/): contains the main outputs of the identification of duplication types, including TAGs so far through the gene spacer based method, in `TAGs/low` and `TAGs/high` folder, with files named `TAGs_*.tsv` that correspond to different gene spcacer thresholds
+## Datasets
+Two duplication datasets were generated using different stringency thresholds:
 
-```
-output/duplication_classes/
-├── TAGs
-│   ├── high
-│   │   ├── TAG_gene_pairs.tsv
-│   │   ├── TAGs_0.tsv
-│   │   ├── TAGs_1.tsv
-│   │   ├── TAGs_10.tsv
-│   │   ├── TAGs_2.tsv
-│   │   ├── TAGs_3.tsv
-│   │   ├── TAGs_4.tsv
-│   │   ├── TAGs_5.tsv
-│   │   ├── TAGs_6.tsv
-│   │   ├── TAGs_7.tsv
-│   │   ├── TAGs_8.tsv
-│   │   └── TAGs_9.tsv
-│   └── low
-│       ├── TAG_gene_pairs.tsv
-│       ├── TAGs_0.tsv
-│       ├── TAGs_1.tsv
-│       ├── TAGs_10.tsv
-│       ├── TAGs_2.tsv
-│       ├── TAGs_3.tsv
-│       ├── TAGs_4.tsv
-│       ├── TAGs_5.tsv
-│       ├── TAGs_6.tsv
-│       ├── TAGs_7.tsv
-│       ├── TAGs_8.tsv
-│       └── TAGs_9.tsv
-└── singletons
-    ├── singletons_high.csv
-    └── singletons_low.csv
-```
+- **Low stringency** (`low` / `id30_cov50_evalue1e-10`)  
+  - 30% sequence identity  
+  - 50% query and subject coverage  
+  - e-value = 1e-10  
 
-4. [`output/info`](output/info): contains info files used in the process, including the duplicated genes info files at different stringency levels, subsetted from `protein_longest_info.csv` which is also copied here for reference
+- **High stringency** (`high` / `id50_cov70_evalue1e-10`)  
+  - 50% sequence identity  
+  - 70% query and subject coverage  
+  - e-value = 1e-10  
 
-```
-output/info/
-├── duplicated_genes_info_high.csv
-├── duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv
-├── duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv
-├── duplicated_genes_info_low.csv
-└── protein_info_longest.csv
-```
+Both datasets were analyzed independently to assess robustness and parameter sensitivity.
 
-note: duplicated_genes_info_id30_qcov50_scov50_evalue1e-10_wcol12.csv=duplicated_genes_info_low.csv and duplicated_genes_info_id50_qcov70_scov70_evalue1e-10_wcol12.csv=duplicated_genes_info_high.csv
-
-
-## code
-
-will update tmrw
+---

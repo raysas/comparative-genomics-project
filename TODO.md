@@ -1,7 +1,18 @@
 # TODO
 
-- [ ] pipeline 1: from raw data to duplicated genes
-- [ ] pipeline 2: from duplicated genes to Ks computation
+Family sizes analysis:
+
+- [ ] functional annotation of gene families based on sizes (seperate to small, and large families + singletons maybe)
+- [x] family size distribution plots
+- [ ] largest family analysis (functional, ppi, identify what family, distribution on genome, etc)
+
+> [!NOTE]
+> will have both high stringency (H) and low stringency (L) results which will lead to different families in teh results, the analysis most probably would be related to the high stringency one
+
+General tasks:
+
+- [x] pipeline 1: from raw data to duplicated genes
+- [x] pipeline 2: from duplicated genes to Ks computation
 - [ ] annotate duplicated genes with different types (TAGs, WGD...)
 - [ ] retrieval of PPIs from STRING database from a list of genes
 - [ ] General analysis of duplicated genes families
