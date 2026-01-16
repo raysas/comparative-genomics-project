@@ -7,17 +7,6 @@
 
 set -euo pipefail
 
-<<<<<<< HEAD
-# Color codes
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-# Default parameters
-INPUT_FILE='output/blast_output/blast_results_with_coverage.tsv'
-OUTPUT_DIR='output/blast_filtered'
-=======
 
 # Resolve paths to run from anywhere
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -35,22 +24,16 @@ NC='\033[0m'
 INPUT_FILE=""
 OUTPUT_DIR=""
 SPECIES_NAME=""
->>>>>>> master
 ID_THRESHOLD=30
 Q_COV_THRESHOLD=50
 S_COV_THRESHOLD=50
 BIT_SCORE_THRESHOLD=""
 E_VALUE_THRESHOLD=""
 NUM_JOBS=$(nproc)
-<<<<<<< HEAD
-CHUNK_SIZE=1000000  # Process in chunks of 1M lines
-
-=======
 CHUNK_SIZE=1000000
 AUTO_DETECT=true
 
 
->>>>>>> master
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -71,10 +54,7 @@ Usage: $0 [OPTIONS]
 OPTIONS:
   -i FILE    Input BLAST results with coverage
   -o DIR     Output directory
-<<<<<<< HEAD
-=======
   -s NAME    Species name (auto-detects input/output)
->>>>>>> master
   -id NUM    Identity threshold (default: 30)
   -qcov NUM  Query coverage threshold (default: 50)
   -scov NUM  Subject coverage threshold (default: 50)
@@ -100,21 +80,6 @@ EOF
     esac
 done
 
-<<<<<<< HEAD
-# Setup logging
-LOG_DIR="logs/pipeline"
-mkdir -p "$LOG_DIR"
-LOG_FILE="${LOG_DIR}/$(basename "$0" .sh)_$(date +%Y%m%d_%H%M%S).log"
-exec > >(tee -i "$LOG_FILE") 2>&1
-
-echo -e "${GREEN}===================================="
-echo " OPTIMIZED BLAST FILTERING"
-echo "====================================${NC}"
-echo " Input:  $INPUT_FILE"
-echo " Output: $OUTPUT_DIR"
-echo " CPUs:   $NUM_JOBS"
-echo -e "${GREEN}====================================${NC}"
-=======
 # Auto-detect input/output if not provided
 if [ "$AUTO_DETECT" = true ]; then
     if [ -n "$SPECIES_NAME" ]; then
@@ -159,7 +124,6 @@ echo -e "${GREEN}====================================${NC}"
 echo -e "${GREEN}Input:   ${BLUE}$INPUT_FILE${NC}"
 echo -e "${GREEN}Output:  ${BLUE}$OUTPUT_DIR${NC}"
 echo -e "${GREEN}CPUs:    ${YELLOW}$NUM_JOBS${NC}"
->>>>>>> master
 
 # Check input
 if [ ! -f "$INPUT_FILE" ]; then
@@ -181,16 +145,6 @@ fi
 OUTPUT_FILE="${OUTPUT_FILE}.tsv"
 
 echo -e "${YELLOW}Filtering parameters:${NC}"
-<<<<<<< HEAD
-echo "  Identity       >= $ID_THRESHOLD"
-echo "  Query Coverage >= $Q_COV_THRESHOLD"
-echo "  Subject Coverage >= $S_COV_THRESHOLD"
-if [ -n "$BIT_SCORE_THRESHOLD" ]; then
-    echo "  Bit Score     >= $BIT_SCORE_THRESHOLD"
-fi
-if [ -n "$E_VALUE_THRESHOLD" ]; then
-    echo "  E-value       <= $E_VALUE_THRESHOLD"
-=======
 echo -e "  Identity        >= ${BLUE}$ID_THRESHOLD${NC}"
 echo -e "  Query Coverage  >= ${BLUE}$Q_COV_THRESHOLD${NC}"
 echo -e "  Subject Coverage>= ${BLUE}$S_COV_THRESHOLD${NC}"
@@ -199,17 +153,12 @@ if [ -n "$BIT_SCORE_THRESHOLD" ]; then
 fi
 if [ -n "$E_VALUE_THRESHOLD" ]; then
     echo -e "  E-value        <= ${BLUE}$E_VALUE_THRESHOLD${NC}"
->>>>>>> master
 fi
 
 # Count input lines
 echo -e "${YELLOW}Analyzing input file...${NC}"
 TOTAL_LINES=$(wc -l < "$INPUT_FILE")
-<<<<<<< HEAD
-echo -e "${GREEN}✓ Total lines: $TOTAL_LINES${NC}"
-=======
 echo -e "${GREEN}✓ Total lines: ${YELLOW}$TOTAL_LINES${NC}"
->>>>>>> master
 
 # Create temp directory
 TEMP_DIR=$(mktemp -d)
@@ -250,19 +199,11 @@ else
     echo -e "${YELLOW}Using parallel chunk processing (file > 10M lines)...${NC}"
     
     # Split file into chunks
-<<<<<<< HEAD
-    echo "Splitting into chunks of $CHUNK_SIZE lines..."
-    split -l "$CHUNK_SIZE" "$INPUT_FILE" "$TEMP_DIR/chunk_"
-    
-    NUM_CHUNKS=$(ls "$TEMP_DIR"/chunk_* | wc -l)
-    echo -e "${GREEN}✓ Created $NUM_CHUNKS chunks${NC}"
-=======
     echo -e "Splitting into chunks of ${YELLOW}$CHUNK_SIZE${NC} lines..."
     split -l "$CHUNK_SIZE" "$INPUT_FILE" "$TEMP_DIR/chunk_"
     
     NUM_CHUNKS=$(ls "$TEMP_DIR"/chunk_* | wc -l)
     echo -e "${GREEN}✓ Created ${YELLOW}$NUM_CHUNKS${NC} chunks${NC}"
->>>>>>> master
     
     # Function to filter a chunk
     filter_chunk() {
@@ -295,20 +236,12 @@ else
     export BIT_SCORE_THRESHOLD E_VALUE_THRESHOLD
     
     # Process chunks in parallel
-<<<<<<< HEAD
-    echo "Filtering chunks in parallel..."
-=======
     echo -e "Filtering chunks in parallel..."
->>>>>>> master
     ls "$TEMP_DIR"/chunk_* | \
         parallel -j "$NUM_JOBS" --progress --bar filter_chunk {} > "$TEMP_DIR/filtered_list.txt"
     
     # Combine filtered chunks
-<<<<<<< HEAD
-    echo "Combining filtered results..."
-=======
     echo -e "Combining filtered results..."
->>>>>>> master
     cat $(cat "$TEMP_DIR/filtered_list.txt") > "$OUTPUT_FILE"
 fi
 
@@ -323,20 +256,6 @@ OUTPUT_LINES=$(wc -l < "$OUTPUT_FILE")
 REMOVED_LINES=$((TOTAL_LINES - OUTPUT_LINES))
 RETENTION_PCT=$(echo "scale=2; $OUTPUT_LINES * 100 / $TOTAL_LINES" | bc)
 
-<<<<<<< HEAD
-echo ""
-echo -e "${GREEN}===================================="
-echo " FILTERING COMPLETE"
-echo "====================================${NC}"
-echo " Processing time: ${ELAPSED}s"
-echo " Input lines:     $TOTAL_LINES"
-echo " Output lines:    $OUTPUT_LINES"
-echo " Removed:         $REMOVED_LINES"
-echo " Retention:       ${RETENTION_PCT}%"
-echo -e "${GREEN}====================================${NC}"
-echo " Output saved to:"
-echo " $OUTPUT_FILE"
-=======
 echo -e "\n${GREEN}===================================="
 echo " FILTERING COMPLETE"
 echo -e "====================================${NC}"
@@ -348,7 +267,6 @@ echo -e " Retention:       ${YELLOW}${RETENTION_PCT}%${NC}"
 echo -e "${GREEN}====================================${NC}"
 echo -e " Output saved to:"
 echo -e " ${BLUE}$OUTPUT_FILE${NC}"
->>>>>>> master
 echo -e "${GREEN}====================================${NC}"
 
 # Additional statistics
@@ -358,15 +276,9 @@ if [ "$OUTPUT_LINES" -gt 0 ]; then
     echo -n "  Average identity: "
     awk '{sum+=$3; n++} END {printf "%.1f%%\n", sum/n}' "$OUTPUT_FILE"
     echo -n "  Average query coverage: "
-<<<<<<< HEAD
-    awk '{sum+=$13; n++} END {printf "%.1f%%\n", sum/n}' "$OUTPUT_FILE"
-    echo -n "  Average subject coverage: "
-    awk '{sum+=$14; n++} END {printf "%.1f%%\n", sum/n}' "$OUTPUT_FILE"
-=======
     awk '{sum+=$15; n++} END {printf "%.1f%%\n", sum/n}' "$OUTPUT_FILE"
     echo -n "  Average subject coverage: "
     awk '{sum+=$16; n++} END {printf "%.1f%%\n", sum/n}' "$OUTPUT_FILE"
->>>>>>> master
     
     # Check for problematic clustering
     echo ""

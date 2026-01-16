@@ -7,65 +7,15 @@
 
 set -euo pipefail
 
-<<<<<<< HEAD
-=======
 
 # Resolve paths to run from anywhere
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
->>>>>>> master
 # Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-<<<<<<< HEAD
-NC='\033[0m'
-
-# Default parameters
-INPUT_FILE='output/blast_filtered/filtered_blast_results_id30_qcov50_scov50.tsv'
-OUTPUT_DIR='output/similarity_edgelists'
-WEIGHT_COLUMN_INDEX=12  # Bit score column
-NUM_JOBS=$(nproc)
-CHUNK_SIZE=10000000  # 10M lines per chunk
-USE_MEMORY_SORT=false
-
-# Parse arguments
-while getopts "i:o:w:j:c:mh" flag; do
-    case "${flag}" in
-        i) INPUT_FILE="${OPTARG}" ;;
-        o) OUTPUT_DIR="${OPTARG}" ;;
-        w) WEIGHT_COLUMN_INDEX="${OPTARG}" ;;
-        j) NUM_JOBS="${OPTARG}" ;;
-        c) CHUNK_SIZE="${OPTARG}" ;;
-        m) USE_MEMORY_SORT=true ;;
-        h)
-            cat <<EOF
-Usage: $0 [OPTIONS]
-
-OPTIONS:
-  -i FILE    Input filtered BLAST results
-  -o DIR     Output directory
-  -w NUM     Weight column index (default: 12 for bit score)
-  -j NUM     Parallel jobs (default: all CPUs)
-  -c NUM     Chunk size for processing (default: 10000000)
-  -m         Use memory-based sorting (faster for <100M edges)
-  -h         Show this help
-
-EXAMPLES:
-  # Standard usage
-  $0 -i blast_filtered.tsv -o edgelists/
-
-  # Fast processing with memory sort
-  $0 -i blast_filtered.tsv -m -j 32
-
-  # Large file with chunking
-  $0 -i huge_blast.tsv -c 50000000 -j 64
-
-EOF
-            exit 0
-            ;;
-=======
 BLUE='\033[1;34m'
 NC='\033[0m'
 
@@ -116,15 +66,10 @@ EXAMPLES:
 EOF
                         exit 0
                         ;;
->>>>>>> master
         *) echo "Unknown option: $1"; exit 1;;
     esac
 done
 
-<<<<<<< HEAD
-# Setup logging
-LOG_DIR="logs/pipeline"
-=======
 
 # Auto-detect input/output if not provided
 if [ "$AUTO_DETECT" = true ]; then
@@ -150,24 +95,10 @@ fi
 
 # Setup logging inside the pipeline directory regardless of where the script is run from
 LOG_DIR="${SCRIPT_DIR}/logs/pipeline"
->>>>>>> master
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/$(basename "$0" .sh)_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -i "$LOG_FILE") 2>&1
 
-<<<<<<< HEAD
-echo -e "${GREEN}===================================="
-echo " OPTIMIZED EDGELIST GENERATION"
-echo "====================================${NC}"
-echo " Input:  $INPUT_FILE"
-echo " Output: $OUTPUT_DIR"
-echo " Weight column: $WEIGHT_COLUMN_INDEX"
-echo " CPUs:   $NUM_JOBS"
-if [ "$USE_MEMORY_SORT" = true ]; then
-    echo " Mode:   Memory-based sorting"
-else
-    echo " Mode:   Disk-based sorting"
-=======
 # echo " OPTIMIZED EDGELIST GENERATION"
 # echo -e "====================================${NC}"
 # echo " Input:  $INPUT_FILE"
@@ -189,7 +120,6 @@ if [ "$USE_MEMORY_SORT" = true ]; then
     echo -e "${GREEN}Mode:    ${YELLOW}Memory-based sorting${NC}"
 else
     echo -e "${GREEN}Mode:    ${YELLOW}Disk-based sorting${NC}"
->>>>>>> master
 fi
 echo -e "${GREEN}====================================${NC}"
 
@@ -334,59 +264,6 @@ ELAPSED=$((END_TIME - START_TIME))
 
 FINAL_COUNT=$(wc -l < "$OUTPUT_FILE")
 REMOVED_DUPLICATES=$((NORMALIZED_COUNT - FINAL_COUNT))
-<<<<<<< HEAD
-
-echo ""
-echo -e "${GREEN}===================================="
-echo " EDGELIST GENERATION COMPLETE"
-echo "====================================${NC}"
-echo " Processing time: ${ELAPSED}s"
-echo " Input edges:     $((TOTAL_LINES - 1))"
-echo " Self-loops removed: $((TOTAL_LINES - NORMALIZED_COUNT - 1))"
-echo " Duplicates removed: $REMOVED_DUPLICATES"
-echo " Final edges:     $FINAL_COUNT"
-echo " Reduction:       $(echo "scale=1; (1 - $FINAL_COUNT / ($TOTAL_LINES - 1)) * 100" | bc)%"
-echo -e "${GREEN}====================================${NC}"
-echo " Output saved to:"
-echo " $OUTPUT_FILE"
-echo -e "${GREEN}====================================${NC}"
-
-# Additional analysis
-if [ "$FINAL_COUNT" -gt 0 ]; then
-    echo ""
-    echo "Edge weight statistics:"
-    awk '{sum+=$3; if(NR==1||$3>max)max=$3; if(NR==1||$3<min)min=$3} 
-         END {printf "  Min weight:  %.1f\n  Max weight:  %.1f\n  Mean weight: %.1f\n", min, max, sum/NR}' \
-         "$OUTPUT_FILE"
-    
-    # Check connectivity
-    echo ""
-    echo "Network connectivity:"
-    UNIQUE_NODES=$(awk '{print $1; print $2}' "$OUTPUT_FILE" | sort -u | wc -l)
-    AVG_DEGREE=$(echo "scale=1; $FINAL_COUNT * 2 / $UNIQUE_NODES" | bc)
-    
-    echo "  Unique nodes: $UNIQUE_NODES"
-    echo "  Average degree: $AVG_DEGREE"
-    
-    # Find highest degree node
-    echo -n "  Max degree node: "
-    awk '{print $1; print $2}' "$OUTPUT_FILE" | \
-        sort | uniq -c | sort -rn | head -1 | \
-        awk '{printf "%s (degree: %d)\n", $2, $1}'
-    
-    # Warning for problematic clustering
-    if (( $(echo "$AVG_DEGREE > 100" | bc -l) )); then
-        echo ""
-        echo -e "${YELLOW}⚠ WARNING: High average degree detected!${NC}"
-        echo "  This may cause large clusters in MCL."
-        echo "  Consider:"
-        echo "    1. Stricter BLAST filtering"
-        echo "    2. Higher MCL inflation (2.5-3.0)"
-        echo "    3. Edge weight threshold filtering"
-    fi
-fi
-=======
->>>>>>> master
 
 echo ""
 echo -e "${GREEN}===================================="

@@ -1,115 +1,45 @@
 # Duplicated genes
 
-*currently looking into orientation analysis and circos configuration*
+# On Glycine max
 
-Associated with this part are the following scripts and analysis:
-```
-├── analysis/
-│   └── duplicated_genes/
-│       ├── explore_*.R     # -- just exploration no need to run
-│       ├── load_variables.R
-│       ├── plot_*.R        # -- plotting scripts
-│       └── duplicated_genes.Rproj
-└──scripts/
-    ├── SETUP.sh
-    ├── TAGs_compute.sh             # -- compute TAGs ratios for spacers 0-10 from TAGs_detect.R
-    ├── TAGs_detect.R           # -- detect TAGs script
-    ├── TAGs_get_list.sh            # -- get list of TAGs
-    ├── TAGs_get_ratio.sh           # -- get TAGs counts and ratios for spacers 0-10
-    ├── proximal_detect.R           # -- detect proximal gene pairs by family within a specified distance
-    ├── blast_diagnostics.py        # -- blast diagnostics script
-    ├── blast_top5_per_protein.py   # -- filter blast results to keep top 5 hits per protein
-    ├── dups_get_ratio.sh           # -- get duplication ratios for
-    ├── dups_info_filter.sh         # -- filter duplicated genes info out of prot_longest_info.csv
-    └── extract_fasta.sh        # -- extract fasta sequences for each chromosome
-```
+Studies in Glycine max show the organism to have around 70-75% of its genes as duplicated genes [^4][^5], due to its paleopolyploid nature with 2 rounds of whole-genome duplications. Yang et al. (2013) [^5] performed their analysis on genomes taken from Plant Genome Duplication Database and used the MCScan tool to perform syntenic black dedtection, classification of dup genes and downstream analysis.
 
-**To keep the scripts/ dir as clean as possible, the name of each script shall begin with the main topic it addresses, e.g., TAGs_, dups_, extract_, etc. and that is because the code became too complex to create inner directories within scripts and the 1st goal is to keep everything complelty 100% reproducible and as orgaized as possible**
+Most studies we found on duplicated genes in Glycine max were family-focused, i.e. they studied the duplication patterns of specific gene families such as PP2C, WRKY genes.., rather than performing a genome-wide analysis of duplicated genes. Some performed genome-wide analysis using BAC sequences and mapping to identify duplicates.
 
-> [!TIP]
-> In case wanted too replicate analyses, recommended to open the .Rproj file in RStudio to have all paths set correctly and run `load_variables.R` first to load all variables used in the analysis scripts
+## On pipeline 1
 
-Relevant outputs:
-```
-output/
-├── duplication_classes
-│   ├── proximal
-│   │   └── proximal_500kb.csv
-│   └── TAGs
-│       ├── TAGs_0.tsv
-│       ├── TAGs_1.tsv
-│       ├── TAGs_10.tsv
-│       ├── TAGs_2.tsv
-│       ├── TAGs_3.tsv
-│       ├── TAGs_4.tsv
-│       ├── TAGs_5.tsv
-│       ├── TAGs_6.tsv
-│       ├── TAGs_7.tsv
-│       ├── TAGs_8.tsv
-│       └── TAGs_9.tsv
-├── gene_lists
-│   ├── TAGs.txt
-│   ├── largest_family.txt
-│   └── singleton_genes.txt
-└── statistics
-    ├── TAGs_ratios.tsv
-    ├── duplicated_genes_info.csv
-    ├── duplication_ratios.tsv
-    └── protein_info_longest.csv
-```
-
-## Methods to identify duplicated genes
-
-The default thresholds used in our pipeline: 30% identity, 50% coverage => 99% of genes are duplicated genes (89598 isoforms, 56680 genes, 56144 out of them are duplicated genes)
-
-In [^3], the work was performed on rice, with a relatively higher number of initial genes (42534, higher than arabidpsis studies and closer to our number), they used to filtering strategies:  
-- 30% identity and 70% coverage => low stringency dataset (reduced to ~18k)
-- 50% identity and 90% coverage => high stringency dataset (reduced to ~9k)
-
-> [!TIP]
-> maybe would consider the data we have as a low stringency dataset and then perform analysis using a high stringency one (like 70,90) to see how results change
+Starting from blast results, we identify duplicated genes in the genome.
 
 Done some diagnostics plots on the blast results to see how identity and coverage are distributed (script:[`scripts/blast_diagnostics.py`](../scripts/blast_diagnostics.py))
+
 
 | id distribution | coverage distribution | id vs coverage |
 |-----------------|-----------------------|----------------|
 | ![id distribution](./assets/blast_viz_pident_hist.png) | ![coverage distribution](./assets/blast_viz_coverage_hist.png) | ![id vs coverage](./assets/blast_viz_pident_vs_cov.png) |
 
+The default thresholds to rub blastp used in our pipeline: 30% identity, 50% coverage => 99% of genes are duplicated genes (89598 isoforms filtered to 56680 genes, 56144 out of them are duplicated genes)
+
+In [^3], the work was performed on rice, with a relatively higher number of initial genes (42534, higher than arabidpsis studies and closer to our number), they used to filtering strategies:  
+- 30% identity and 70% coverage => low stringency dataset (reduced to ~18k)
+- 50% identity and 90% coverage => high stringency dataset (reduced to ~9k)
+
+
+## On datasets
+
+At the start, on an exploratory phase, we tried performing the full analysis on a low stringency dataset (30% id, 50% cov) to check initial resultsm knowing that we can use a more stringent dataset later on based on filtration thresholds. The dataset had a 99% duplication rate which led to a pretty exhaustive search space to work with in pipeline 2 in particular, requiring really high computational power to run (yazid part here).
+From a large search space of the righ filtration thresholds, we gor preliminary statistics on duplicated genes as well as some analysis results that made us judge better what to go for, for the rest of the analysis.  
 Running pipeline on different thresholds to see how results change, by comparing number of duplicated genes in each file in `output/clusters/` containing gene families detected with different thresholds
 ```bash
-./scripts/get_duplication_ratios.sh
+./scripts/dups_get_ratio.sh
 # -- outputs in output/statistics/duplication_ratios.tsv this table
 ```
-| id | cov | evalue | duplicated_genes | total_genes | duplication_ratio | largest_family_size |
-| -- | --- | ------ | ---------------- | ----------- | ----------------- | ------------------- |
-| 30 | 50  | 10e-10  | 52139            | 56679       | 91.98%            | 1326                |
-| 30 | 50  | 1e-5   | 52516            | 56679       | 92.65%            | 1311                |
-| 30 | 50  | NA     | 56145            | 56679       | 99.05%            | 1314                |
-| 30 | 60  | 10e-10  | 51870            | 56679       | 91.51%            | 1324                |
-| 30 | 60  | 1e-5   | 52227            | 56679       | 92.14%            | 1309                |
-| 30 | 70  | 10e-10  | 51196            | 56679       | 90.32%            | 1320                |
-| 30 | 70  | 1e-5   | 51526            | 56679       | 90.90%            | 1304                |
-| 30 | 70  | NA     | 54271            | 56679       | 95.75%            | 1307                |
-| 40 | 60  | 10e-10  | 51484            | 56679       | 90.83%            | 828                 |
-| 40 | 60  | 1e-5   | 51814            | 56679       | 91.41%            | 842                 |
-| 40 | 70  | 10e-10  | 50801            | 56679       | 89.62%            | 825                 |
-| 40 | 70  | 1e-5   | 51101            | 56679       | 90.15%            | 840                 |
-| 40 | 80  | 10e-10  | 49824            | 56679       | 87.90%            | 821                 |
-| 40 | 80  | 1e-5   | 50085            | 56679       | 88.36%            | 835                 |
-| 50 | 70  | 10e-10  | 50031            | 56679       | 88.27%            | 350                 |
-| 50 | 70  | 1e-5   | 50280            | 56679       | 88.71%            | 357                 |
-| 50 | 80  | 10e-10  | 49073            | 56679       | 86.58%            | 349                 |
-| 50 | 80  | 1e-5   | 49290            | 56679       | 86.96%            | 355                 |
-| 50 | 90  | 10e-10  | 48080            | 56679       | 84.82%            | 348                 |
-| 50 | 90  | 1e-5   | 48261            | 56679       | 85.14%            | 354                 |
-| 50 | 90  | NA     | 49334            | 56679       | 87.04%            | 360                 |
-| 60 | 70  | 10e-10  | 48662            | 56679       | 85.85%            | 211                 |
-| 60 | 70  | 1e-5   | 48863            | 56679       | 86.21%            | 214                 |
-| 60 | 80  | 10e-10  | 47723            | 56679       | 84.19%            | 209                 |
-| 60 | 80  | 1e-5   | 47897            | 56679       | 84.50%            | 212                 |
-| 70 | 90  | 10e-10  | 44341            | 56679       | 78.23%            | 177                 |
-| 70 | 90  | NA     | 44925            | 56679       | 79.26%            | 177                 |
 
+| cluster_file | duplicated_genes | total_genes | duplication_ratio |
+|--------------|------------------|-------------|-------------------|
+| protein_families_filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv | 56145 | 56679 | 0.9905 |
+| protein_families_filtered_blast_results_id30_qcov70_scov70_wcol12_network.tsv | 54271 | 56679 | 0.9575 |
+| protein_families_filtered_blast_results_id50_qcov90_scov90_wcol12_network.tsv | 49334 | 56679 | 0.8704 |
+| protein_families_filtered_blast_results_id70_qcov90_scov90_wcol12_network.tsv | 44925 | 56679 | 0.7926 |
 
 *consider filtering by # of protein hits, [scripts/top5_per_protein.py](../scripts/top5_per_protein.py) for reference*
 
@@ -155,123 +85,45 @@ It is also recommended by the tool developers to filter the BLAST results to kee
 ```bash
 # tmux new -s mcscanx_blast
 makeblastdb -in ../../data/peptides_longest.fa -dbtype prot -out peptides_db
-blastp -query ../../data/peptides_longest.fa -db peptides_db   -evalue 10e-10 -max_target_seqs 5 -out gm.blast -outfmt 6
+blastp -query ../../data/peptides_longest.fa -db peptides_db   -evalue 1e-10 -max_target_seqs 5 -out gm.blast -outfmt 6
 ```
 
 
 ## Duplicated genes studies in _Glycine max_
-# On Glycine max
 
 Studies in Glycine max show the organism to have around 70-75% of its genes as duplicated genes [^4][^5], due to its paleopolyploid nature with 2 rounds of whole-genome duplications. Yang et al. (2013) [^5] performed their analysis on genomes taken from Plant Genome Duplication Database and used the MCScan tool to perform syntenic black dedtection, classification of dup genes and downstream analysis.
 
 Most studies we found on duplicated genes in Glycine max were family-focused, i.e. they studied the duplication patterns of specific gene families such as PP2C, WRKY genes.., rather than performing a genome-wide analysis of duplicated genes. Some performed genome-wide analysis using BAC sequences and mapping to identify duplicates.
 
-## On pipeline 1
 
-Starting from blast results, we identify duplicated genes in the genome.
+## Types of duplications
 
-Done some diagnostics plots on the blast results to see how identity and coverage are distributed (script:[`scripts/blast_diagnostics.py`](../scripts/blast_diagnostics.py))
+### Tandemly arrayed genes (TAGs)
+
+| script  | description/plot |
+|-------------|--------------------|
+| [`scripts/detect_TAGs.R`](../scripts/detect_TAGs.R) | detect TAGs with a given spacer number |
+| [`scripts/TAGs_get_ratio.sh`](../scripts/TAGs_get_ratio.sh) | automates detection for spacer numbers 0–10 (results in `output/duplication_classes/TAGs/TAGs_<spacer_number>.tsv`) |
+| [`scripts/TAGs_get_list.sh`](../scripts/TAGs_get_list.sh) | get list of TAG genes from TAGs_1.tsv file |
+| [`scripts/TAGs_pairs_orientation.R`](../scripts/TAGs_pairs_orientation.R) | analyze orientation of TAG gene pairs |
+| [`analysis/duplicated_genes/plot_TAGs_distribution.R`](../analysis/duplicated_genes/plot_TAGs_distribution.R) | [![tag_vs_spacer](./assets/TAGs_vs_spacer.png)](../analysis/duplicated_genes/plot_TAGs_distribution.R) |
+| [`analysis/duplicated_genes/plot_TAGs_distribution.R`](../analysis/duplicated_genes/plot_TAGs_distribution.R) | [![tag array vs spacer](./assets/TAG_array_vs_spacer.png)](../analysis/duplicated_genes/plot_TAGs_distribution.R) |
+| [`analysis/duplicated_genes/plot_TAGs_distribution.R`](../analysis/duplicated_genes/plot_TAGs_distribution.R) | [![tag spacer 1 size distribution](./assets/TAG_sizes_dist.png)](../analysis/duplicated_genes/plot_TAGs_distribution.R) |
+| [`analysis/duplicated_genes/plot_chr_distribution.R`](../analysis/duplicated_genes/plot_chr_distribution.R) | [![tag chr distribution](./assets/TAGs_chr_dist.png)](../analysis/duplicated_genes/plot_chr_distribution.R)  |
 
 
-| id distribution | coverage distribution | id vs coverage |
-|-----------------|-----------------------|----------------|
-| ![id distribution](./assets/blast_viz_pident_hist.png) | ![coverage distribution](./assets/blast_viz_coverage_hist.png) | ![id vs coverage](./assets/blast_viz_pident_vs_cov.png) |
 
-The default thresholds to rub blastp used in our pipeline: 30% identity, 50% coverage => 99% of genes are duplicated genes (89598 isoforms filtered to 56680 genes, 56144 out of them are duplicated genes)
-
-In [^3], the work was performed on rice, with a relatively higher number of initial genes (42534, higher than arabidpsis studies and closer to our number), they used to filtering strategies:  
-- 30% identity and 70% coverage => low stringency dataset (reduced to ~18k)
-- 50% identity and 90% coverage => high stringency dataset (reduced to ~9k)
-
-
-## On datasets
-
-At the start, on an exploratory phase, we tried performing the full analysis on a low stringency dataset (30% id, 50% cov) to check initial resultsm knowing that we can use a more stringent dataset later on based on filtration thresholds. The dataset had a 99% duplication rate which led to a pretty exhaustive search space to work with in pipeline 2 in particular, requiring really high computational power to run (yazid part here).
-From a large search space of the righ filtration thresholds, we gor preliminary statistics on duplicated genes as well as some analysis results that made us judge better what to go for, for the rest of the analysis.  
-Running pipeline on different thresholds to see how results change, by comparing number of duplicated genes in each file in `output/clusters/` containing gene families detected with different thresholds
-```bash
-./scripts/dups_get_ratio.sh
-# -- outputs in output/statistics/duplication_ratios.tsv this table
-```
-
-| id  | qcov | scov | evalue | duplicated_genes | total_genes | duplication_percent | largest_family_size |
-|-----|------|------|--------|------------------|-------------|----------------------|----------------------|
-| 30  | 50   | 50   | 1e-10 | 52139 | 56679 | 91.98% | 1326 |
-| 30  | 50   | 50   | 1e-10 | 52031 | 56679 | 91.79% | 1323 |
-| 30  | 50   | 50   | 1e-5  | 52516 | 56679 | 92.65% | 1311 |
-| 30  | 50   | 50   | none  | 56145 | 56679 | 99.05% | 1314 |
-| 30  | 60   | 60   | 1e-10 | 51870 | 56679 | 91.51% | 1324 |
-| 30  | 60   | 60   | 1e-10 | 51768 | 56679 | 91.33% | 1321 |
-| 30  | 60   | 60   | 1e-5  | 52227 | 56679 | 92.14% | 1309 |
-| 30  | 70   | 70   | 1e-10 | 51196 | 56679 | 90.32% | 1320 |
-| 30  | 70   | 70   | 1e-10 | 51114 | 56679 | 90.18% | 1302 |
-| 30  | 70   | 70   | 1e-5  | 51526 | 56679 | 90.90% | 1304 |
-| 30  | 70   | 70   | none  | 54271 | 56679 | 95.75% | 1307 |
-| 40  | 60   | 60   | 1e-10 | 51484 | 56679 | 90.83% | 828 |
-| 40  | 60   | 60   | 1e-5  | 51814 | 56679 | 91.41% | 842 |
-| 40  | 70   | 70   | 1e-10 | 50801 | 56679 | 89.62% | 825 |
-| 40  | 70   | 70   | 1e-5  | 51101 | 56679 | 90.15% | 840 |
-| 40  | 80   | 80   | 1e-10 | 49824 | 56679 | 87.90% | 821 |
-| 40  | 80   | 80   | 1e-5  | 50085 | 56679 | 88.36% | 835 |
-| 50  | 70   | 70   | 1e-10 | 50031 | 56679 | 88.27% | 350 |
-| 50  | 70   | 70   | 1e-10 | 49956 | 56679 | 88.13% | 349 |
-| 50  | 70   | 70   | 1e-5  | 50280 | 56679 | 88.71% | 357 |
-| 50  | 80   | 80   | 1e-10 | 49073 | 56679 | 86.58% | 349 |
-| 50  | 80   | 80   | 1e-5  | 49290 | 56679 | 86.96% | 355 |
-| 50  | 90   | 90   | 1e-10 | 48080 | 56679 | 84.82% | 348 |
-| 50  | 90   | 90   | 1e-5  | 48261 | 56679 | 85.14% | 354 |
-| 50  | 90   | 90   | none  | 49334 | 56679 | 87.04% | 360 |
-| 60  | 70   | 70   | 1e-10 | 48662 | 56679 | 85.85% | 211 |
-| 60  | 70   | 70   | 1e-5  | 48863 | 56679 | 86.21% | 214 |
-| 60  | 80   | 80   | 1e-10 | 47723 | 56679 | 84.19% | 209 |
-| 60  | 80   | 80   | 1e-5  | 47897 | 56679 | 84.50% | 212 |
-| 70  | 90   | 90   | 1e-10 | 44341 | 56679 | 78.23% | 177 |
-| 70  | 90   | 90   | none  | 44925 | 56679 | 79.26% | 177 |
-
-We chose 2 datasets to work with for the rest of the analysis:
-- Low stringency: 30% id, 50% cov, 1e-10 evalue => 91.98% duplication rate
-- High stringency: 50% id, 70% cov, 1e-10 evalue => 88.27% duplication rate
-
-Main results for each can be found in files suffixed with `_low` and `_high` respectively in subdirectoried of the `output/` folder.
-
-## On gene families
-
-*gene family size distribution*
-
-### largest family
-
-## On TAGs
-
-### gene spacer based indentification
-
-The first approach used to identify tandemly arrayed genes (TAGs) was based on several works like [^1], also mentioned in this review [^2].
-In the review [^1], Tandemly arrayed genes are defined as genes that are physically close on the chromosome and share high sequence similarity. As we have dealth previously with the definition of "sequence similarity" to be considered duplicated, what's left to define is "physically close". The gene spacer strategy revolves aroung setting a max spacer number, i.e. threshold of intervening genes, to consider two genes as tandemly duplicated. Usually this spacer number ranges between 0 (a perfect TAG cluster with no intervening genes) to 10, with 1, 5 and 10 being common choices. To choose ours, we refer to Shoja & Zhang (2006) [^2] who tried the 11 different spacer numbers from 0 to 10 on 3 different genomes (human, mouse, rat) and observed the increase in the number of TAGs detected with increasing spacer number. 
-
-We tried the same approach on our data, running the detection of TAGs with spacer numbers from 0 to 10 and plotting the results. We observed a similar trend as in[^2], with a rapid increase in the number of TAGs detected from spacer 0 to 1, then a slower one follows. Bsed on the same approach, we will consider spacer number 1 as our threshold to define TAGs in our data, this is from running the script `script/compute_TAGs.sh` which uses the R script `scripts/detect_TAGs.R` to detect TAGs with a given spacer number on 0:10 range.
+#### Identification of TAGs by setting a gene spacer threshold
 
 ```bash
-Rscript scripts/TAGs_detect.R --help
-./scripts/TAGs_compute.sh -h
-# Usage: ./scripts/TAGs_compute.sh [low|high]
+Rscript scripts/TAGs_compute.sh #-- takes arounf 4000 seconds (outputs the dir output/duplication_classes/TAGs/)
+Rscript scripts/TAGs_get_list.sh
+Rscript scripts/TAGs_get_ratio.sh
 ```
 
-* low stringency dataset ([`output/statistics/TAGs_spacers_ratios_low.tsv`](../output/statistics/TAGs_spacers_ratios_low.tsv) )
+In this review [^1], Tandemly arrayed genes are defined as genes that are physically close on the chromosome and share high sequence similarity. As we have dealth previously with the definition of "sequence similarity" to be considered duplicated, what's left to define is "physically close". The gene spacer strategy revolves aroung setting a max spacer number, i.e. threshold of intervening genes, to consider two genes as tandemly duplicated. Usually this spacer number ranges between 0 (a perfect TAG cluster with no intervening genes) to 10, with 1, 5 and 10 being common choices. To choose ours, we refer to Shoja & Zhang (2006) [^2] who tried the 11 different spacer numbers from 0 to 11 on 3 different genomes (human, mouse, rat) and observed the increase in the number of TAGs detected with increasing spacer number. 
 
-| spacer | n_TAG_genes | n_TAG_arrays | TAG_genes_percent |
-|--------|-------------|--------------|--------------------|
-| 0      | 8563        | 1263         | 15.107% |
-| 1      | 9696        | 1381         | 17.106% |
-| 2      | 10164       | 1425         | 17.932% |
-| 3      | 10442       | 1447         | 18.423% |
-| 4      | 10607       | 1458         | 18.714% |
-| 5      | 10751       | 1468         | 18.968% |
-| 6      | 10894       | 1474         | 19.220% |
-| 7      | 11010       | 1480         | 19.425% |
-| 8      | 11151       | 1487         | 19.673% |
-| 9      | 11267       | 1495         | 19.878% |
-| 10     | 11370       | 1499         | 20.060% |
-
-* high stringency dataset ([`output/statistics/TAGs_spacers_ratios_high.tsv`](../output/statistics/TAGs_spacers_ratios_high.tsv) )
+We tried the same approach on our data, running the detection of TAGs with spacer numbers from 0 to 10 and plotting the results. We observed a similar trend as in[^2], with a rapid increase in the number of TAGs detected from spacer 0 to 1, then a slower one follows. Bsed on the same approach, we will consider spacer number 1 as our threshold to define TAGs in our data, this is from running the script `script/compute_TAGs.sh` which uses the R script `scripts/detect_TAGs.R` to detect TAGs with a given spacer number on 0:10 range (can be found in `output/statistics/TAGs_ratios.tsv`)
 
 | spacer | n_TAG_genes | n_TAG_arrays | TAG_genes_percent |
 |--------|-------------|--------------|--------------------|
@@ -360,9 +212,3 @@ The extremely low p-value indicates that the observed distribution of TAG gene p
 [^4]: Kim, K. D., El Baidouri, M., Abernathy, B., Iwata-Otsubo, A., Chavarro, C., Gonzales, M., ... & Jackson, S. A. (2015). A comparative epigenomic analysis of polyploidy-derived genes in soybean and common bean. Plant Physiology, 168(4), 1433-1447.
 [^5]: Yang, Y., Wang, J., & Di, J. (2013). Comparative inference of duplicated genes produced by polyploidization in soybean genome. International journal of genomics, 2013(1), 275616.
 [^6]: Rizzon, C., Ponger, L., & Gaut, B. S. (2006). Striking similarities in the genomic distribution of tandemly arrayed genes in Arabidopsis and rice. PLoS computational biology, 2(9), e115.
-
-<<<<<<< HEAD
-"Genes without hits that met a threshold of e-value 10e-10 were deemed singletons"
-=======
-<!-- "Genes without hits that met a threshold of e-value 10e-10 were deemed singletons" -->
->>>>>>> master

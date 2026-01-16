@@ -41,16 +41,10 @@ INPUT_FILE=''
 OUTPUT_FILE=''
 PROTEIN_INFO_FILE=''
 AUTO_DETECT=true
-<<<<<<< HEAD
-
-# -- arguments
-while getopts "i:o:p:fh" flag; do
-=======
 SPECIES_NAME=""
 
 # -- arguments
 while getopts "i:o:p:s:h" flag; do
->>>>>>> master
     case "${flag}" in
         i) INPUT_FILE="${OPTARG}" ;;
         o) OUTPUT_FILE="${OPTARG}" ;;
@@ -64,23 +58,14 @@ OPTIONS:
   -i FILE       Input BLAST results file (blast_results.tsv)
   -o FILE       Output file with coverage (blast_results_with_coverage.tsv)
   -p FILE       Protein info file (protein_info_longest.csv)
-<<<<<<< HEAD
-=======
     -s NAME       Species name (uses data/NAME and output/NAME paths)
->>>>>>> master
   -h            Show this help
 
 AUTO-DETECTION:
   If no options specified, automatically detects species directory:
-<<<<<<< HEAD
-    Input:  output/{species}/blast_output/blast_results.tsv
-    Output: output/{species}/blast_output/blast_results_with_coverage.tsv
-    Protein: data/{species}/protein_info_longest.csv
-=======
         Input:  output/pipeline1/{species}/blast_results/blast_results.tsv
         Output: output/pipeline1/{species}/blast_results/blast_results_with_coverage.tsv
         Protein: data/{species}/protein_info_longest.csv
->>>>>>> master
 
 EXAMPLES:
   # Auto-detect (recommended)
@@ -104,53 +89,6 @@ done
 # Check if user provided any input - disable auto-detect only if files are specified
 if [ -n "$INPUT_FILE" ] || [ -n "$OUTPUT_FILE" ] || [ -n "$PROTEIN_INFO_FILE" ]; then
     AUTO_DETECT=false
-<<<<<<< HEAD
-fi
-
-# Auto-detect species directory if not specified
-if [ "$AUTO_DETECT" = true ]; then
-    echo "-- Auto-detecting species directory..."
-    
-    SPECIES_DIRS=(output/*/blast_output)
-    
-    if [ ${#SPECIES_DIRS[@]} -eq 1 ] && [ -d "${SPECIES_DIRS[0]}" ]; then
-        BLAST_DIR="${SPECIES_DIRS[0]}"
-        SPECIES_NAME=$(basename $(dirname "$BLAST_DIR"))
-        
-        INPUT_FILE="${BLAST_DIR}/blast_results.tsv"
-        OUTPUT_FILE="${BLAST_DIR}/blast_results_with_coverage.tsv"
-        PROTEIN_INFO_FILE="data/${SPECIES_NAME}/protein_info_longest.csv"
-        
-        echo "   Detected species: $SPECIES_NAME"
-        echo "   Input:  $INPUT_FILE"
-        echo "   Output: $OUTPUT_FILE"
-        echo "   Protein info: $PROTEIN_INFO_FILE"
-    elif [ ${#SPECIES_DIRS[@]} -gt 1 ]; then
-        echo "ERROR: Multiple species BLAST results found"
-        echo "       Specify files explicitly with -i, -o, -p"
-        echo "       Found: ${SPECIES_DIRS[*]}"
-        exit 1
-    else
-        echo "ERROR: No BLAST results found in output/*/"
-        echo "       Run 2_blast.sh first"
-        exit 1
-    fi
-fi
-
-# Set default output file name if not provided or if OUTPUT_FILE is a directory
-if [ -z "$OUTPUT_FILE" ] && [ -n "$INPUT_FILE" ]; then
-    OUTPUT_DIR=$(dirname "$INPUT_FILE")
-    OUTPUT_FILE="${OUTPUT_DIR}/$(basename "$INPUT_FILE" .tsv)_with_coverage.tsv"
-elif [ -d "$OUTPUT_FILE" ]; then
-    # If OUTPUT_FILE is a directory, append default filename
-    OUTPUT_FILE="${OUTPUT_FILE%/}/$(basename "$INPUT_FILE" .tsv)_with_coverage.tsv"
-fi
-
-LOG_DIR="logs/pipeline"
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir -p "$LOG_DIR"
-=======
->>>>>>> master
 fi
 
 
@@ -215,14 +153,6 @@ echo -e "${GREEN}Input:   ${BLUE}$INPUT_FILE${NC}"
 echo -e "${GREEN}Protein: ${BLUE}$PROTEIN_INFO_FILE${NC}"
 echo -e "${GREEN}Output:  ${BLUE}$OUTPUT_FILE${NC}"
 
-<<<<<<< HEAD
-echo "-- Parameters:"
-echo "   INPUT FILE    : $INPUT_FILE"
-echo "   PROTEIN INFO  : $PROTEIN_INFO_FILE"
-echo "   OUTPUT FILE   : $OUTPUT_FILE"
-
-=======
->>>>>>> master
 # -- check input files exist
 if [ ! -f "$INPUT_FILE" ]; then
     echo "ERROR: BLAST results file not found: $INPUT_FILE"
@@ -242,11 +172,7 @@ if [ -f "$OUTPUT_FILE" ]; then
     echo "   Overwriting existing file"
 fi
 
-<<<<<<< HEAD
-echo "-- Computing coverage for BLASTP results..."
-=======
 echo -e "${YELLOW}-- Computing coverage for BLASTP results...${NC}"
->>>>>>> master
 
 ################################################################################
 # Optimized coverage computation:
@@ -256,21 +182,13 @@ echo -e "${YELLOW}-- Computing coverage for BLASTP results...${NC}"
 
 # Count input rows for progress
 TOTAL_BLAST_HITS=$(wc -l < "$INPUT_FILE")
-<<<<<<< HEAD
-echo "   Processing $TOTAL_BLAST_HITS BLAST hits..."
-=======
 echo -e "   Processing: ${YELLOW}$TOTAL_BLAST_HITS${NC} BLAST hits"
->>>>>>> master
 
 # Start timing
 START_TIME=$(date +%s)
 
 # Single optimized AWK script - no temp files, no joins, no sorts
-<<<<<<< HEAD
-echo "   Computing coverage with optimized single-pass algorithm..."
-=======
 echo -e "   Using optimized single-pass AWK"
->>>>>>> master
 
 # Write header first
 echo -e "qseqid\tsseqid\tpident\tlength\tmismatch\tgapopen\tqstart\tqend\tsstart\tsend\tevalue\tbitscore\tqlength\tslength\tqcov\tscov" > "$OUTPUT_FILE"
@@ -294,11 +212,7 @@ awk -F'\t' -v protein_file="$PROTEIN_INFO_FILE" 'BEGIN {
         }
     }
     close(protein_file)
-<<<<<<< HEAD
-    printf "   Loaded %d protein lengths into memory\n", length(protein_lengths) > "/dev/stderr"
-=======
     printf "   Loaded %d protein lengths\n", length(protein_lengths) > "/dev/stderr"
->>>>>>> master
 }
 {
     # Process BLAST results
@@ -311,13 +225,8 @@ awk -F'\t' -v protein_file="$PROTEIN_INFO_FILE" 'BEGIN {
     qlength = protein_lengths[qseqid]
     slength = protein_lengths[sseqid]
     
-<<<<<<< HEAD
-    # Skip if either protein not found
-    if (qlength == "" || slength == "") {
-=======
     # Skip if either protein not found or length is not a positive integer
     if (qlength == "" || slength == "" || qlength <= 0 || slength <= 0) {
->>>>>>> master
         missing++
         next
     }
@@ -342,18 +251,6 @@ END_TIME=$(date +%s)
 ELAPSED=$((END_TIME - START_TIME))
 FINAL_HITS=$(tail -n +2 "$OUTPUT_FILE" | wc -l)
 
-<<<<<<< HEAD
-echo ""
-echo "-- Coverage computation completed successfully"
-echo "   Input hits:    $TOTAL_BLAST_HITS"
-echo "   Output hits:   $FINAL_HITS" 
-echo "   Processing time: ${ELAPSED}s"
-echo "   Output file:   $OUTPUT_FILE"
-
-# Validation
-if [ $FINAL_HITS -ne $TOTAL_BLAST_HITS ]; then
-    MISSING=$((TOTAL_BLAST_HITS - FINAL_HITS))
-=======
 echo -e "\n${GREEN}✓ Coverage computation completed${NC}"
 echo -e "   Input hits:    ${BLUE}$TOTAL_BLAST_HITS${NC}"
 echo -e "   Output hits:   ${BLUE}$FINAL_HITS${NC}"
@@ -368,7 +265,6 @@ if [ -n "$FINAL_HITS" ] && [ -n "$TOTAL_BLAST_HITS" ] && [ "$FINAL_HITS" -ne "$T
     else
         MISSING=$((TOTAL_BLAST_HITS - FINAL_HITS))
     fi
->>>>>>> master
     echo "   WARNING: $MISSING hits missing (proteins not in protein_info file)"
 fi
 

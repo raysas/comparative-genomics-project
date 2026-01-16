@@ -20,16 +20,9 @@
 # -- keep only the longest isoform from the initial fasta file
 set -euo pipefail
 
-<<<<<<< HEAD
-# Default paths (will auto-detect species subdirectory)
-FASTA_FILE=''
-FEATURE_FILE=''
-AUTO_DETECT=true
-=======
 # Resolve paths to run from anywhere and improve UX
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
->>>>>>> master
 
 # Colors
 RED='\033[0;31m'
@@ -54,43 +47,23 @@ AUTO_DETECT=false
 # -- get arguments if provided any
 while getopts "f:i:s:h" flag; do
     case "${flag}" in
-<<<<<<< HEAD
-        f) FASTA_FILE="${OPTARG}"; AUTO_DETECT=false ;;
-        i) FEATURE_FILE="${OPTARG}"; AUTO_DETECT=false ;;
-        h)
-            cat <<EOF
-Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE]
-=======
         f) FASTA_FILE="${OPTARG}";;
         i) FEATURE_FILE="${OPTARG}";;
         s) SPECIES_NAME="${OPTARG}"; AUTO_DETECT=true ;;
         h)
             cat <<EOF
 Usage: $0 [-f FASTA_FILE] [-i FEATURE_FILE] [-s SPECIES_NAME] [-h]
->>>>>>> master
 
 OPTIONS:
   -f FASTA_FILE     Input peptide FASTA file
   -i FEATURE_FILE   Input protein info CSV file
-<<<<<<< HEAD
-=======
   -s SPECIES_NAME   Specify species name (for auto-detection)
->>>>>>> master
   -h                Show this help message
 
 AUTO-DETECTION:
   If no files are specified, the script will automatically detect
   species-specific directories under data/
   
-<<<<<<< HEAD
-  Expected structure:
-    data/{species}/peptides.fa
-    data/{species}/protein_info.csv
-
-EXAMPLES:
-  # Auto-detect (recommended)
-  $0
-=======
     Expected structure (relative to repo root):
         data/{species}/peptides.fa
         data/{species}/protein_info.csv
@@ -98,7 +71,6 @@ EXAMPLES:
 EXAMPLES:
   # Auto-detect (recommended)
   $0 -s glycine_max
->>>>>>> master
 
   # Explicit paths
   $0 -f data/glycine_max/peptides.fa -i data/glycine_max/protein_info.csv
@@ -115,48 +87,6 @@ done
 
 # Auto-detect species directory if not specified
 if [ "$AUTO_DETECT" = true ]; then
-<<<<<<< HEAD
-    echo "-- Auto-detecting species directory..."
-    
-    # Look for data/species_name/ structure
-    SPECIES_DIRS=(data/*/)
-    
-    if [ ${#SPECIES_DIRS[@]} -eq 1 ] && [ -d "${SPECIES_DIRS[0]}" ]; then
-        SPECIES_DIR="${SPECIES_DIRS[0]%/}"
-        SPECIES_NAME=$(basename "$SPECIES_DIR")
-        
-        FASTA_FILE="${SPECIES_DIR}/peptides.fa"
-        FEATURE_FILE="${SPECIES_DIR}/protein_info.csv"
-        
-        echo "   Detected species: $SPECIES_NAME"
-        echo "   Using directory: $SPECIES_DIR"
-    elif [ ${#SPECIES_DIRS[@]} -gt 1 ]; then
-        echo "ERROR: Multiple species directories found in data/"
-        echo "       Please specify files explicitly with -f and -i"
-        echo "       Found: ${SPECIES_DIRS[*]}"
-        exit 1
-    else
-        echo "ERROR: No species directories found in data/"
-        echo "       Run 0_extract_data.sh first or specify files with -f and -i"
-        exit 1
-    fi
-fi
-
-# Validate files exist
-if [ ! -f "$FASTA_FILE" ]; then
-    echo "ERROR: FASTA file not found: $FASTA_FILE"
-    exit 1
-fi
-
-if [ ! -f "$FEATURE_FILE" ]; then
-    echo "ERROR: Feature file not found: $FEATURE_FILE"
-    exit 1
-fi
-
-LOG_DIR="logs/pipeline"
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir -p "$LOG_DIR"
-=======
     echo -e "${YELLOW}-- Auto-detecting species directory...${NC}"
     if [ -n "${SPECIES_NAME:-}" ]; then
         SPECIES_DIR="$REPO_ROOT/data/${SPECIES_NAME}"
@@ -173,7 +103,6 @@ if [ ! -d "$LOG_DIR" ]; then
 else
     echo -e "${RED}ERROR: Species name not specified. Use -s <species> or provide -f and -i.${NC}"
     exit 1
->>>>>>> master
 fi
 
 # Fallback defaults if not provided (run-from-anywhere)
@@ -287,17 +216,6 @@ with open(fasta_path) as fin, open(out_path, "w") as out:
             out.write(line)
 EOF
 
-<<<<<<< HEAD
-echo "-- step 2 done."
-echo ""
-echo "========================================="
-echo "FILTERING COMPLETED"
-echo "========================================="
-echo "Filtered FASTA:    $FASTA_FILTERED"
-echo "Filtered features: $FEATURE_FILTERED"
-echo "Genes retained:    $N_GENES"
-echo "========================================="
-=======
 # echo -e "${GREEN}✓ Step 2 complete${NC}"
 # echo ""
 echo -e "${GREEN}=========================================${NC}"
@@ -308,7 +226,6 @@ echo -e "Filtered features: ${BLUE}$FEATURE_FILTERED${NC}"
 echo -e "Genes retained   : ${YELLOW}$N_GENES${NC}"
 echo -e "Log              : ${BLUE}$LOG_FILE${NC}"
 echo -e "${GREEN}=========================================${NC}"
->>>>>>> master
 
 # cleanup
 rm -f "$TMP_METADATA" "$TMP_IDS"
