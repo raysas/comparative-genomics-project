@@ -1,9 +1,0 @@
-[0;32m====================================
- OPTIMIZED MCL CLUSTERING
-====================================\033[0m
- Input:     output/similarity_edgelists/filtered_blast_results_id30_qcov60_scov60_evalue1e-10_wcol12_network.tsv
- Output:    output/clusters
- Inflation: 2.0
- Threads:   16
-[0;32m====================================[0m
-[1;33mAnalyzing input network...[0m
