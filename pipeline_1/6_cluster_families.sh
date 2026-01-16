@@ -7,15 +7,23 @@
 
 set -euo pipefail
 
+
+# Resolve paths to run from anywhere
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
 NC='\033[0m'
 
-# Default parameters
-INPUT_FILE='output/similarity_edgelists/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv'
-OUTPUT_DIR='output/clusters'
+
+# Default parameters (species-aware, pipeline1 layout)
+INPUT_FILE=""
+OUTPUT_DIR=""
+SPECIES_NAME=""
 MCL_INFLATION=2.0
 PRUNING_THRESHOLD=4000
 SELECT_DOWN_TO=500
@@ -23,12 +31,13 @@ RECOVER=600
 PCT=90
 NUM_THREADS=$(nproc)
 MIN_FAMILY_SIZE=2
+AUTO_DETECT=true
 
-# Parse arguments
-while getopts "i:o:I:P:S:R:t:m:h" flag; do
+while getopts "i:o:s:I:P:S:R:t:m:h" flag; do
     case "${flag}" in
-        i) INPUT_FILE="${OPTARG}" ;;
-        o) OUTPUT_DIR="${OPTARG}" ;;
+        i) INPUT_FILE="${OPTARG}"; AUTO_DETECT=false ;;
+        o) OUTPUT_DIR="${OPTARG}"; AUTO_DETECT=false ;;
+        s) SPECIES_NAME="${OPTARG}"; AUTO_DETECT=true ;;
         I) MCL_INFLATION="${OPTARG}" ;;
         P) PRUNING_THRESHOLD="${OPTARG}" ;;
         S) SELECT_DOWN_TO="${OPTARG}" ;;
@@ -36,55 +45,89 @@ while getopts "i:o:I:P:S:R:t:m:h" flag; do
         t) NUM_THREADS="${OPTARG}" ;;
         m) MIN_FAMILY_SIZE="${OPTARG}" ;;
         h)
-            cat <<EOF
+                        cat <<EOF
 Usage: $0 [OPTIONS]
 
 OPTIONS:
-  -i FILE    Input edgelist file
-  -o DIR     Output directory
-  -I NUM     MCL inflation (default: 2.0, higher=more clusters)
-  -P NUM     Pruning threshold (default: 4000)
-  -S NUM     Select down to N entries (default: 500)
-  -R NUM     Recover to N entries (default: 600)
-  -t NUM     Number of threads for MCL (default: all CPUs)
-  -m NUM     Minimum family size (default: 2)
-  -h         Show this help
+    -i FILE    Input edgelist file
+    -o DIR     Output directory
+    -s NAME    Species name (auto-detects input/output)
+    -I NUM     MCL inflation (default: 2.0, higher=more clusters)
+    -P NUM     Pruning threshold (default: 4000)
+    -S NUM     Select down to N entries (default: 500)
+    -R NUM     Recover to N entries (default: 600)
+    -t NUM     Number of threads for MCL (default: all CPUs)
+    -m NUM     Minimum family size (default: 2)
+    -h         Show this help
 
 INFLATION GUIDELINES FOR Ks:
-  1.4-2.0: Balanced families (default)
-  2.5-3.0: Stricter clustering (breaks large families)
-  3.5-5.0: Very strict (many small families)
+    1.4-2.0: Balanced families (default)
+    2.5-3.0: Stricter clustering (breaks large families)
+    3.5-5.0: Very strict (many small families)
 
 EXAMPLES:
-  # Standard clustering
-  $0 -i edgelist.tsv -o clusters/
+    # Standard clustering
+    $0 -s glycine_max
 
-  # Strict clustering for Ks analysis
-  $0 -i edgelist.tsv -I 2.5 -o clusters/
+    # Strict clustering for Ks analysis
+    $0 -i edgelist.tsv -I 2.5 -o clusters/
 
-  # Very strict to break mega-families
-  $0 -i edgelist.tsv -I 3.0 -P 2000 -S 300
+    # Very strict to break mega-families
+    $0 -i edgelist.tsv -I 3.0 -P 2000 -S 300
 
 EOF
-            exit 0
-            ;;
+                        exit 0
+                        ;;
         *) echo "Unknown option: $1"; exit 1;;
     esac
 done
 
-# Setup logging
-LOG_DIR="logs/pipeline"
+
+# Auto-detect input/output if not provided
+if [ "$AUTO_DETECT" = true ]; then
+    if [ -n "$SPECIES_NAME" ]; then
+        EDGE_DIR="$REPO_ROOT/output/pipeline1/${SPECIES_NAME}/filtered_networks"
+        if [ -d "$EDGE_DIR" ]; then
+            INPUT_FILE="$EDGE_DIR/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv"
+            OUTPUT_DIR="$REPO_ROOT/output/pipeline1/${SPECIES_NAME}/clusters"
+        else
+            echo -e "${RED}ERROR:${NC} Could not find edgelist for species '$SPECIES_NAME'"; exit 1
+        fi
+    else
+        # Try to auto-detect single species
+        EDGE_DIRS=("$REPO_ROOT"/output/pipeline1/*/filtered_networks)
+        if [ ${#EDGE_DIRS[@]} -eq 1 ] && [ -d "${EDGE_DIRS[0]}" ]; then
+            INPUT_FILE="${EDGE_DIRS[0]}/filtered_blast_results_id30_qcov50_scov50_wcol12_network.tsv"
+            OUTPUT_DIR="$(dirname "${EDGE_DIRS[0]}")/clusters"
+        else
+            echo -e "${RED}ERROR:${NC} Could not auto-detect species. Use -s or specify -i/-o."; exit 1
+        fi
+    fi
+fi
+
+# Setup logging inside the pipeline directory regardless of where the script is run from
+LOG_DIR="${SCRIPT_DIR}/logs/pipeline"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/$(basename "$0" .sh)_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -i "$LOG_FILE") 2>&1
 
-echo -e "${GREEN}===================================="
-echo " OPTIMIZED MCL CLUSTERING"
-echo "====================================${NC}"
-echo " Input:     $INPUT_FILE"
-echo " Output:    $OUTPUT_DIR"
-echo " Inflation: $MCL_INFLATION"
-echo " Threads:   $NUM_THREADS"
+# echo " OPTIMIZED MCL CLUSTERING"
+# echo -e "====================================${NC}"
+# echo " Input:     $INPUT_FILE"
+# echo " Output:    $OUTPUT_DIR"
+# echo " Inflation: $MCL_INFLATION"
+# echo " Threads:   $NUM_THREADS"
+# echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN} Step 6: Cluster Families ${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo -e " 1) Run MCL clustering on edgelist"
+echo -e " 2) Post-process and analyze clusters"
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN}Input:      ${BLUE}$INPUT_FILE${NC}"
+echo -e "${GREEN}Output:     ${BLUE}$OUTPUT_DIR${NC}"
+echo -e "${GREEN}Inflation:  ${YELLOW}$MCL_INFLATION${NC}"
+echo -e "${GREEN}Threads:    ${YELLOW}$NUM_THREADS${NC}"
 echo -e "${GREEN}====================================${NC}"
 
 # Validate input
@@ -241,7 +284,7 @@ TOTAL_TIME=$((END_TIME - START_TIME))
 echo ""
 echo -e "${GREEN}===================================="
 echo " CLUSTERING COMPLETE"
-echo "====================================${NC}"
+echo -e "====================================${NC}"
 echo " Total time:     ${TOTAL_TIME}s"
 echo " MCL time:       ${MCL_TIME}s"
 echo " Post-process:   $((TOTAL_TIME - MCL_TIME))s"

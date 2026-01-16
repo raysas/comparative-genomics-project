@@ -1,4 +1,3 @@
-test/
 results/
 data/
 output/ks_results.tsv
@@ -15,3 +14,7 @@ output/*
 output/duplication_classes/proximal/
 !output/info/
 !output/info/**
+output/
+tmp/
+logs/
+test/

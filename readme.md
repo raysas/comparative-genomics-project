@@ -8,7 +8,7 @@
 ![Perl](https://img.shields.io/badge/Perl-39457E?logo=perl&logoColor=white)
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?logo=gnubash&logoColor=white)
 
-<<<<<<< HEAD
+
 ## Overview
 Computational genomics analysis of gene duplication mechanisms and transposable element (TE) dynamics in the *Glycine max* genome.  
 The project integrates large-scale sequence clustering, Ks-based duplication dating, statistical testing, and comparative genomics to study the impact of whole-genome duplication, tandem duplication, and TE activity on soybean genome evolution.
@@ -54,5 +54,3 @@ Two duplication datasets were generated using different stringency thresholds:
   - e-value = 1e-10  
 
 Both datasets were analyzed independently to assess robustness and parameter sensitivity.
-
----

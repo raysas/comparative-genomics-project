@@ -1,0 +1,108 @@
+Input file: test/blast_results.tsv
+Analysis date: 2025-11-24 00:43:18
+
+=== BASIC STATISTICS ===
+
+Total BLAST hits:          8864404
+  Self-hits:               56635 (0.6%)
+  Non-self hits:           8807769 (99.4%)
+
+Unique query proteins:     56634
+Unique target proteins:    56634
+
+=== PERCENT IDENTITY DISTRIBUTION ===
+Average % identity:        35.59%
+
+  High (≥90%):             123393 (1.4%)
+  Medium (70-90%):         144339 (1.6%)
+  Low (<70%):              8596672 (97.0%)
+
+=== E-VALUE DISTRIBUTION ===
+  Very significant (<1e-50):  1850643 (20.9%)
+  Significant (1e-10–1e-50):  5424018 (61.2%)
+  Weak (1e-5–1e-10):          1589678 (17.9%)
+  Insignificant (>1e-5):      65 (0.0%)
+
+=== ALIGNMENT LENGTH DISTRIBUTION ===
+Average alignment length:  281.4 aa
+
+  Short (<50 aa):           95692 (1.1%)
+  Medium (50-200 aa):       2886582 (32.6%)
+  Long (>200 aa):           5882130 (66.4%)
+
+=== PARALOG ANALYSIS ===
+Genes with paralogs:       52845 (93.3% of queries)
+Average paralogs per gene: 166.7
+Max paralogs (gene):       8862 (KRH07065)
+
+Gene family size distribution:
+  Singletons (1 paralog):    4336 (8.2%)
+  Small (2-5):               9507 (18.0%)
+  Medium (6-20):             13749 (26.0%)
+  Large (21-100):            13772 (26.1%)
+  Huge (>100):               11481 (21.7%)
+
+=== TOP 50 GENE FAMILIES ===
+(Genes with most paralogs, see test/analysis/top_gene_families.txt for full list)
+
+  1  KRH07065                        8862
+  2  KRH07059                        6500
+  3  KRH07060                        6259
+  4  KRG91463                        5932
+  5  KRH12156                        5931
+  6  KRH37162                        5864
+  7  KRH35354                        5836
+  8  KRH07070                        5794
+  9  KRH07061                        5765
+ 10  KRH58543                        5739
+ 11  KRH42437                        5619
+ 12  KRH57106                        5509
+ 13  KRH67435                        5424
+ 14  KRH42321                        5315
+ 15  KRH67440                        5298
+ 16  KRH58443                        5282
+ 17  KRH13407                        5268
+ 18  KRG95718                        5258
+ 19  KRH75100                        5232
+ 20  KRG91721                        5230
+ 21  KRG99860                        5219
+ 22  KRH70959                        5193
+ 23  KRH35050                        5184
+ 24  KRH34632                        5167
+ 25  KRH18124                        5167
+ 26  KRH27378                        5164
+ 27  KRH64523                        5160
+ 28  KRH53418                        5146
+ 29  KRH21908                        5108
+ 30  KRH03251                        5101
+ 31  KRH27392                        5094
+ 32  KRH28774                        5092
+ 33  KRH00188                        5091
+ 34  KRH07063                        5085
+ 35  KRG95717                        5078
+ 36  KRG92156                        5071
+ 37  KRH46804                        5059
+ 38  KRH69809                        5054
+ 39  KRH01038                        5053
+ 40  KRG89760                        4980
+ 41  KRH33495                        4973
+ 42  KRH11043                        4973
+ 43  KRH57093                        4972
+ 44  KRH00186                        4961
+ 45  KRH15990                        4951
+ 46  KRH01055                        4943
+ 47  KRH59319                        4934
+ 48  KRH01051                        4928
+ 49  KRH43169                        4917
+ 50  KRH09613                        4905
+
+========================================================
+
+Analysis complete!
+
+Output files:
+  Summary:           test/blast_results.tsv.summary.txt
+  Paralog counts:    test/analysis/paralog_counts.tsv
+  Top gene families: test/analysis/top_gene_families.txt
+
+Results saved to: test/analysis

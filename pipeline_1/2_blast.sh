@@ -16,16 +16,41 @@
 # prepare variables, get arguments, set up logging
 # ---------------------------------------------------------------------
 # -- message on what this script does
+<<<<<<< HEAD
 cat <<EOF
 -- this script:
   1) creates a BLAST database from a given peptide fasta file
   2) runs a BLASTP search of the peptides against themselves
 EOF
+=======
+# cat <<EOF
+# -- this script:
+#   1) creates a BLAST database from a given peptide fasta file
+#   2) runs a BLASTP search of the peptides against themselves
+# EOF
+
+# Resolve paths to run from anywhere and improve UX
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+NC='\033[0m'
+
+>>>>>>> master
 
 # -- default parameters
 INPUT_FILE=''
 OUTPUT_DIR=''
 AUTO_DETECT=true
+<<<<<<< HEAD
+=======
+E_VALUE='10'
+MAX_TARGET_SEQS=500
+>>>>>>> master
 
 DB_NAME='peptide_db'
 OUTPUT_FILE='blast_results.tsv'
@@ -34,10 +59,17 @@ OUTPUT_FILE='blast_results.tsv'
 force_new=false
 
 # -- get arguments
+<<<<<<< HEAD
 while getopts "i:o:fh" flag; do
+=======
+SPECIES_NAME=""
+while getopts "i:o:s:e:fh" flag; do
+>>>>>>> master
     case "${flag}" in
-        i) INPUT_FILE="${OPTARG}" ;;
-        o) OUTPUT_DIR="${OPTARG}" ;;
+        i) INPUT_FILE="${OPTARG}";;
+        o) OUTPUT_DIR="${OPTARG}";;
+        s) SPECIES_NAME="${OPTARG}"; AUTO_DETECT=true;;
+        e) E_VALUE="${OPTARG}";;
         f) force_new=true ;;
         h)
             cat <<EOF
@@ -46,20 +78,39 @@ Usage: $0 [OPTIONS]
 OPTIONS:
   -i FILE       Input FASTA file (peptides_longest.fa)
   -o DIR        Output directory for BLAST results
+<<<<<<< HEAD
+=======
+    -s NAME       Species name (uses data/NAME and output/NAME paths)
+    -e VALUE      E-value threshold for BLAST (default: 1e-5)
+>>>>>>> master
   -f            Force new output directory (rename existing)
   -h            Show this help
 
 AUTO-DETECTION:
+<<<<<<< HEAD
   If no options specified, automatically detects species directory:
     Input:  data/{species}/peptides_longest.fa
     Output: output/{species}/blast_output
+=======
+    If -s is provided or no options specified, automatically detects species directory:
+        Input :  data/{species}/peptides_longest.fa
+        Output: output/pipeline1/{species}/blast_results/
+>>>>>>> master
 
 EXAMPLES:
   # Auto-detect (recommended)
   $0
 
+<<<<<<< HEAD
   # Explicit paths
   $0 -i data/glycine_max/peptides_longest.fa -o output/glycine_max/blast_output
+=======
+    # Explicit paths
+    $0 -i data/glycine_max/peptides_longest.fa -o output/glycine_max/blast_output
+
+    # Species-driven auto paths
+    $0 -s glycine_max
+>>>>>>> master
 
   # Force new run (archive existing results)
   $0 -f
@@ -87,8 +138,13 @@ if [ -n "$INPUT_FILE" ] || [ -n "$OUTPUT_DIR" ]; then
             SPECIES_DIR="${SPECIES_DIRS[0]%/}"
             SPECIES_NAME=$(basename "$SPECIES_DIR")
             
+<<<<<<< HEAD
             [ -z "$INPUT_FILE" ] && INPUT_FILE="${SPECIES_DIR}/peptides_longest.fa"
             [ -z "$OUTPUT_DIR" ] && OUTPUT_DIR="output/${SPECIES_NAME}/blast_output"
+=======
+            [ -z "$INPUT_FILE" ] && INPUT_FILE="${SPECIES_DIR}/processed/peptides_longest.fa"
+            [ -z "$OUTPUT_DIR" ] && OUTPUT_DIR="output/pipeline1/${SPECIES_NAME}/blast_results"
+>>>>>>> master
             
             echo "   Detected species: $SPECIES_NAME"
         else
@@ -100,6 +156,7 @@ fi
 
 # Auto-detect species directory if not specified
 if [ "$AUTO_DETECT" = true ]; then
+<<<<<<< HEAD
     echo "-- Auto-detecting species directory..."
     
     SPECIES_DIRS=(data/*/)
@@ -123,23 +180,66 @@ if [ "$AUTO_DETECT" = true ]; then
         echo "ERROR: No species directories found in data/"
         echo "       Run 0_extract_data.sh and 1_filter_isoforms.sh first"
         exit 1
+=======
+    echo -e "${YELLOW}-- Auto-detecting species directory...${NC}"
+    if [ -n "$SPECIES_NAME" ]; then
+        SPECIES_DIR="$REPO_ROOT/data/$SPECIES_NAME"
+        if [ -d "$SPECIES_DIR" ]; then
+            INPUT_FILE="${SPECIES_DIR}/processed/peptides_longest.fa"
+            OUTPUT_DIR="${REPO_ROOT}/output/pipeline1/${SPECIES_NAME}/blast_results"
+            echo -e "   Detected species: ${GREEN}$SPECIES_NAME${NC}"
+            echo -e "   Input : ${BLUE}$INPUT_FILE${NC}"
+            echo -e "   Output: ${BLUE}$OUTPUT_DIR${NC}"
+        else
+            echo -e "${RED}ERROR:${NC} Species directory not found: $SPECIES_DIR"
+            exit 1
+        fi
+    else
+        SPECIES_DIRS=("$REPO_ROOT"/data/*/)
+        if [ ${#SPECIES_DIRS[@]} -eq 1 ] && [ -d "${SPECIES_DIRS[0]}" ]; then
+            SPECIES_DIR="${SPECIES_DIRS[0]%/}"
+            SPECIES_NAME=$(basename "$SPECIES_DIR")
+            INPUT_FILE="${SPECIES_DIR}/processed/peptides_longest.fa"
+            OUTPUT_DIR="${REPO_ROOT}/output/pipeline1/${SPECIES_NAME}/blast_results"
+            echo -e "   Detected species: ${GREEN}$SPECIES_NAME${NC}"
+            echo -e "   Input : ${BLUE}$INPUT_FILE${NC}"
+            echo -e "   Output: ${BLUE}$OUTPUT_DIR${NC}"
+        elif [ ${#SPECIES_DIRS[@]} -gt 1 ]; then
+            echo -e "${RED}ERROR: Multiple species directories found in data/. Use -s, -i and -o.${NC}"
+            exit 1
+        else
+            echo -e "${RED}ERROR: No species directories found and no default inputs present.${NC}"
+            echo "       Run 1_filter_isoforms.sh first or provide -i and -o."
+            exit 1
+        fi
+>>>>>>> master
     fi
 fi
 
 
 # -- name log file based on script name
-LOG_DIR="logs/pipeline"
-if [ ! -d "$LOG_DIR" ]; then
-    mkdir -p "$LOG_DIR"
-fi
-LOG_FILE="${LOG_DIR}/$(basename "$0" .sh).log"
+# Logging inside pipeline directory
+LOG_DIR="${SCRIPT_DIR}/logs/pipeline"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/$(basename "$0" .sh)_$(date +%Y%m%d_%H%M%S).log"
 exec > >(tee -i "$LOG_FILE") 2>&1
 echo "Command: $0 $*"
 
+<<<<<<< HEAD
 echo "-- Parameters:"
 echo "   INPUT FILE : $INPUT_FILE"
 echo "   OUTPUT DIR : $OUTPUT_DIR"
 echo "   FORCE NEW  : $force_new"
+=======
+echo -e "${GREEN}====================================${NC}"
+echo -e "${GREEN} Step 2: BLAST ${NC}"
+echo -e "${GREEN}====================================${NC}"
+echo -e "Parameters:"
+echo -e "  INPUT  : ${BLUE}$INPUT_FILE${NC}"
+echo -e "  OUTPUT : ${BLUE}$OUTPUT_DIR${NC}"
+echo -e "  E-VALUE: ${YELLOW}$E_VALUE${NC}"
+echo -e "  FORCE  : ${YELLOW}$force_new${NC}"
+>>>>>>> master
 
 # -- check if input file exists
 if [ ! -f "$INPUT_FILE" ]; then
@@ -158,7 +258,7 @@ if [ "$force_new" = false ] && [ -d "$OUTPUT_DIR" ]; then
     echo "-- to force creation of a new output directory, use the -f flag"
 # -- else output directory exists and -f flag is set: rename exsisting output dire to old_blast_output_1, old_blast_output_2, etc.
 else
-    echo "-- preparing to create new output directory: $OUTPUT_DIR"
+    echo -e "${YELLOW}-- Preparing output directory:${NC} $OUTPUT_DIR"
     leaf_dir=$(basename "$OUTPUT_DIR")
     parent_dir=$(dirname "$OUTPUT_DIR")
     if [ -d "$OUTPUT_DIR" ]; then
@@ -168,42 +268,58 @@ else
             ((n++))
         done
         mv "$OUTPUT_DIR" "${parent_dir}/${leaf_dir}_old_${n}"
-        echo "-- ! moved existing directory $OUTPUT_DIR to ${parent_dir}/${leaf_dir}_old_${n}"
+        echo -e "${YELLOW}-- Moved existing:${NC} $OUTPUT_DIR -> ${parent_dir}/${leaf_dir}_old_${n}"
     fi
 
     # -- create output directory
     mkdir -p "$OUTPUT_DIR"
-    echo "-- created output directory: $OUTPUT_DIR"
+    echo -e "${GREEN}✓ Created output directory:${NC} $OUTPUT_DIR"
 
     # -- make blast db
     if ! command -v makeblastdb &> /dev/null
     then
-        echo "-- error: makeblastdb could not be found: install BLAST+ tools"
+        echo -e "${RED}ERROR:${NC} makeblastdb not found. Install BLAST+ tools."
         exit 2
     fi
 
     makeblastdb -in "$INPUT_FILE" -dbtype prot -out "${OUTPUT_DIR}/${DB_NAME}"
+<<<<<<< HEAD
     echo "-- created BLAST database from $INPUT_FILE"
     
     # Count total sequences for progress estimation
     TOTAL_SEQS=$(grep -c "^>" "$INPUT_FILE")
     echo "-- Total sequences to process: $TOTAL_SEQS"
+=======
+    echo -e "${GREEN}✓ BLAST DB created from:${NC} $INPUT_FILE"
+    
+    # Count total sequences for progress estimation
+    TOTAL_SEQS=$(grep -c "^>" "$INPUT_FILE")
+    echo -e "Total sequences to process: ${YELLOW}$TOTAL_SEQS${NC}"
+>>>>>>> master
 
     # -- run blastp with optimizations for speed
     if ! command -v blastp &> /dev/null
     then
-        echo "-- error: blastp could not be found: install BLAST+ tools"
+        echo -e "${RED}ERROR:${NC} blastp not found. Install BLAST+ tools."
         exit 3
     fi
     
     # Detect available CPU cores
     NCORES=$(nproc 2>/dev/null || echo 4)
+<<<<<<< HEAD
     # Use 75% of cores for BLAST
     BLAST_THREADS=$((NCORES * 3 / 4))
     [ $BLAST_THREADS -lt 1 ] && BLAST_THREADS=1
     
     echo "-- Running BLASTP with $BLAST_THREADS threads (detected $NCORES cores)"
     echo "   This may take a while for large genomes..."
+=======
+    # Use all cores - 1
+    BLAST_THREADS=$((NCORES - 1))
+    [ $BLAST_THREADS -lt 1 ] && BLAST_THREADS=1
+    
+    echo -e "${YELLOW}Running BLASTP with${NC} $BLAST_THREADS threads (detected $NCORES cores)"
+>>>>>>> master
     echo "   Progress will be logged to: ${OUTPUT_DIR}/blast_progress.txt"
     echo ""
     
@@ -216,6 +332,7 @@ else
     echo "Started: $(date)" > "$PROGRESS_LOG"
     
     # Run BLAST in background and monitor progress
+<<<<<<< HEAD
     blastp -query "$INPUT_FILE" -db "${OUTPUT_DIR}/${DB_NAME}" \
            -out "$TEMP_OUTPUT" \
            -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore" \
@@ -230,6 +347,22 @@ else
     BLAST_PID=$!
     
     echo "BLAST process started (PID: $BLAST_PID)"
+=======
+        blastp -query "$INPUT_FILE" -db "${OUTPUT_DIR}/${DB_NAME}" \
+            -out "$TEMP_OUTPUT" \
+            -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore" \
+            -evalue "$E_VALUE" \
+            -max_target_seqs $MAX_TARGET_SEQS \
+            -num_threads $BLAST_THREADS \
+            -word_size 6 \
+            -threshold 21 \
+            -comp_based_stats 0 \
+            -seg no &
+    
+    BLAST_PID=$!
+    
+    echo -e "BLAST process started (PID: ${YELLOW}$BLAST_PID${NC})"
+>>>>>>> master
     echo ""
     echo "Monitoring progress (press Ctrl+C to stop monitoring, BLAST will continue):"
     echo "───────────────────────────────────────────────────────────────────"
@@ -287,8 +420,13 @@ else
         END_TIME=$(date +%s)
         TOTAL_TIME=$((END_TIME - START_TIME))
         
+<<<<<<< HEAD
         echo "-- BLAST search completed successfully"
         echo "   Results: ${OUTPUT_DIR}/${OUTPUT_FILE}"
+=======
+        echo -e "${GREEN}✓ BLAST search completed successfully${NC}"
+        echo -e "   Results: ${BLUE}${OUTPUT_DIR}/${OUTPUT_FILE}${NC}"
+>>>>>>> master
         echo "   Total hits: $(wc -l < ${OUTPUT_DIR}/${OUTPUT_FILE})"
         echo "   Total time: $(printf '%02d:%02d:%02d' $((TOTAL_TIME/3600)) $(((TOTAL_TIME%3600)/60)) $((TOTAL_TIME%60)))"
         echo "   Progress log: $PROGRESS_LOG"
@@ -296,7 +434,11 @@ else
         echo "Completed: $(date)" >> "$PROGRESS_LOG"
         echo "Total time: ${TOTAL_TIME}s" >> "$PROGRESS_LOG"
     else
+<<<<<<< HEAD
         echo "ERROR: BLAST failed with exit code $BLAST_EXIT"
+=======
+        echo -e "${RED}ERROR:${NC} BLAST failed with exit code $BLAST_EXIT"
+>>>>>>> master
         exit $BLAST_EXIT
     fi
     
@@ -305,6 +447,11 @@ else
     
     # Clean up temp files
     rm -f "${OUTPUT_DIR}/.blast_results_temp.tsv"
+<<<<<<< HEAD
+=======
+    # remove the peptide_db files
+    rm -f "${OUTPUT_DIR}/${DB_NAME}."*
+>>>>>>> master
 fi
 
 
